@@ -4,6 +4,7 @@ import { Sidebar, MobileNav } from "@/components/sidebar";
 import { NotificationBell } from "@/components/notifications";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { AppRatingModal } from "@/components/app-rating-modal";
+import { MobileBurgerMenu } from "@/components/mobile-burger-menu";
 import type { Profile, Notification as NotifType } from "@/lib/types/database";
 
 export default async function DashboardLayout({
@@ -57,19 +58,24 @@ export default async function DashboardLayout({
     return (
         <div className="flex min-h-screen bg-background text-foreground">
             <Sidebar fullName={fullName} role={role} />
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col min-w-0">
                 {/* Top bar con notificaciones y theme toggle */}
-                <header className="flex items-center justify-end gap-2 px-4 md:px-8 py-3 border-b border-border">
-                    <ThemeToggle />
-                    <NotificationBell
-                        notifications={notifications}
-                        unreadCount={unreadCount}
-                    />
-                    <span className="text-sm text-muted-foreground hidden md:inline">
-                        {fullName}
-                    </span>
+                <header className="flex items-center justify-between gap-2 px-4 md:px-8 py-3 border-b border-border bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40">
+                    <div className="flex items-center">
+                        <MobileBurgerMenu fullName={fullName} role={role} />
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <ThemeToggle />
+                        <NotificationBell
+                            notifications={notifications}
+                            unreadCount={unreadCount}
+                        />
+                        <span className="text-sm text-muted-foreground hidden md:inline ml-2">
+                            {fullName}
+                        </span>
+                    </div>
                 </header>
-                <main className="flex-1 p-4 md:p-8 pb-20 md:pb-8">{children}</main>
+                <main className="flex-1 p-4 md:p-8 pb-20 md:pb-8 overflow-x-hidden">{children}</main>
             </div>
             <MobileNav fullName={fullName} role={role} />
 
