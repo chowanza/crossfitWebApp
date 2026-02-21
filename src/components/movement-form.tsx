@@ -61,31 +61,31 @@ export function MovementForm({ movement, trigger }: MovementFormProps) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>{trigger}</DialogTrigger>
-            <DialogContent className="border-zinc-800 bg-zinc-900 text-white sm:max-w-md">
+            <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle>{isEdit ? "Editar Movimiento" : "Nuevo Movimiento"}</DialogTitle>
-                    <DialogDescription className="text-zinc-400">
+                    <DialogDescription>
                         {isEdit ? "Modifica los datos." : "Agrega un movimiento al catálogo."}
                     </DialogDescription>
                 </DialogHeader>
                 <form action={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
-                        <Label className="text-zinc-300">Nombre</Label>
+                        <Label>Nombre</Label>
                         <Input
                             name="name"
                             defaultValue={movement?.name}
                             placeholder='Ej: "Back Squat"'
                             required
-                            className="border-zinc-700 bg-zinc-800/50 text-white"
+                            className="bg-muted/50"
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label className="text-zinc-300">Categoría</Label>
+                        <Label>Categoría</Label>
                         <Select name="category" defaultValue={movement?.category || "OTHER"}>
-                            <SelectTrigger className="border-zinc-700 bg-zinc-800/50 text-white">
+                            <SelectTrigger className="bg-muted/50">
                                 <SelectValue />
                             </SelectTrigger>
-                            <SelectContent className="border-zinc-700 bg-zinc-900 text-white">
+                            <SelectContent>
                                 {CATEGORIES.map((c) => (
                                     <SelectItem key={c.value} value={c.value}>
                                         {c.label}
@@ -95,13 +95,23 @@ export function MovementForm({ movement, trigger }: MovementFormProps) {
                         </Select>
                     </div>
                     <div className="space-y-2">
-                        <Label className="text-zinc-300">Descripción</Label>
+                        <Label>Descripción</Label>
                         <Textarea
                             name="description"
                             defaultValue={movement?.description}
                             placeholder="Descripción breve del movimiento"
                             rows={2}
-                            className="border-zinc-700 bg-zinc-800/50 text-white resize-none"
+                            className="bg-muted/50 resize-none"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>URL de Imagen/Video (Opcional)</Label>
+                        <Input
+                            name="media_url"
+                            type="url"
+                            defaultValue={movement?.media_url || ""}
+                            placeholder="https://ejemplo.com/gif-del-ejercicio.gif"
+                            className="bg-muted/50"
                         />
                     </div>
 
@@ -112,13 +122,13 @@ export function MovementForm({ movement, trigger }: MovementFormProps) {
                     )}
 
                     <div className="flex justify-end gap-3">
-                        <Button type="button" variant="ghost" onClick={() => setOpen(false)} className="text-zinc-400">
+                        <Button type="button" variant="ghost" onClick={() => setOpen(false)} className="text-muted-foreground">
                             Cancelar
                         </Button>
                         <Button
                             type="submit"
                             disabled={loading}
-                            className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white"
+                            className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white"
                         >
                             {loading ? "Guardando..." : isEdit ? "Guardar" : "Crear"}
                         </Button>

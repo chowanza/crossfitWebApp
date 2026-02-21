@@ -1,22 +1,41 @@
 import { createClient } from "@/lib/supabase/server";
-import type { Wod } from "@/lib/types/database";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { CalendarDays, ChevronRight, Dumbbell, Settings } from "lucide-react";
 
 export default async function WodsPage() {
     const supabase = await createClient();
 
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+
+    let userRole = "USER";
+    if (user) {
+        const { data: profile } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", user.id)
+            .single();
+        if (profile) userRole = profile.role;
+    }
+
+    // Fetch wods con sections
     const { data: wodsData } = await supabase
         .from("wods")
-        .select("*")
+        .select(`
+            *,
+            wod_sections(section_type)
+        `)
         .order("date", { ascending: false })
         .limit(30);
 
-    const wods = (wodsData || []) as Wod[];
+    const wods = (wodsData || []) as any[];
 
     // Agrupar por fecha
-    const grouped = wods.reduce<Record<string, Wod[]>>((acc, wod) => {
+    const grouped = wods.reduce<Record<string, any[]>>((acc, wod) => {
         if (!acc[wod.date]) acc[wod.date] = [];
         acc[wod.date].push(wod);
         return acc;
@@ -26,58 +45,86 @@ export default async function WodsPage() {
     const today = new Date().toISOString().split("T")[0];
 
     return (
-        <div className="space-y-8">
-            <div>
-                <h2 className="text-2xl font-bold">WODs</h2>
-                <p className="text-zinc-400 text-sm mt-1">
-                    Rutinas recientes. Toca una para ver detalles y registrar tu score.
-                </p>
+        <div className="space-y-8 pb-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 className="text-2xl font-bold tracking-tight">Registro de Entrenamientos</h2>
+                    <p className="text-muted-foreground text-sm mt-1">
+                        Selecciona una fecha para ver los bloques y registrar tu marca.
+                    </p>
+                </div>
+                {userRole === "ADMIN" && (
+                    <Link href="/admin/wods">
+                        <Button variant="outline" className="shrink-0 gap-2">
+                            <Settings className="w-4 h-4" />
+                            Gestionar WODs
+                        </Button>
+                    </Link>
+                )}
             </div>
 
             {dates.length > 0 ? (
-                dates.map((date) => (
-                    <div key={date}>
-                        <div className="flex items-center gap-3 mb-3">
-                            <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider">
-                                {date === today ? "Hoy" : date}
-                            </h3>
-                            {date === today && (
-                                <Badge className="bg-amber-500/20 text-amber-500 border-0 text-xs">
-                                    Hoy
-                                </Badge>
-                            )}
+                <div className="space-y-6">
+                    {dates.map((date) => (
+                        <div key={date}>
+                            <div className="flex items-center gap-2 mb-3 px-1">
+                                <CalendarDays className="w-4 h-4 text-muted-foreground" />
+                                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                                    {date === today ? "Hoy" : date}
+                                </h3>
+                                {date === today && (
+                                    <Badge className="ml-2 bg-blue-500/20 text-blue-500 border-0 text-[10px] px-2 uppercase tracking-wide">
+                                        Entrenamiento
+                                    </Badge>
+                                )}
+                            </div>
+                            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                                {grouped[date].map((wod) => (
+                                    <Link key={wod.id} href={`/wods/${wod.id}`}>
+                                        <Card className="group hover:border-blue-500/50 transition-all shadow-sm hover:shadow h-full flex flex-col justify-between">
+                                            <CardHeader className="pb-2 pt-4">
+                                                <div className="flex items-start justify-between gap-4">
+                                                    <CardTitle className="text-base leading-tight group-hover:text-blue-500 transition-colors">
+                                                        {wod.title}
+                                                    </CardTitle>
+                                                    <ChevronRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                                                </div>
+                                            </CardHeader>
+                                            <CardContent className="pb-4">
+                                                <p className="text-muted-foreground text-xs line-clamp-2 mb-3">
+                                                    {wod.notes || "Preparado por tu coach. Toca para ver detalle."}
+                                                </p>
+                                                <div className="flex flex-wrap gap-1">
+                                                    {wod.wod_sections?.map((sec: any, i: number) => (
+                                                        <Badge
+                                                            key={i}
+                                                            variant="secondary"
+                                                            className="text-[9px] px-1.5 font-medium bg-muted/80 text-muted-foreground group-hover:bg-blue-500/10 group-hover:text-blue-500 transition-colors"
+                                                        >
+                                                            {sec.section_type}
+                                                        </Badge>
+                                                    ))}
+                                                    {(!wod.wod_sections || wod.wod_sections.length === 0) && (
+                                                        <span className="text-[10px] text-muted-foreground italic">Sin bloques</span>
+                                                    )}
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    </Link>
+                                ))}
+                            </div>
                         </div>
-                        <div className="space-y-3">
-                            {grouped[date].map((wod) => (
-                                <Link key={wod.id} href={`/wods/${wod.id}`}>
-                                    <Card className="border-zinc-800 bg-zinc-900/50 hover:border-amber-500/30 transition-all cursor-pointer mb-3">
-                                        <CardHeader className="pb-2">
-                                            <div className="flex items-center justify-between">
-                                                <CardTitle className="text-base text-white">
-                                                    {wod.title}
-                                                </CardTitle>
-                                                <Badge
-                                                    variant="outline"
-                                                    className="border-zinc-700 text-zinc-400 text-xs"
-                                                >
-                                                    {wod.wod_type.replace("_", " ")}
-                                                </Badge>
-                                            </div>
-                                        </CardHeader>
-                                        <CardContent>
-                                            <p className="text-zinc-500 text-sm line-clamp-2">
-                                                {wod.description}
-                                            </p>
-                                        </CardContent>
-                                    </Card>
-                                </Link>
-                            ))}
-                        </div>
-                    </div>
-                ))
+                    ))}
+                </div>
             ) : (
-                <div className="rounded-lg border border-zinc-800 border-dashed py-12 text-center">
-                    <p className="text-zinc-500">No hay WODs aún.</p>
+                <div className="rounded-xl border border-dashed bg-muted/5 py-16 flex flex-col items-center justify-center text-center">
+                    <div className="bg-muted p-4 rounded-full mb-4">
+                        <Dumbbell className="w-8 h-8 text-muted-foreground" />
+                    </div>
+                    <h3 className="font-semibold text-lg">No hay WODs publicados</h3>
+                    <p className="text-sm text-muted-foreground max-w-sm mt-1">
+                        Tu entrenador aún no ha programado rutinas. Vuelve más tarde.
+                    </p>
                 </div>
             )}
         </div>

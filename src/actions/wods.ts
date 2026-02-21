@@ -2,70 +2,155 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-import type { WodType } from "@/lib/types/database";
+import type { SectionType } from "@/lib/types/database";
 
-export async function createWod(formData: FormData) {
+interface SectionInput {
+    section_type: SectionType;
+    time_cap_seconds: number | null;
+    description: string;
+    order_index: number;
+    movements: {
+        movement_id: string;
+        reps: number | null;
+        weight_kg: number | null;
+        notes: string;
+        order_index: number;
+    }[];
+}
+
+export async function createWod(data: {
+    title: string;
+    date: string;
+    notes: string;
+    sections: SectionInput[];
+}) {
     const supabase = await createClient();
-
     const {
         data: { user },
     } = await supabase.auth.getUser();
 
-    if (!user) {
-        return { error: "No autenticado." };
-    }
+    if (!user) return { error: "No autenticado." };
 
-    const title = formData.get("title") as string;
-    const description = formData.get("description") as string;
-    const wod_type = formData.get("wod_type") as WodType;
-    const date = (formData.get("date") as string) || new Date().toISOString().split("T")[0];
+    // 1. Crear el WOD padre
+    const { data: wod, error: wodError } = await supabase
+        .from("wods")
+        .insert({
+            title: data.title,
+            date: data.date || new Date().toISOString().split("T")[0],
+            notes: data.notes,
+            created_by: user.id,
+        })
+        .select("id")
+        .single();
 
-    const { error } = await supabase.from("wods").insert({
-        title,
-        description,
-        wod_type,
-        date,
-        created_by: user.id,
-    });
+    if (wodError || !wod) return { error: wodError?.message || "Error al crear WOD." };
 
-    if (error) {
-        return { error: error.message };
+    // 2. Crear secciones
+    for (const section of data.sections) {
+        const { data: sec, error: secError } = await supabase
+            .from("wod_sections")
+            .insert({
+                wod_id: wod.id,
+                section_type: section.section_type,
+                time_cap_seconds: section.time_cap_seconds,
+                description: section.description,
+                order_index: section.order_index,
+            })
+            .select("id")
+            .single();
+
+        if (secError || !sec) return { error: secError?.message || "Error al crear sección." };
+
+        // 3. Crear movimientos en la sección
+        if (section.movements.length > 0) {
+            const movs = section.movements.map((m) => ({
+                section_id: sec.id,
+                movement_id: m.movement_id,
+                reps: m.reps,
+                weight_kg: m.weight_kg,
+                notes: m.notes,
+                order_index: m.order_index,
+            }));
+
+            const { error: movError } = await supabase
+                .from("wod_section_movements")
+                .insert(movs);
+
+            if (movError) return { error: movError.message };
+        }
     }
 
     revalidatePath("/wods");
+    revalidatePath("/admin/wods");
     return { success: true };
 }
 
-export async function updateWod(id: string, formData: FormData) {
+export async function updateWod(
+    id: string,
+    data: {
+        title: string;
+        date: string;
+        notes: string;
+        sections: SectionInput[];
+    }
+) {
     const supabase = await createClient();
 
-    const title = formData.get("title") as string;
-    const description = formData.get("description") as string;
-    const wod_type = formData.get("wod_type") as WodType;
-    const date = formData.get("date") as string;
-
-    const { error } = await supabase
+    // 1. Actualizar WOD padre
+    const { error: wodError } = await supabase
         .from("wods")
-        .update({ title, description, wod_type, date })
+        .update({ title: data.title, date: data.date, notes: data.notes })
         .eq("id", id);
 
-    if (error) {
-        return { error: error.message };
+    if (wodError) return { error: wodError.message };
+
+    // 2. Eliminar secciones viejas (cascade elimina movimientos)
+    await supabase.from("wod_sections").delete().eq("wod_id", id);
+
+    // 3. Reinsertar secciones nuevas
+    for (const section of data.sections) {
+        const { data: sec, error: secError } = await supabase
+            .from("wod_sections")
+            .insert({
+                wod_id: id,
+                section_type: section.section_type,
+                time_cap_seconds: section.time_cap_seconds,
+                description: section.description,
+                order_index: section.order_index,
+            })
+            .select("id")
+            .single();
+
+        if (secError || !sec) return { error: secError?.message || "Error al crear sección." };
+
+        if (section.movements.length > 0) {
+            const movs = section.movements.map((m) => ({
+                section_id: sec.id,
+                movement_id: m.movement_id,
+                reps: m.reps,
+                weight_kg: m.weight_kg,
+                notes: m.notes,
+                order_index: m.order_index,
+            }));
+
+            const { error: movError } = await supabase
+                .from("wod_section_movements")
+                .insert(movs);
+
+            if (movError) return { error: movError.message };
+        }
     }
 
     revalidatePath("/wods");
+    revalidatePath("/admin/wods");
     return { success: true };
 }
 
 export async function deleteWod(id: string) {
     const supabase = await createClient();
-
     const { error } = await supabase.from("wods").delete().eq("id", id);
-
-    if (error) {
-        return { error: error.message };
-    }
-
+    if (error) return { error: error.message };
     revalidatePath("/wods");
+    revalidatePath("/admin/wods");
     return { success: true };
 }

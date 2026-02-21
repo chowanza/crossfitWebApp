@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { logWodResult } from "@/actions/results";
+import { logSectionResult } from "@/actions/results";
+import { Check, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,6 +18,7 @@ import type { ScoreType, WodResult } from "@/lib/types/database";
 
 interface ScoreFormProps {
     wodId: string;
+    sectionId: string;
     existingResult?: WodResult | null;
 }
 
@@ -29,7 +31,7 @@ const SCORE_TYPES: { value: ScoreType; label: string }[] = [
     { value: "POINTS", label: "Puntos" },
 ];
 
-export function ScoreForm({ wodId, existingResult }: ScoreFormProps) {
+export function ScoreForm({ wodId, sectionId, existingResult }: ScoreFormProps) {
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -41,9 +43,10 @@ export function ScoreForm({ wodId, existingResult }: ScoreFormProps) {
         setSuccess(false);
 
         formData.set("wod_id", wodId);
+        formData.set("section_id", sectionId);
         formData.set("rx", rx.toString());
 
-        const result = await logWodResult(formData);
+        const result = await logSectionResult(formData);
         if (result?.error) {
             setError(result.error);
         } else {
@@ -56,25 +59,24 @@ export function ScoreForm({ wodId, existingResult }: ScoreFormProps) {
         <form action={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                    <Label className="text-zinc-300">Tu Score</Label>
+                    <Label>Tu Score</Label>
                     <Input
                         name="score_value"
                         defaultValue={existingResult?.score_value}
                         placeholder='Ej: "3:45", "150", "8+12"'
                         required
-                        className="border-zinc-700 bg-zinc-800/50 text-white"
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label className="text-zinc-300">Tipo</Label>
+                    <Label>Tipo</Label>
                     <Select
                         name="score_type"
                         defaultValue={existingResult?.score_type || "TIME"}
                     >
-                        <SelectTrigger className="border-zinc-700 bg-zinc-800/50 text-white">
+                        <SelectTrigger>
                             <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="border-zinc-700 bg-zinc-900 text-white">
+                        <SelectContent>
                             {SCORE_TYPES.map((t) => (
                                 <SelectItem key={t.value} value={t.value}>
                                     {t.label}
@@ -89,45 +91,45 @@ export function ScoreForm({ wodId, existingResult }: ScoreFormProps) {
                 <button
                     type="button"
                     onClick={() => setRx(!rx)}
-                    className={`rounded-lg px-4 py-2 text-sm font-bold transition-colors ${rx
-                            ? "bg-amber-500 text-black"
-                            : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"
+                    className={`rounded-lg px-4 py-2 text-sm font-bold transition-colors flex items-center gap-1 ${rx
+                        ? "bg-blue-500 text-white"
+                        : "bg-muted text-muted-foreground hover:bg-muted/80"
                         }`}
                 >
-                    RX {rx ? "✓" : ""}
+                    RX {rx && <Check className="w-4 h-4" />}
                 </button>
-                <span className="text-xs text-zinc-500">
-                    {rx ? "Peso y movimientos como prescrito" : "Marca si hiciste el WOD como prescrito"}
+                <span className="text-xs text-muted-foreground">
+                    {rx ? "Peso y movimientos como prescrito" : "Marca si hiciste el bloque tal cual"}
                 </span>
             </div>
 
             <div className="space-y-2">
-                <Label className="text-zinc-300">Notas (opcional)</Label>
+                <Label>Notas (opcional)</Label>
                 <Textarea
                     name="notes"
                     defaultValue={existingResult?.notes || ""}
-                    placeholder="¿Cómo te fue? ¿Modificaste algo?"
+                    placeholder="¿Cómo te fue? ¿Escalaste algún peso?"
                     rows={2}
-                    className="border-zinc-700 bg-zinc-800/50 text-white resize-none"
+                    className="resize-none"
                 />
             </div>
 
             {error && (
-                <div className="rounded-md bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400">
+                <div className="rounded-md bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-500">
                     {error}
                 </div>
             )}
 
             {success && (
-                <div className="rounded-md bg-green-500/10 border border-green-500/20 p-3 text-sm text-green-400">
-                    ✅ {existingResult ? "Score actualizado" : "Score registrado"} exitosamente.
+                <div className="rounded-md bg-green-500/10 border border-green-500/20 p-3 text-sm text-green-500 flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4" /> {existingResult ? "Score actualizado" : "Score registrado"} exitosamente.
                 </div>
             )}
 
             <Button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-semibold"
+                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold"
             >
                 {loading
                     ? "Guardando..."

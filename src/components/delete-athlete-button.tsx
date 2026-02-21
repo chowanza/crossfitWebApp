@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { deleteWod } from "@/actions/wods";
+import { useState, useTransition } from "react";
+import { deleteAthlete } from "@/actions/athletes";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -12,20 +12,23 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 
-interface DeleteWodButtonProps {
-    wodId: string;
-    wodTitle: string;
+interface DeleteAthleteButtonProps {
+    athleteId: string;
+    athleteName: string;
 }
 
-export function DeleteWodButton({ wodId, wodTitle }: DeleteWodButtonProps) {
+export function DeleteAthleteButton({
+    athleteId,
+    athleteName,
+}: DeleteAthleteButtonProps) {
     const [open, setOpen] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const [isPending, startTransition] = useTransition();
 
-    async function handleDelete() {
-        setLoading(true);
-        await deleteWod(wodId);
-        setOpen(false);
-        setLoading(false);
+    function handleDelete() {
+        startTransition(async () => {
+            await deleteAthlete(athleteId);
+            setOpen(false);
+        });
     }
 
     return (
@@ -35,24 +38,24 @@ export function DeleteWodButton({ wodId, wodTitle }: DeleteWodButtonProps) {
                     Eliminar
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>¿Eliminar WOD?</DialogTitle>
+                    <DialogTitle>Eliminar Atleta</DialogTitle>
                     <DialogDescription>
-                        Vas a eliminar <span className="text-foreground font-medium">&ldquo;{wodTitle}&rdquo;</span>.
-                        Esta acción no se puede deshacer.
+                        ¿Estás seguro de que quieres eliminar a <strong>{athleteName}</strong>?
+                        Esta acción eliminará su cuenta y todos sus datos de forma permanente.
                     </DialogDescription>
                 </DialogHeader>
                 <div className="flex justify-end gap-3 mt-4">
-                    <Button variant="ghost" onClick={() => setOpen(false)} className="text-muted-foreground">
+                    <Button variant="ghost" onClick={() => setOpen(false)}>
                         Cancelar
                     </Button>
                     <Button
+                        variant="destructive"
                         onClick={handleDelete}
-                        disabled={loading}
-                        className="bg-red-600 hover:bg-red-700 text-white"
+                        disabled={isPending}
                     >
-                        {loading ? "Eliminando..." : "Eliminar"}
+                        {isPending ? "Eliminando..." : "Eliminar"}
                     </Button>
                 </div>
             </DialogContent>

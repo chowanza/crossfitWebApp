@@ -42,12 +42,12 @@ export function DeleteMovementButton({
                     Eliminar
                 </Button>
             </DialogTrigger>
-            <DialogContent className="border-zinc-800 bg-zinc-900 text-white sm:max-w-md">
+            <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle>¿Eliminar movimiento?</DialogTitle>
-                    <DialogDescription className="text-zinc-400">
+                    <DialogDescription>
                         Vas a eliminar{" "}
-                        <span className="text-white font-medium">
+                        <span className="text-foreground font-medium">
                             &ldquo;{movementName}&rdquo;
                         </span>
                         . Se eliminarán también todos los PRs asociados.
@@ -57,7 +57,7 @@ export function DeleteMovementButton({
                     <Button
                         variant="ghost"
                         onClick={() => setOpen(false)}
-                        className="text-zinc-400"
+                        className="text-muted-foreground"
                     >
                         Cancelar
                     </Button>

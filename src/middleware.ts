@@ -29,21 +29,26 @@ export async function middleware(request: NextRequest) {
         .eq("id", user.id)
         .single();
 
-    if (profile && profile.role === "USER" && profile.last_payment_date) {
-        const lastPayment = new Date(profile.last_payment_date);
-        const now = new Date();
-        const diffDays = Math.floor(
-            (now.getTime() - lastPayment.getTime()) / (1000 * 60 * 60 * 24)
-        );
-
-        // Bloqueo estricto: más de 3 días de morosidad.
-        const isOverdue = diffDays > 3;
+    if (profile && profile.role === "USER") {
         const isPaymentPage = pathname.startsWith("/payment");
 
-        if (isOverdue && !isPaymentPage) {
-            const paymentUrl = request.nextUrl.clone();
-            paymentUrl.pathname = "/payment";
-            return NextResponse.redirect(paymentUrl);
+        // Si no tiene ningún pago registrado, no bloquear aún
+        // (usuario nuevo sin historial de pagos).
+        if (profile.last_payment_date) {
+            const lastPayment = new Date(profile.last_payment_date);
+            const now = new Date();
+            const diffDays = Math.floor(
+                (now.getTime() - lastPayment.getTime()) / (1000 * 60 * 60 * 24)
+            );
+
+            // Bloqueo estricto: más de 3 días desde el último pago registrado.
+            // El trigger de BD actualiza last_payment_date automáticamente
+            // cuando se registra un pago con status = 'PAID'.
+            if (diffDays > 3 && !isPaymentPage) {
+                const paymentUrl = request.nextUrl.clone();
+                paymentUrl.pathname = "/payment";
+                return NextResponse.redirect(paymentUrl);
+            }
         }
     }
 

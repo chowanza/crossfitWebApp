@@ -13,6 +13,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { Image as ImageIcon } from "lucide-react";
 
 const CATEGORY_LABELS: Record<string, string> = {
     WEIGHTLIFTING: "Halterofilia",
@@ -22,10 +23,10 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
-    WEIGHTLIFTING: "border-red-500/30 text-red-400",
-    GYMNASTICS: "border-blue-500/30 text-blue-400",
-    CARDIO: "border-green-500/30 text-green-400",
-    OTHER: "border-zinc-500/30 text-zinc-400",
+    WEIGHTLIFTING: "border-red-500/30 text-red-500",
+    GYMNASTICS: "border-blue-500/30 text-blue-500",
+    CARDIO: "border-green-500/30 text-green-500",
+    OTHER: "border-muted-foreground/30 text-muted-foreground",
 };
 
 export default async function AdminMovementsPage() {
@@ -56,13 +57,13 @@ export default async function AdminMovementsPage() {
             <div className="flex items-center justify-between">
                 <div>
                     <h2 className="text-2xl font-bold">Movimientos</h2>
-                    <p className="text-zinc-400 text-sm mt-1">
+                    <p className="text-muted-foreground text-sm mt-1">
                         Catálogo de movimientos básicos de CrossFit.
                     </p>
                 </div>
                 <MovementForm
                     trigger={
-                        <Button className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white">
+                        <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white">
                             + Nuevo
                         </Button>
                     }
@@ -70,23 +71,30 @@ export default async function AdminMovementsPage() {
             </div>
 
             {movements.length > 0 ? (
-                <div className="rounded-lg border border-zinc-800 overflow-hidden">
+                <div className="rounded-lg border border-border overflow-hidden">
                     <Table>
                         <TableHeader>
-                            <TableRow className="border-zinc-800 hover:bg-transparent">
-                                <TableHead className="text-zinc-400">Nombre</TableHead>
-                                <TableHead className="text-zinc-400">Categoría</TableHead>
-                                <TableHead className="text-zinc-400 hidden md:table-cell">
+                            <TableRow className="border-border hover:bg-transparent">
+                                <TableHead className="text-muted-foreground">Nombre</TableHead>
+                                <TableHead className="text-muted-foreground">Categoría</TableHead>
+                                <TableHead className="text-muted-foreground hidden md:table-cell">
                                     Descripción
                                 </TableHead>
-                                <TableHead className="text-zinc-400 text-right">Acciones</TableHead>
+                                <TableHead className="text-muted-foreground text-right">Acciones</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {movements.map((movement) => (
-                                <TableRow key={movement.id} className="border-zinc-800">
-                                    <TableCell className="text-white font-medium">
-                                        {movement.name}
+                                <TableRow key={movement.id} className="border-border">
+                                    <TableCell className="text-foreground font-medium">
+                                        <div className="flex items-center gap-2">
+                                            {movement.name}
+                                            {movement.media_url && (
+                                                <a href={movement.media_url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-blue-500" title="Ver media">
+                                                    <ImageIcon className="w-4 h-4" />
+                                                </a>
+                                            )}
+                                        </div>
                                     </TableCell>
                                     <TableCell>
                                         <Badge
@@ -96,7 +104,7 @@ export default async function AdminMovementsPage() {
                                             {CATEGORY_LABELS[movement.category]}
                                         </Badge>
                                     </TableCell>
-                                    <TableCell className="text-zinc-400 text-sm max-w-xs truncate hidden md:table-cell">
+                                    <TableCell className="text-muted-foreground text-sm max-w-xs truncate hidden md:table-cell">
                                         {movement.description}
                                     </TableCell>
                                     <TableCell className="text-right">
@@ -107,7 +115,7 @@ export default async function AdminMovementsPage() {
                                                     <Button
                                                         variant="ghost"
                                                         size="sm"
-                                                        className="text-zinc-400 hover:text-white"
+                                                        className="text-muted-foreground hover:text-foreground"
                                                     >
                                                         Editar
                                                     </Button>
@@ -125,8 +133,8 @@ export default async function AdminMovementsPage() {
                     </Table>
                 </div>
             ) : (
-                <div className="rounded-lg border border-zinc-800 border-dashed py-12 text-center">
-                    <p className="text-zinc-500">No hay movimientos registrados.</p>
+                <div className="rounded-lg border border-border border-dashed py-12 text-center bg-muted/5">
+                    <p className="text-muted-foreground">No hay movimientos registrados.</p>
                 </div>
             )}
         </div>

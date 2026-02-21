@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { logPersonalRecord } from "@/actions/prs";
+import { registerPayment } from "@/actions/payments";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,24 +21,33 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import type { Movement } from "@/lib/types/database";
+import type { Profile } from "@/lib/types/database";
 
-interface PrFormProps {
-    movements: Movement[];
+interface PaymentFormProps {
+    athletes: Pick<Profile, "id" | "full_name">[];
     trigger: React.ReactNode;
-    defaultMovementId?: string;
+    defaultUserId?: string;
 }
 
-export function PrForm({ movements, trigger, defaultMovementId }: PrFormProps) {
+export function PaymentForm({ athletes, trigger, defaultUserId }: PaymentFormProps) {
     const [open, setOpen] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+
+    // Defaults: período del mes actual
+    const now = new Date();
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1)
+        .toISOString()
+        .split("T")[0];
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+        .toISOString()
+        .split("T")[0];
 
     async function handleSubmit(formData: FormData) {
         setLoading(true);
         setError(null);
 
-        const result = await logPersonalRecord(formData);
+        const result = await registerPayment(formData);
         if (result?.error) {
             setError(result.error);
             setLoading(false);
@@ -53,58 +62,71 @@ export function PrForm({ movements, trigger, defaultMovementId }: PrFormProps) {
             <DialogTrigger asChild>{trigger}</DialogTrigger>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Registrar PR</DialogTitle>
+                    <DialogTitle>Registrar Pago</DialogTitle>
                     <DialogDescription>
-                        Registra tu nuevo peso máximo.
+                        Registra el pago de mensualidad de un atleta.
                     </DialogDescription>
                 </DialogHeader>
                 <form action={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
-                        <Label>Movimiento</Label>
-                        <Select name="movement_id" defaultValue={defaultMovementId}>
+                        <Label>Atleta</Label>
+                        <Select name="user_id" defaultValue={defaultUserId}>
                             <SelectTrigger className="bg-muted/50">
-                                <SelectValue placeholder="Selecciona un movimiento" />
+                                <SelectValue placeholder="Selecciona un atleta" />
                             </SelectTrigger>
                             <SelectContent className="max-h-60">
-                                {movements.map((m) => (
-                                    <SelectItem key={m.id} value={m.id}>
-                                        {m.name}
+                                {athletes.map((a) => (
+                                    <SelectItem key={a.id} value={a.id}>
+                                        {a.full_name || "Sin nombre"}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
                     </div>
 
+                    <div className="space-y-2">
+                        <Label>Monto</Label>
+                        <Input
+                            name="amount"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            placeholder="Ej: 30.00"
+                            required
+                            className="bg-muted/50"
+                        />
+                    </div>
+
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label>Peso (kg)</Label>
+                            <Label>Período Inicio</Label>
                             <Input
-                                name="weight_value"
-                                type="number"
-                                step="0.5"
-                                min="0"
-                                placeholder="Ej: 100"
+                                name="period_start"
+                                type="date"
+                                defaultValue={firstDay}
                                 required
                                 className="bg-muted/50"
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label>Reps</Label>
+                            <Label>Período Fin</Label>
                             <Input
-                                name="reps"
-                                type="number"
-                                min="1"
-                                defaultValue="1"
+                                name="period_end"
+                                type="date"
+                                defaultValue={lastDay}
+                                required
                                 className="bg-muted/50"
                             />
                         </div>
                     </div>
 
+                    <input type="hidden" name="status" value="PAID" />
+
                     <div className="space-y-2">
                         <Label>Notas (opcional)</Label>
                         <Textarea
                             name="notes"
-                            placeholder="¿Fue strict? ¿Con cinturón?"
+                            placeholder="Método de pago, referencia, etc."
                             rows={2}
                             className="bg-muted/50 resize-none"
                         />
@@ -130,7 +152,7 @@ export function PrForm({ movements, trigger, defaultMovementId }: PrFormProps) {
                             disabled={loading}
                             className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white"
                         >
-                            {loading ? "Guardando..." : "Guardar PR"}
+                            {loading ? "Registrando..." : "Registrar Pago"}
                         </Button>
                     </div>
                 </form>

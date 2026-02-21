@@ -1,10 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import type { Profile, Wod } from "@/lib/types/database";
+import type { Profile, Movement } from "@/lib/types/database";
 import { WodForm } from "@/components/wod-form";
 import { DeleteWodButton } from "@/components/delete-wod-button";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Dumbbell } from "lucide-react";
 import {
     Table,
     TableBody,
@@ -20,7 +21,7 @@ export default async function AdminWodsPage() {
         data: { user },
     } = await supabase.auth.getUser();
 
-    // Verificar que es admin
+    // Verificar admin
     const { data: profileData } = await supabase
         .from("profiles")
         .select("role")
@@ -28,28 +29,42 @@ export default async function AdminWodsPage() {
         .single();
 
     const profile = profileData as Pick<Profile, "role"> | null;
-    if (profile?.role !== "ADMIN") {
-        redirect("/");
-    }
+    if (profile?.role !== "ADMIN") redirect("/");
 
+    // Obtener movimientos para el formulario
+    const { data: movementsData } = await supabase
+        .from("movements")
+        .select("*")
+        .order("name");
+    const movements = (movementsData || []) as Movement[];
+
+    // Obtener WODs con sus secciones y movimientos
     const { data: wodsData } = await supabase
         .from("wods")
-        .select("*")
+        .select(`
+            *,
+            wod_sections (
+                *,
+                wod_section_movements (*)
+            )
+        `)
         .order("date", { ascending: false })
         .limit(50);
 
-    const wods = (wodsData || []) as Wod[];
+    // Tipar manualmente el resultado compuesto
+    const wods = wodsData as any[] || [];
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h2 className="text-2xl font-bold">Gestionar WODs</h2>
-                    <p className="text-zinc-400 text-sm mt-1">Crea y administra las rutinas diarias.</p>
+                    <p className="text-muted-foreground text-sm mt-1">Crea y administra las rutinas diarias.</p>
                 </div>
                 <WodForm
+                    movements={movements}
                     trigger={
-                        <Button className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white">
+                        <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white">
                             + Nuevo WOD
                         </Button>
                     }
@@ -57,45 +72,54 @@ export default async function AdminWodsPage() {
             </div>
 
             {wods.length > 0 ? (
-                <div className="rounded-lg border border-zinc-800 overflow-hidden">
+                <div className="rounded-lg border border-border overflow-hidden">
                     <Table>
                         <TableHeader>
-                            <TableRow className="border-zinc-800 hover:bg-transparent">
-                                <TableHead className="text-zinc-400">Fecha</TableHead>
-                                <TableHead className="text-zinc-400">Título</TableHead>
-                                <TableHead className="text-zinc-400">Tipo</TableHead>
-                                <TableHead className="text-zinc-400 hidden md:table-cell">
-                                    Descripción
+                            <TableRow className="hover:bg-transparent">
+                                <TableHead>Fecha</TableHead>
+                                <TableHead>Título</TableHead>
+                                <TableHead>Bloques</TableHead>
+                                <TableHead className="hidden md:table-cell">
+                                    Notas
                                 </TableHead>
-                                <TableHead className="text-zinc-400 text-right">Acciones</TableHead>
+                                <TableHead className="text-right">Acciones</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {wods.map((wod) => (
-                                <TableRow key={wod.id} className="border-zinc-800">
-                                    <TableCell className="text-zinc-300 font-mono text-sm">
+                                <TableRow key={wod.id}>
+                                    <TableCell className="font-mono text-sm">
                                         {wod.date}
                                     </TableCell>
-                                    <TableCell className="text-white font-medium">
+                                    <TableCell className="font-medium">
                                         {wod.title}
                                     </TableCell>
                                     <TableCell>
-                                        <Badge
-                                            variant="outline"
-                                            className="border-amber-500/30 text-amber-500"
-                                        >
-                                            {wod.wod_type.replace("_", " ")}
-                                        </Badge>
+                                        <div className="flex flex-wrap gap-1">
+                                            {wod.wod_sections?.sort((a: any, b: any) => a.order_index - b.order_index).map((sec: any) => (
+                                                <Badge
+                                                    key={sec.id}
+                                                    variant="secondary"
+                                                    className="text-xs bg-blue-500/10 text-blue-500 hover:bg-blue-500/20"
+                                                >
+                                                    {sec.section_type.replace("_", " ")}
+                                                </Badge>
+                                            ))}
+                                            {(!wod.wod_sections || wod.wod_sections.length === 0) && (
+                                                <span className="text-muted-foreground text-xs">Sin bloques</span>
+                                            )}
+                                        </div>
                                     </TableCell>
-                                    <TableCell className="text-zinc-400 text-sm max-w-xs truncate hidden md:table-cell">
-                                        {wod.description}
+                                    <TableCell className="text-muted-foreground text-sm max-w-xs truncate hidden md:table-cell">
+                                        {wod.notes}
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex items-center justify-end gap-2">
                                             <WodForm
                                                 wod={wod}
+                                                movements={movements}
                                                 trigger={
-                                                    <Button variant="ghost" size="sm" className="text-zinc-400 hover:text-white">
+                                                    <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
                                                         Editar
                                                     </Button>
                                                 }
@@ -109,9 +133,14 @@ export default async function AdminWodsPage() {
                     </Table>
                 </div>
             ) : (
-                <div className="rounded-lg border border-zinc-800 border-dashed py-12 text-center">
-                    <p className="text-zinc-500">No hay WODs creados aún.</p>
-                    <p className="text-zinc-600 text-sm mt-1">Crea el primer WOD para tus atletas.</p>
+                <div className="rounded-xl border border-border border-dashed py-16 flex flex-col items-center justify-center text-center bg-muted/5">
+                    <div className="bg-muted p-4 rounded-full mb-4">
+                        <Dumbbell className="w-8 h-8 text-muted-foreground" />
+                    </div>
+                    <p className="font-semibold text-lg">No hay WODs programados</p>
+                    <p className="text-sm text-muted-foreground mt-1 max-w-sm">
+                        Crea el primer entrenamiento para que tus atletas puedan registrar sus marcas.
+                    </p>
                 </div>
             )}
         </div>

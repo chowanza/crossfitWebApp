@@ -4,6 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PrForm } from "@/components/pr-form";
+import { MovementMediaDialog } from "@/components/movement-media-dialog";
+import { Dumbbell, PersonStanding, Timer, Zap } from "lucide-react";
 
 interface PrWithMovement extends PersonalRecord {
     movements: Pick<Movement, "name" | "category"> | null;
@@ -44,28 +46,28 @@ export default async function PrsPage() {
         return { movement, bestPr, historyCount: movementPrs.length };
     });
 
-    const categoryLabels: Record<string, string> = {
-        WEIGHTLIFTING: "🏋️ Halterofilia",
-        GYMNASTICS: "🤸 Gimnásticos",
-        CARDIO: "🏃 Cardio",
-        OTHER: "⚡ Otros",
+    const categoryInfo: Record<string, { label: string, icon: React.ReactNode }> = {
+        WEIGHTLIFTING: { label: "Halterofilia", icon: <Dumbbell className="w-4 h-4" /> },
+        GYMNASTICS: { label: "Gimnásticos", icon: <PersonStanding className="w-4 h-4" /> },
+        CARDIO: { label: "Cardio", icon: <Timer className="w-4 h-4" /> },
+        OTHER: { label: "Otros", icon: <Zap className="w-4 h-4" /> },
     };
 
     const categories = ["WEIGHTLIFTING", "GYMNASTICS", "CARDIO", "OTHER"] as const;
 
     return (
         <div className="space-y-8">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h2 className="text-2xl font-bold">Mis PRs</h2>
-                    <p className="text-zinc-400 text-sm mt-1">
+                    <p className="text-muted-foreground text-sm mt-1">
                         Tus pesos máximos por movimiento.
                     </p>
                 </div>
                 <PrForm
                     movements={movements}
                     trigger={
-                        <Button className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white">
+                        <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white">
                             + Nuevo PR
                         </Button>
                     }
@@ -78,53 +80,61 @@ export default async function PrsPage() {
                 );
                 if (categoryItems.length === 0) return null;
 
+                const { label, icon } = categoryInfo[category];
+
                 return (
                     <div key={category}>
-                        <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-3">
-                            {categoryLabels[category]}
+                        <h3 className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                            {icon} {label}
                         </h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                             {categoryItems.map(({ movement, bestPr, historyCount }) => (
                                 <Card
                                     key={movement.id}
-                                    className="border-zinc-800 bg-zinc-900/50 hover:border-zinc-700 transition-colors"
+                                    className="border-border bg-muted/10 hover:border-border/80 transition-colors"
                                 >
                                     <CardContent className="pt-5 pb-4">
                                         <div className="flex items-start justify-between mb-3">
-                                            <h4 className="font-medium text-white text-sm">
+                                            <h4 className="font-medium text-foreground text-sm flex items-center">
                                                 {movement.name}
+                                                {movement.media_url && (
+                                                    <MovementMediaDialog
+                                                        movementName={movement.name}
+                                                        mediaUrl={movement.media_url}
+                                                    />
+                                                )}
                                             </h4>
                                             {bestPr && bestPr.reps === 1 && (
-                                                <Badge className="bg-amber-500/20 text-amber-500 border-0 text-[10px]">
+                                                <Badge className="bg-blue-500/20 text-blue-500 border-0 text-[10px]">
                                                     1RM
                                                 </Badge>
                                             )}
                                         </div>
                                         {bestPr ? (
                                             <div>
-                                                <p className="text-2xl font-bold text-amber-500">
+                                                <p className="text-2xl font-bold text-blue-500">
                                                     {bestPr.weight_value}
-                                                    <span className="text-sm text-zinc-500 ml-1">kg</span>
+                                                    <span className="text-sm text-muted-foreground ml-1">kg</span>
                                                 </p>
                                                 {bestPr.reps > 1 && (
-                                                    <p className="text-xs text-zinc-500">
+                                                    <p className="text-xs text-muted-foreground">
                                                         × {bestPr.reps} reps
                                                     </p>
                                                 )}
                                                 {historyCount > 1 && (
-                                                    <p className="text-xs text-zinc-600 mt-1">
+                                                    <p className="text-xs text-muted-foreground/70 mt-1">
                                                         {historyCount} registros
                                                     </p>
                                                 )}
                                             </div>
                                         ) : (
                                             <div>
-                                                <p className="text-sm text-zinc-600">Sin registro</p>
+                                                <p className="text-sm text-muted-foreground/70">Sin registro</p>
                                                 <PrForm
                                                     movements={movements}
                                                     defaultMovementId={movement.id}
                                                     trigger={
-                                                        <button className="text-xs text-amber-500 hover:underline mt-1">
+                                                        <button className="text-xs text-blue-500 hover:underline mt-1">
                                                             Registrar →
                                                         </button>
                                                     }

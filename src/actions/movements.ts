@@ -10,11 +10,13 @@ export async function createMovement(formData: FormData) {
     const name = formData.get("name") as string;
     const description = (formData.get("description") as string) || "";
     const category = formData.get("category") as MovementCategory;
+    const media_url = (formData.get("media_url") as string) || null;
 
     const { error } = await supabase.from("movements").insert({
         name,
         description,
         category,
+        media_url,
     });
 
     if (error) return { error: error.message };
@@ -29,10 +31,11 @@ export async function updateMovement(id: string, formData: FormData) {
     const name = formData.get("name") as string;
     const description = (formData.get("description") as string) || "";
     const category = formData.get("category") as MovementCategory;
+    const media_url = (formData.get("media_url") as string) || null;
 
     const { error } = await supabase
         .from("movements")
-        .update({ name, description, category })
+        .update({ name, description, category, media_url })
         .eq("id", id);
 
     if (error) return { error: error.message };
