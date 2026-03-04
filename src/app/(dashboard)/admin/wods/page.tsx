@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import type { Profile, Movement } from "@/lib/types/database";
 import { WodForm } from "@/components/wod-form";
 import { DeleteWodButton } from "@/components/delete-wod-button";
@@ -62,14 +63,11 @@ export default async function AdminWodsPage() {
                     <h2 className="text-2xl font-bold">Gestionar WODs</h2>
                     <p className="text-muted-foreground text-sm mt-1">Crea y administra las rutinas diarias.</p>
                 </div>
-                <WodForm
-                    movements={movements}
-                    trigger={
-                        <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white">
-                            + Nuevo WOD
-                        </Button>
-                    }
-                />
+                <Link href="/admin/wods/builder">
+                    <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-sm">
+                        + Nueva Rutina
+                    </Button>
+                </Link>
             </div>
 
             {wods.length > 0 ? (
