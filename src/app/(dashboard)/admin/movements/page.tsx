@@ -13,7 +13,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { Image as ImageIcon } from "lucide-react";
+import { MovementMediaDialog } from "@/components/movement-media-dialog";
 
 const CATEGORY_LABELS: Record<string, string> = {
     WEIGHTLIFTING: "Halterofilia",
@@ -90,9 +90,10 @@ export default async function AdminMovementsPage() {
                                         <div className="flex items-center gap-2">
                                             {movement.name}
                                             {movement.media_url && (
-                                                <a href={movement.media_url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-blue-500" title="Ver media">
-                                                    <ImageIcon className="w-4 h-4" />
-                                                </a>
+                                                <MovementMediaDialog
+                                                    movementName={movement.name}
+                                                    mediaUrl={movement.media_url}
+                                                />
                                             )}
                                         </div>
                                     </TableCell>

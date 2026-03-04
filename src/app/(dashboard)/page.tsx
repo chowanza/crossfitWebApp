@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from "@/lib/supabase/server";
 import type { Profile } from "@/lib/types/database";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -196,60 +197,86 @@ export default async function DashboardPage() {
     // RENDER: VISTA ATLETA (USER)
     // ==========================================
     return (
-        <div className="space-y-8 pb-8">
-            {/* Header Atleta */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div className="space-y-6 pb-20">
+            {/* Intro Header */}
+            <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
-                        ¿Listo para hoy, <span className="text-blue-500">{firstName}</span>?
+                    <h2 className="text-2xl font-bold tracking-tight">
+                        Hola, <span className="text-blue-500">{firstName}</span> 👋
                     </h2>
-                    <p className="text-muted-foreground mt-1">
-                        Tu centro de entrenamiento personal.
+                    <p className="text-muted-foreground text-sm">
+                        ¿Qué entrenamos hoy?
                     </p>
                 </div>
-
-                {/* Pago Status Badge */}
-                <div className="flex items-center gap-2 bg-muted/40 px-3 py-1.5 rounded-full border border-border/50 w-fit">
+                <div className="flex items-center gap-2 bg-green-500/10 px-3 py-1.5 rounded-full border border-green-500/20">
                     <div className="w-2 h-2 rounded-full bg-green-500" />
-                    <span className="text-xs font-medium">Suscripción Activa</span>
+                    <span className="text-[10px] font-semibold text-green-500">Activo</span>
                 </div>
             </div>
 
-            {/* Main Action: WOD del día */}
+            {/* Offer Banner */}
+            <Card className="bg-card border-border overflow-hidden relative shadow-sm">
+                <div className="absolute -right-10 -top-10 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl" />
+                <CardHeader className="pb-2">
+                    <CardTitle className="text-xl">Oferta 50%</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4 relative z-10">
+                    <p className="text-sm text-muted-foreground">
+                        ¡Aprovecha nuestros descuentos en planes semestrales!
+                        <span className="font-mono text-[11px] block mt-1.5 text-foreground/80">
+                            Termina en 2d 6hr 55m 6s
+                        </span>
+                    </p>
+                    <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 shadow-md text-white border-0">
+                        Ver más
+                    </Button>
+                </CardContent>
+            </Card>
+
+            {/* Horizontal Categories */}
+            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none snap-x -mx-4 px-4 md:mx-0 md:px-0">
+                <div className="snap-start shrink-0 w-32 h-24 rounded-2xl bg-gradient-to-br from-blue-500/10 to-background border flex flex-col justify-end p-3 relative overflow-hidden group cursor-pointer hover:border-blue-500/50 transition-colors">
+                    <Dumbbell className="absolute top-2 right-2 w-10 h-10 text-blue-500/20 group-hover:scale-110 transition-transform" />
+                    <span className="font-bold text-sm tracking-tight text-foreground/90">CrossFit<br />Diario</span>
+                </div>
+                <div className="snap-start shrink-0 w-32 h-24 rounded-2xl bg-muted/20 border flex flex-col justify-end p-3 relative overflow-hidden group cursor-pointer hover:border-border/80 transition-colors">
+                    <Activity className="absolute top-2 right-2 w-10 h-10 text-muted-foreground/20 group-hover:scale-110 transition-transform" />
+                    <span className="font-bold text-sm tracking-tight text-foreground/90">Open<br />Box</span>
+                </div>
+                <div className="snap-start shrink-0 w-32 h-24 rounded-2xl bg-muted/20 border flex flex-col justify-end p-3 relative overflow-hidden group cursor-pointer hover:border-border/80 transition-colors">
+                    <Trophy className="absolute top-2 right-2 w-10 h-10 text-muted-foreground/20 group-hover:scale-110 transition-transform" />
+                    <span className="font-bold text-sm tracking-tight text-foreground/90">Fuerza<br />Extra</span>
+                </div>
+            </div>
+
+            {/* WOD de Hoy */}
             <div>
-                <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold flex items-center gap-2">
-                        <Activity className="w-5 h-5 text-blue-500" /> Entrenamiento de Hoy
-                    </h3>
-                    <Link href="/wods" className="text-xs text-blue-500 font-medium hover:underline">
-                        Ver anteriores
+                <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-lg font-bold">Mis rutinas ({wods.length})</h3>
+                    <Link href="/wods" className="text-xs text-blue-500 font-bold hover:underline">
+                        Ver pasadas
                     </Link>
                 </div>
 
                 {wods.length > 0 ? (
-                    <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-3">
                         {wods.map((wod) => (
-                            <Card key={wod.id} className="relative overflow-hidden border-border/60 hover:border-blue-500/50 transition-all shadow-sm">
-                                <div className="absolute top-0 right-0 p-4 opacity-10">
-                                    <Dumbbell className="w-24 h-24 -mr-6 -mt-6 transform rotate-12" />
-                                </div>
-                                <CardHeader className="pb-3 relative z-10">
-                                    <div className="flex gap-1.5 flex-wrap mb-2">
-                                        {wod.wod_sections?.map((sec: any, i: number) => (
-                                            <Badge key={i} variant="secondary" className="bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 text-[10px] px-2 h-5 font-semibold">
-                                                {sec.section_type}
-                                            </Badge>
-                                        ))}
+                            <Card key={wod.id} className="overflow-hidden border-border/50 hover:border-blue-500/30 transition-colors shadow-none bg-card">
+                                <CardHeader className="pb-2 pt-4 bg-muted/5">
+                                    <div className="flex justify-between items-start">
+                                        <CardTitle className="text-base font-bold">{wod.title}</CardTitle>
+                                        <Badge className="text-[9px] bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 border-0 px-2 py-0 uppercase uppercase font-bold tracking-wider">
+                                            Hoy
+                                        </Badge>
                                     </div>
-                                    <CardTitle className="text-xl">{wod.title}</CardTitle>
-                                    <CardDescription className="line-clamp-2 mt-2 font-medium">
-                                        {wod.notes || "Preparado por tu coach. Toca para ver detalle."}
-                                    </CardDescription>
+                                    <p className="text-[11px] text-muted-foreground uppercase tracking-widest font-semibold mt-1">
+                                        {wod.wod_sections?.map((s: any) => s.section_type).join(" • ") || "WOD"}
+                                    </p>
                                 </CardHeader>
-                                <CardContent className="relative z-10 pt-4 pb-5">
-                                    <Link href={`/wods/${wod.id}`} className="w-full block">
-                                        <Button className="w-full shadow-md bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400">
-                                            <Play className="w-4 h-4 mr-2 fill-current" /> Ver e Iniciar
+                                <CardContent className="pt-3 pb-4">
+                                    <Link href={`/tracker/${wod.id}`}>
+                                        <Button className="w-full bg-blue-600 hover:bg-blue-700 h-11 shadow-sm font-semibold rounded-xl">
+                                            Empezar rutina
                                         </Button>
                                     </Link>
                                 </CardContent>
@@ -257,50 +284,36 @@ export default async function DashboardPage() {
                         ))}
                     </div>
                 ) : (
-                    <Card className="border-dashed bg-muted/10">
-                        <CardContent className="py-12 flex flex-col items-center justify-center text-center space-y-3">
-                            <div className="p-4 bg-muted rounded-full">
-                                <CalendarPlus className="w-8 h-8 text-muted-foreground" />
+                    <Card className="border-dashed bg-muted/5 shadow-none">
+                        <CardContent className="py-10 flex flex-col items-center justify-center text-center">
+                            <div className="p-3 bg-muted rounded-full mb-3">
+                                <CalendarPlus className="w-6 h-6 text-muted-foreground" />
                             </div>
-                            <div>
-                                <p className="font-semibold">Día de Descanso Activo</p>
-                                <p className="text-sm text-muted-foreground max-w-sm mt-1">
-                                    Tu coach no ha publicado la rutina de hoy. Aprovecha para estirar o salir a correr.
-                                </p>
-                            </div>
+                            <h4 className="font-bold text-sm">Descanso</h4>
+                            <p className="text-xs text-muted-foreground mt-1 max-w-[200px]">
+                                No hay WOD asignado hoy. Dedica tiempo a estirar.
+                            </p>
                         </CardContent>
                     </Card>
                 )}
             </div>
 
-            {/* Quick Stats Atleta */}
+            {/* Tips de Entrenamiento */}
             <div>
-                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                    <Trophy className="w-5 h-5 text-blue-500" /> Tus Marcas
-                </h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <Card className="bg-card">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-sm text-muted-foreground font-medium">Bloques Ejecutados</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-3xl font-black text-foreground">{totalWods ?? 0}</div>
-                        </CardContent>
-                    </Card>
-                    <Card className="bg-card cursor-pointer hover:border-blue-500/30 transition-colors">
-                        <Link href="/prs" className="block w-full h-full">
-                            <CardHeader className="pb-2">
-                                <CardTitle className="text-sm text-muted-foreground font-medium flex justify-between items-center">
-                                    PRs (RMs)
-                                    <ChevronRight className="w-4 h-4" />
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-3xl font-black text-blue-500">{totalPrs ?? 0}</div>
-                            </CardContent>
-                        </Link>
-                    </Card>
-                </div>
+                <h3 className="text-lg font-bold mb-3">Tips de entrenamiento</h3>
+                <Card className="border-l-4 border-l-blue-500 overflow-hidden shadow-sm bg-card">
+                    <CardHeader className="pb-2 pt-4">
+                        <CardTitle className="text-base font-bold">Mejora tu empuje en Hip Thrust</CardTitle>
+                    </CardHeader>
+                    <CardContent className="pb-4 pt-1">
+                        <p className="text-[13px] text-muted-foreground mb-4 leading-relaxed">
+                            Aprende la técnica correcta para maximizar la activación de glúteos sin lastimar tu zona lumbar.
+                        </p>
+                        <Button variant="secondary" className="w-full bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 font-semibold rounded-xl">
+                            Explorar
+                        </Button>
+                    </CardContent>
+                </Card>
             </div>
         </div>
     );

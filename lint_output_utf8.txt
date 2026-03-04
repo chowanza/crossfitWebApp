@@ -1,0 +1,55 @@
+﻿
+C:\Users\luisi\Documents\PASANTIA AIBBYS\crossfitWebApp\src\app\(dashboard)\admin\wods\page.tsx
+  55:30   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  99:73   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  99:81   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  99:130  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\luisi\Documents\PASANTIA AIBBYS\crossfitWebApp\src\app\(dashboard)\page.tsx
+   45:39  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  153:82  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  238:70  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\luisi\Documents\PASANTIA AIBBYS\crossfitWebApp\src\app\(dashboard)\wods\[id]\page.tsx
+    3:38  warning  'WodSection' is defined but never used          @typescript-eslint/no-unused-vars
+    3:50  warning  'WodSectionMovement' is defined but never used  @typescript-eslint/no-unused-vars
+    3:70  warning  'Movement' is defined but never used            @typescript-eslint/no-unused-vars
+   18:25  warning  'Star' is defined but never used                @typescript-eslint/no-unused-vars
+   52:28  error    Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+   55:56  error    Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+   55:64  error    Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+   58:41  error    Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  112:40  error    Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  114:73  error    Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  114:81  error    Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+  151:67  error    Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+
+C:\Users\luisi\Documents\PASANTIA AIBBYS\crossfitWebApp\src\app\(dashboard)\wods\page.tsx
+  35:38  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  38:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  98:82  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\luisi\Documents\PASANTIA AIBBYS\crossfitWebApp\src\components\sidebar.tsx
+   15:5   warning  'CalendarPlus' is defined but never used  @typescript-eslint/no-unused-vars
+  122:29  warning  'fullName' is defined but never used      @typescript-eslint/no-unused-vars
+
+C:\Users\luisi\Documents\PASANTIA AIBBYS\crossfitWebApp\src\components\theme-toggle.tsx
+  12:21  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\luisi\Documents\PASANTIA AIBBYS\crossfitWebApp\src\components\theme-toggle.tsx:12:21
+  10 |     const [mounted, setMounted] = useState(false);
+  11 |
+> 12 |     useEffect(() => setMounted(true), []);
+     |                     ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  13 |
+  14 |     if (!mounted) {
+  15 |         return (  react-hooks/set-state-in-effect
+
+Γ£û 25 problems (19 errors, 6 warnings)
+

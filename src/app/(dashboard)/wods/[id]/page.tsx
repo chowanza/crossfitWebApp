@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import type { Profile, ClassSession, WodSection, WodSectionMovement, Movement, WodResult } from "@/lib/types/database";

@@ -26,10 +26,10 @@ interface SidebarProps {
 }
 
 const NAV_ITEMS = [
-    { href: "/", label: "Dashboard", icon: LayoutDashboard, roles: ["ADMIN", "USER"] as UserRole[] },
-    { href: "/wods", label: "WODs", icon: Dumbbell, roles: ["ADMIN", "USER"] as UserRole[] },
-    { href: "/prs", label: "Mis PRs", icon: Trophy, roles: ["ADMIN", "USER"] as UserRole[] },
-    { href: "/profile", label: "Mi Perfil", icon: User, roles: ["ADMIN", "USER"] as UserRole[] },
+    { href: "/", label: "Inicio", icon: LayoutDashboard, roles: ["ADMIN", "USER"] as UserRole[] },
+    { href: "/wods", label: "Entrenamientos", icon: Dumbbell, roles: ["ADMIN", "USER"] as UserRole[] },
+    { href: "/prs", label: "PRs", icon: Trophy, roles: ["ADMIN", "USER"] as UserRole[] },
+    { href: "/profile", label: "Perfil", icon: User, roles: ["ADMIN", "USER"] as UserRole[] },
     { href: "/admin/movements", label: "Movimientos", icon: Activity, roles: ["ADMIN"] as UserRole[] },
     { href: "/admin/payments", label: "Pagos", icon: CreditCard, roles: ["ADMIN"] as UserRole[] },
     { href: "/admin/athletes", label: "Atletas", icon: Users, roles: ["ADMIN"] as UserRole[] },
@@ -121,13 +121,17 @@ export function Sidebar({ fullName, role }: SidebarProps) {
 
 export function MobileNav({ fullName, role }: SidebarProps) {
     const pathname = usePathname();
-    // Mostrar max 5 items relevantes para mobile
-    const filteredItems = NAV_ITEMS.filter((item) => item.roles.includes(role)).slice(0, 5);
+
+    // FitMe Navigation: 3 primary items for User.
+    const userNavHrefs = ["/", "/wods", "/profile"];
+    const filteredItems = role === "USER"
+        ? NAV_ITEMS.filter((item) => userNavHrefs.includes(item.href))
+        : NAV_ITEMS.filter((item) => item.roles.includes(role)).slice(0, 5);
 
     return (
-        <>
-            <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)]">
-                <div className="flex items-center justify-around px-1 py-1 max-w-md mx-auto h-16">
+        <nav className="md:hidden fixed bottom-4 left-4 right-4 z-50">
+            <div className="bg-card/95 backdrop-blur-xl border border-border/50 shadow-lg rounded-2xl p-1">
+                <div className="flex items-center justify-around h-14 w-full">
                     {filteredItems.map((item) => {
                         const isActive =
                             item.href === "/"
@@ -140,28 +144,25 @@ export function MobileNav({ fullName, role }: SidebarProps) {
                                 key={item.href}
                                 href={item.href}
                                 className={cn(
-                                    "relative flex flex-col items-center justify-center gap-1 w-full h-full text-[10px] transition-all duration-200 font-medium",
-                                    isActive ? "text-blue-500" : "text-muted-foreground hover:text-foreground"
+                                    "relative flex flex-col items-center justify-center gap-1 flex-1 h-full text-[10px] sm:text-xs transition-all duration-200 font-medium rounded-xl",
+                                    isActive ? "text-blue-500 bg-blue-500/10" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                                 )}
                             >
-                                {isActive && (
-                                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-blue-500 rounded-b-full shadow-[0_0_8px_rgba(59,130,246,0.6)]" />
-                                )}
                                 <Icon
                                     strokeWidth={isActive ? 2.5 : 2}
                                     className={cn(
-                                        "h-5 w-5 mb-0.5 transition-transform duration-200",
-                                        isActive ? "scale-110" : "scale-100"
+                                        "h-5 w-5 sm:h-6 sm:w-6 transition-transform duration-200",
+                                        isActive ? "scale-105" : "scale-100"
                                     )}
                                 />
-                                <span className="truncate w-full text-center px-1 tracking-tight">
+                                <span className={cn("truncate w-full text-center px-1 tracking-tight", isActive ? "font-bold" : "")}>
                                     {item.label}
                                 </span>
                             </Link>
                         );
                     })}
                 </div>
-            </nav>
-        </>
+            </div>
+        </nav>
     );
 }
