@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { PrProgressChart } from "@/components/charts/pr-progress-chart";
 import { WodActivityChart } from "@/components/charts/wod-activity-chart";
+import { ProfileEditDialog } from "@/components/profile-edit-dialog";
 
 export default async function ProfilePage() {
     const supabase = await createClient();
@@ -75,28 +76,31 @@ export default async function ProfilePage() {
     return (
         <div className="max-w-2xl mx-auto space-y-8">
             {/* Header */}
-            <div className="flex items-center gap-4">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-xl font-black text-white">
-                    {profile.full_name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")
-                        .slice(0, 2)
-                        .toUpperCase() || "?"}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-xl font-black text-white">
+                        {profile.full_name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")
+                            .slice(0, 2)
+                            .toUpperCase() || "?"}
+                    </div>
+                    <div>
+                        <h2 className="text-2xl font-bold">{profile.full_name || "Usuario"}</h2>
+                        <Badge
+                            variant="outline"
+                            className={
+                                profile.role === "ADMIN"
+                                    ? "border-blue-500/30 text-blue-500"
+                                    : "border-muted-foreground/30 text-muted-foreground"
+                            }
+                        >
+                            {profile.role === "ADMIN" ? "Entrenador" : "Atleta"}
+                        </Badge>
+                    </div>
                 </div>
-                <div>
-                    <h2 className="text-2xl font-bold">{profile.full_name || "Usuario"}</h2>
-                    <Badge
-                        variant="outline"
-                        className={
-                            profile.role === "ADMIN"
-                                ? "border-blue-500/30 text-blue-500"
-                                : "border-muted-foreground/30 text-muted-foreground"
-                        }
-                    >
-                        {profile.role === "ADMIN" ? "Entrenador" : "Atleta"}
-                    </Badge>
-                </div>
+                <ProfileEditDialog profile={profile} />
             </div>
 
             {/* Stats */}
