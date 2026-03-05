@@ -78,14 +78,20 @@ export default async function ProfilePage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-xl font-black text-white">
-                        {profile.full_name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")
-                            .slice(0, 2)
-                            .toUpperCase() || "?"}
-                    </div>
+                    {profile.avatar_url ? (
+                        <div className="h-16 w-16 rounded-full overflow-hidden border-2 border-blue-500/20">
+                            <img src={profile.avatar_url} alt={profile.full_name} className="w-full h-full object-cover" />
+                        </div>
+                    ) : (
+                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-xl font-black text-white shadow-sm">
+                            {profile.full_name
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")
+                                .slice(0, 2)
+                                .toUpperCase() || "?"}
+                        </div>
+                    )}
                     <div>
                         <h2 className="text-2xl font-bold">{profile.full_name || "Usuario"}</h2>
                         <Badge

@@ -23,13 +23,14 @@ export default async function DashboardLayout({
 
     const { data } = await supabase
         .from("profiles")
-        .select("full_name, role")
+        .select("full_name, role, avatar_url")
         .eq("id", user.id)
         .single();
 
-    const profile = data as Pick<Profile, "full_name" | "role"> | null;
+    const profile = data as Pick<Profile, "full_name" | "role" | "avatar_url"> | null;
     const fullName = profile?.full_name || "Usuario";
     const role = profile?.role || "USER";
+    const avatarUrl = profile?.avatar_url || null;
 
     // Notificaciones
     const { data: notificationsData } = await supabase
@@ -57,12 +58,12 @@ export default async function DashboardLayout({
 
     return (
         <div className="flex min-h-screen bg-background text-foreground">
-            <Sidebar fullName={fullName} role={role} />
+            <Sidebar fullName={fullName} role={role} avatarUrl={avatarUrl} />
             <div className="flex-1 flex flex-col min-w-0">
                 {/* Top bar con notificaciones y theme toggle */}
                 <header className="flex items-center justify-between gap-2 px-4 md:px-8 py-3 border-b border-border bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40">
                     <div className="flex items-center">
-                        <MobileBurgerMenu fullName={fullName} role={role} />
+                        <MobileBurgerMenu fullName={fullName} role={role} avatarUrl={avatarUrl} />
                     </div>
                     <div className="flex items-center gap-2">
                         <ThemeToggle />
@@ -77,7 +78,7 @@ export default async function DashboardLayout({
                 </header>
                 <main className="flex-1 p-4 md:p-8 pb-20 md:pb-8 overflow-x-hidden">{children}</main>
             </div>
-            <MobileNav fullName={fullName} role={role} />
+            <MobileNav fullName={fullName} role={role} avatarUrl={avatarUrl} />
 
             {/* App Rating Modal — aparece 1 vez al mes */}
             <AppRatingModal

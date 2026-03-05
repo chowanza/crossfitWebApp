@@ -23,6 +23,7 @@ import {
 interface SidebarProps {
     fullName: string;
     role: UserRole;
+    avatarUrl?: string | null;
 }
 
 const NAV_ITEMS = [
@@ -36,7 +37,7 @@ const NAV_ITEMS = [
     { href: "/admin/ratings", label: "Satisfacción", icon: LineChart, roles: ["ADMIN"] as UserRole[] },
 ];
 
-export function Sidebar({ fullName, role }: SidebarProps) {
+export function Sidebar({ fullName, role, avatarUrl }: SidebarProps) {
     const pathname = usePathname();
     const filteredItems = NAV_ITEMS.filter((item) => item.roles.includes(role));
 
@@ -89,14 +90,20 @@ export function Sidebar({ fullName, role }: SidebarProps) {
             {/* User footer */}
             <div className="p-4 space-y-4">
                 <div className="flex items-center gap-3 px-2">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-500/10 text-xs font-bold text-blue-500">
-                        {fullName
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")
-                            .slice(0, 2)
-                            .toUpperCase() || "?"}
-                    </div>
+                    {avatarUrl ? (
+                        <div className="h-10 w-10 shrink-0 rounded-full overflow-hidden border border-border">
+                            <img src={avatarUrl} alt={fullName} className="h-full w-full object-cover" />
+                        </div>
+                    ) : (
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-500/10 text-xs font-bold text-blue-500 shadow-sm">
+                            {fullName
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")
+                                .slice(0, 2)
+                                .toUpperCase() || "?"}
+                        </div>
+                    )}
                     <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold truncate leading-tight">{fullName || "Usuario"}</p>
                         <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mt-0.5">
@@ -119,7 +126,7 @@ export function Sidebar({ fullName, role }: SidebarProps) {
     );
 }
 
-export function MobileNav({ fullName, role }: SidebarProps) {
+export function MobileNav({ fullName, role, avatarUrl }: SidebarProps) {
     const pathname = usePathname();
 
     // FitMe Navigation: 3 primary items for User.
