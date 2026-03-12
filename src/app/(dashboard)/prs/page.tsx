@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PrForm } from "@/components/pr-form";
 import { MovementMediaDialog } from "@/components/movement-media-dialog";
+import { PrHistoryDialog } from "@/components/pr-history-dialog";
 import { Dumbbell, PersonStanding, Timer, Zap } from "lucide-react";
 
 interface PrWithMovement extends PersonalRecord {
@@ -88,62 +89,78 @@ export default async function PrsPage() {
                             {icon} {label}
                         </h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                            {categoryItems.map(({ movement, bestPr, historyCount }) => (
-                                <Card
-                                    key={movement.id}
-                                    className="border-border bg-muted/10 hover:border-border/80 transition-colors"
-                                >
-                                    <CardContent className="pt-5 pb-4">
-                                        <div className="flex items-start justify-between mb-3">
-                                            <h4 className="font-medium text-foreground text-sm flex items-center">
-                                                {movement.name}
-                                                {movement.media_url && (
-                                                    <MovementMediaDialog
-                                                        movementName={movement.name}
-                                                        mediaUrl={movement.media_url}
+                            {categoryItems.map(({ movement, bestPr, historyCount }) => {
+                                const movementPrs = prs.filter((pr) => pr.movement_id === movement.id);
+
+                                return (
+                                    <Card
+                                        key={movement.id}
+                                        className="border-border bg-muted/10 hover:border-border/80 transition-colors"
+                                    >
+                                        <CardContent className="pt-5 pb-4">
+                                            <div className="flex items-start justify-between mb-3">
+                                                <h4 className="font-medium text-foreground text-sm flex items-center">
+                                                    {movement.name}
+                                                    {movement.media_url && (
+                                                        <MovementMediaDialog
+                                                            movementName={movement.name}
+                                                            mediaUrl={movement.media_url}
+                                                        />
+                                                    )}
+                                                </h4>
+                                                {bestPr && bestPr.reps === 1 && (
+                                                    <Badge className="bg-indigo-600/20 text-indigo-600 border-0 text-[10px]">
+                                                        1RM
+                                                    </Badge>
+                                                )}
+                                            </div>
+                                            {bestPr ? (
+                                                <div>
+                                                    <p className="text-2xl font-bold text-indigo-600">
+                                                        {bestPr.weight_value}
+                                                        <span className="text-sm text-muted-foreground ml-1">kg</span>
+                                                    </p>
+                                                    {bestPr.reps > 1 && (
+                                                        <p className="text-xs text-muted-foreground">
+                                                            × {bestPr.reps} reps
+                                                        </p>
+                                                    )}
+                                                    <div className="flex items-center gap-3 mt-1">
+                                                        {historyCount > 1 && (
+                                                            <PrHistoryDialog
+                                                                movementName={movement.name}
+                                                                records={movementPrs}
+                                                            />
+                                                        )}
+                                                        <PrForm
+                                                            movements={movements}
+                                                            defaultMovementId={movement.id}
+                                                            trigger={
+                                                                <button className="text-xs text-indigo-600 hover:underline flex items-center gap-1 mt-1">
+                                                                    + Añadir PR
+                                                                </button>
+                                                            }
+                                                        />
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div>
+                                                    <p className="text-sm text-muted-foreground/70">Sin registro</p>
+                                                    <PrForm
+                                                        movements={movements}
+                                                        defaultMovementId={movement.id}
+                                                        trigger={
+                                                            <button className="text-xs text-indigo-600 hover:underline mt-1">
+                                                                Registrar →
+                                                            </button>
+                                                        }
                                                     />
-                                                )}
-                                            </h4>
-                                            {bestPr && bestPr.reps === 1 && (
-                                                <Badge className="bg-indigo-600/20 text-indigo-600 border-0 text-[10px]">
-                                                    1RM
-                                                </Badge>
+                                                </div>
                                             )}
-                                        </div>
-                                        {bestPr ? (
-                                            <div>
-                                                <p className="text-2xl font-bold text-indigo-600">
-                                                    {bestPr.weight_value}
-                                                    <span className="text-sm text-muted-foreground ml-1">kg</span>
-                                                </p>
-                                                {bestPr.reps > 1 && (
-                                                    <p className="text-xs text-muted-foreground">
-                                                        × {bestPr.reps} reps
-                                                    </p>
-                                                )}
-                                                {historyCount > 1 && (
-                                                    <p className="text-xs text-muted-foreground/70 mt-1">
-                                                        {historyCount} registros
-                                                    </p>
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <div>
-                                                <p className="text-sm text-muted-foreground/70">Sin registro</p>
-                                                <PrForm
-                                                    movements={movements}
-                                                    defaultMovementId={movement.id}
-                                                    trigger={
-                                                        <button className="text-xs text-indigo-600 hover:underline mt-1">
-                                                            Registrar →
-                                                        </button>
-                                                    }
-                                                />
-                                            </div>
-                                        )}
-                                    </CardContent>
-                                </Card>
-                            ))}
+                                        </CardContent>
+                                    </Card>
+                                );
+                            })}
                         </div>
                     </div>
                 );

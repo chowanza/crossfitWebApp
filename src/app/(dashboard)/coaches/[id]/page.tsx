@@ -30,9 +30,7 @@ export default async function CoachProfilePage({
         .eq("id", user.id)
         .single();
 
-    if (currentUserProfile?.role !== "ADMIN") {
-        redirect("/coaches");
-    }
+    // Allow both ADMIN and USER to view a coach's profile
 
     // Buscamos el perfil del coach
     const { data } = await supabase
