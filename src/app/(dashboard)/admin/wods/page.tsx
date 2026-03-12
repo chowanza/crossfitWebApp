@@ -64,7 +64,7 @@ export default async function AdminWodsPage() {
                     <p className="text-muted-foreground text-sm mt-1">Crea y administra las rutinas diarias.</p>
                 </div>
                 <Link href="/admin/wods/builder">
-                    <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-sm">
+                    <Button className="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white shadow-sm">
                         + Nueva Rutina
                     </Button>
                 </Link>
@@ -99,7 +99,7 @@ export default async function AdminWodsPage() {
                                                 <Badge
                                                     key={sec.id}
                                                     variant="secondary"
-                                                    className="text-xs bg-blue-500/10 text-blue-500 hover:bg-blue-500/20"
+                                                    className="text-xs bg-indigo-600/10 text-indigo-600 hover:bg-indigo-600/20"
                                                 >
                                                     {sec.section_type.replace("_", " ")}
                                                 </Badge>

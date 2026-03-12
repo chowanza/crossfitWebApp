@@ -48,8 +48,8 @@ export function Sidebar({ fullName, role, avatarUrl }: SidebarProps) {
             {/* Logo */}
             <div className="p-6">
                 <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm shadow-blue-500/20 text-sm font-black text-white">
-                        IF
+                    <div className="flex h-12 w-auto items-center justify-center">
+                        <img src="/logo.png" alt="Logo" className="h-full w-full object-contain" />
                     </div>
                     <div>
                         <h1 className="text-lg font-bold leading-tight tracking-tight">Iron Fit</h1>
@@ -76,11 +76,11 @@ export function Sidebar({ fullName, role, avatarUrl }: SidebarProps) {
                             className={cn(
                                 "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200",
                                 isActive
-                                    ? "bg-blue-500/10 text-blue-500 font-semibold"
+                                    ? "bg-indigo-600/10 text-indigo-600 font-semibold"
                                     : "text-muted-foreground font-medium hover:bg-accent hover:text-foreground"
                             )}
                         >
-                            <Icon className={cn("h-5 w-5", isActive ? "text-blue-500" : "text-muted-foreground/70")} />
+                            <Icon className={cn("h-5 w-5", isActive ? "text-indigo-600" : "text-muted-foreground/70")} />
                             {item.label}
                         </Link>
                     );
@@ -97,7 +97,7 @@ export function Sidebar({ fullName, role, avatarUrl }: SidebarProps) {
                             <img src={avatarUrl} alt={fullName} className="h-full w-full object-cover" />
                         </div>
                     ) : (
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-500/10 text-xs font-bold text-blue-500 shadow-sm">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-600/10 text-xs font-bold text-indigo-600 shadow-sm">
                             {fullName
                                 .split(" ")
                                 .map((n) => n[0])
@@ -154,7 +154,7 @@ export function MobileNav({ fullName, role, avatarUrl }: SidebarProps) {
                                 href={item.href}
                                 className={cn(
                                     "relative flex flex-col items-center justify-center gap-1 flex-1 h-full text-[10px] sm:text-xs transition-all duration-200 font-medium rounded-xl",
-                                    isActive ? "text-blue-500 bg-blue-500/10" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                                    isActive ? "text-indigo-600 bg-indigo-600/10" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                                 )}
                             >
                                 <Icon

@@ -67,7 +67,7 @@ export function NotificationBell({ notifications, unreadCount }: NotificationBel
                                     size="sm"
                                     onClick={handleMarkAllRead}
                                     disabled={isPending}
-                                    className="text-xs text-blue-500 hover:text-blue-400 h-auto py-1"
+                                    className="text-xs text-indigo-600 hover:text-blue-400 h-auto py-1"
                                 >
                                     Marcar todas como leídas
                                 </Button>
@@ -79,7 +79,7 @@ export function NotificationBell({ notifications, unreadCount }: NotificationBel
                                 notifications.slice(0, 10).map((notif) => (
                                     <div
                                         key={notif.id}
-                                        className={`border-b border-border last:border-0 px-4 py-3 transition-colors ${!notif.is_read ? "bg-blue-500/5" : ""
+                                        className={`border-b border-border last:border-0 px-4 py-3 transition-colors ${!notif.is_read ? "bg-indigo-600/5" : ""
                                             }`}
                                     >
                                         <div className="flex items-start gap-3">
@@ -115,7 +115,7 @@ export function NotificationBell({ notifications, unreadCount }: NotificationBel
                                                     <Link
                                                         href={notif.link}
                                                         onClick={() => setOpen(false)}
-                                                        className="text-xs text-blue-500 hover:underline mt-1 inline-block"
+                                                        className="text-xs text-indigo-600 hover:underline mt-1 inline-block"
                                                     >
                                                         Ver →
                                                     </Link>

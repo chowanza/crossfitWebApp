@@ -128,7 +128,7 @@ export function PrForm({ movements, trigger, defaultMovementId }: PrFormProps) {
                         <Button
                             type="submit"
                             isLoading={loading}
-                            className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white"
+                            className="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white"
                         >
                             {loading ? "Guardando..." : "Guardar PR"}
                         </Button>

@@ -6,8 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { PrProgressChart } from "@/components/charts/pr-progress-chart";
 import { WodActivityChart } from "@/components/charts/wod-activity-chart";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-export default async function CoachProfilePage({
+export default async function AthleteProfilePage({
     params,
 }: {
     params: Promise<{ id: string }>;
@@ -31,21 +34,31 @@ export default async function CoachProfilePage({
         .single();
 
     if (currentUserProfile?.role !== "ADMIN") {
-        redirect("/coaches");
+        redirect("/");
     }
 
-    // Buscamos el perfil del coach
+    // Buscamos el perfil del atleta
     const { data } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", id)
-        .eq("role", "ADMIN")
+        .eq("role", "USER")
         .single();
 
     const profile = data as Profile | null;
 
     if (!profile) {
-        return <p className="text-center p-8 text-muted-foreground">No se encontró el perfil del entrenador.</p>;
+        return (
+            <div className="space-y-6">
+                <Link href="/admin/athletes">
+                    <Button variant="ghost" className="mb-2 -ml-4 text-muted-foreground hover:text-foreground">
+                        <ArrowLeft className="w-4 h-4 mr-2" />
+                        Volver a la lista
+                    </Button>
+                </Link>
+                <p className="text-center p-8 text-muted-foreground">No se encontró el perfil del atleta.</p>
+            </div>
+        );
     }
 
     // Stats
@@ -98,6 +111,13 @@ export default async function CoachProfilePage({
 
     return (
         <div className="max-w-2xl mx-auto space-y-8">
+            <Link href="/admin/athletes">
+                <Button variant="ghost" className="mb-2 -ml-4 text-muted-foreground hover:text-foreground">
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Volver a Atletas
+                </Button>
+            </Link>
+
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
@@ -116,12 +136,12 @@ export default async function CoachProfilePage({
                         </div>
                     )}
                     <div>
-                        <h2 className="text-2xl font-bold">{profile.full_name || "Entrenador"}</h2>
+                        <h2 className="text-2xl font-bold">{profile.full_name || "Atleta"}</h2>
                         <Badge
                             variant="outline"
-                            className="border-indigo-600/30 text-indigo-600"
+                            className="border-muted-foreground/30 text-muted-foreground mt-1"
                         >
-                            Coach
+                            Atleta
                         </Badge>
                     </div>
                 </div>
@@ -195,6 +215,12 @@ export default async function CoachProfilePage({
                         </div>
                     </div>
                     <Separator />
+                    <div>
+                        <p className="text-sm text-muted-foreground">Último pago</p>
+                        <p className="text-lg font-medium">
+                            {profile.last_payment_date ?? "Sin registro"}
+                        </p>
+                    </div>
                     <div>
                         <p className="text-sm text-muted-foreground">Miembro desde</p>
                         <p className="text-lg font-medium">

@@ -32,8 +32,8 @@ export default function LoginPage() {
             <div className="w-full max-w-md px-4">
                 <Card>
                     <CardHeader className="text-center space-y-2">
-                        <div className="mx-auto mb-2 flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-2xl font-black text-white">
-                            IF
+                        <div className="mx-auto mb-2 flex h-24 w-auto items-center justify-center">
+                            <img src="/logo.png" alt="Logo" className="h-full w-full object-contain drop-shadow-lg" />
                         </div>
                         <CardTitle className="text-2xl font-bold">
                             Iron Fit Venezuela
@@ -74,7 +74,7 @@ export default function LoginPage() {
                             <Button
                                 type="submit"
                                 isLoading={loading}
-                                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold"
+                                className="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold"
                             >
                                 {loading ? "Ingresando..." : "Ingresar"}
                             </Button>

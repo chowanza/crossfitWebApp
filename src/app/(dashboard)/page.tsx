@@ -82,9 +82,9 @@ export default async function DashboardPage() {
                 {/* Acciones Rápidas (Grid principal) */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <Link href="/admin/wods">
-                        <Card className="hover:border-blue-500/50 hover:bg-blue-500/5 transition-all cursor-pointer h-full border-blue-500/20 bg-blue-500/5">
+                        <Card className="hover:border-indigo-600/50 hover:bg-indigo-600/5 transition-all cursor-pointer h-full border-indigo-600/20 bg-indigo-600/5">
                             <CardContent className="pt-6 flex flex-col items-center justify-center text-center space-y-2">
-                                <div className="p-3 bg-blue-500/10 rounded-full text-blue-500">
+                                <div className="p-3 bg-indigo-600/10 rounded-full text-indigo-600">
                                     <CalendarPlus className="w-6 h-6" />
                                 </div>
                                 <div>
@@ -95,9 +95,9 @@ export default async function DashboardPage() {
                         </Card>
                     </Link>
                     <Link href="/admin/athletes">
-                        <Card className="hover:border-blue-500/50 hover:bg-muted/30 transition-all cursor-pointer h-full">
+                        <Card className="hover:border-indigo-600/50 hover:bg-muted/30 transition-all cursor-pointer h-full">
                             <CardContent className="pt-6 flex flex-col items-center justify-center text-center space-y-2">
-                                <div className="p-3 bg-muted rounded-full text-foreground hover:text-blue-500 transition-colors">
+                                <div className="p-3 bg-muted rounded-full text-foreground hover:text-indigo-600 transition-colors">
                                     <Users className="w-6 h-6" />
                                 </div>
                                 <div>
@@ -108,9 +108,9 @@ export default async function DashboardPage() {
                         </Card>
                     </Link>
                     <Link href="/admin/payments">
-                        <Card className="hover:border-blue-500/50 hover:bg-muted/30 transition-all cursor-pointer h-full">
+                        <Card className="hover:border-indigo-600/50 hover:bg-muted/30 transition-all cursor-pointer h-full">
                             <CardContent className="pt-6 flex flex-col items-center justify-center text-center space-y-2">
-                                <div className="p-3 bg-muted rounded-full text-foreground hover:text-blue-500 transition-colors">
+                                <div className="p-3 bg-muted rounded-full text-foreground hover:text-indigo-600 transition-colors">
                                     <CreditCard className="w-6 h-6" />
                                 </div>
                                 <div>
@@ -121,9 +121,9 @@ export default async function DashboardPage() {
                         </Card>
                     </Link>
                     <Link href="/admin/movements">
-                        <Card className="hover:border-blue-500/50 hover:bg-muted/30 transition-all cursor-pointer h-full">
+                        <Card className="hover:border-indigo-600/50 hover:bg-muted/30 transition-all cursor-pointer h-full">
                             <CardContent className="pt-6 flex flex-col items-center justify-center text-center space-y-2">
-                                <div className="p-3 bg-muted rounded-full text-foreground hover:text-blue-500 transition-colors">
+                                <div className="p-3 bg-muted rounded-full text-foreground hover:text-indigo-600 transition-colors">
                                     <Dumbbell className="w-6 h-6" />
                                 </div>
                                 <div>
@@ -140,7 +140,7 @@ export default async function DashboardPage() {
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2 text-lg">
-                                <Activity className="w-5 h-5 text-blue-500" /> WODs de Hoy
+                                <Activity className="w-5 h-5 text-indigo-600" /> WODs de Hoy
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -202,7 +202,7 @@ export default async function DashboardPage() {
             <div className="flex items-center justify-between">
                 <div>
                     <h2 className="text-2xl font-bold tracking-tight">
-                        Hola, <span className="text-blue-500">{firstName}</span> 👋
+                        Hola, <span className="text-indigo-600">{firstName}</span> 👋
                     </h2>
                     <p className="text-muted-foreground text-sm">
                         ¿Qué entrenamos hoy?
@@ -216,7 +216,7 @@ export default async function DashboardPage() {
 
             {/* Offer Banner */}
             <Card className="bg-card border-border overflow-hidden relative shadow-sm">
-                <div className="absolute -right-10 -top-10 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl" />
+                <div className="absolute -right-10 -top-10 w-32 h-32 bg-indigo-600/10 rounded-full blur-2xl" />
                 <CardHeader className="pb-2">
                     <CardTitle className="text-xl">Oferta 50%</CardTitle>
                 </CardHeader>
@@ -227,7 +227,7 @@ export default async function DashboardPage() {
                             Termina en 2d 6hr 55m 6s
                         </span>
                     </p>
-                    <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 shadow-md text-white border-0">
+                    <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-indigo-600 shadow-md text-white border-0">
                         Ver más
                     </Button>
                 </CardContent>
@@ -235,8 +235,8 @@ export default async function DashboardPage() {
 
             {/* Horizontal Categories */}
             <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none snap-x -mx-4 px-4 md:mx-0 md:px-0">
-                <div className="snap-start shrink-0 w-32 h-24 rounded-2xl bg-gradient-to-br from-blue-500/10 to-background border flex flex-col justify-end p-3 relative overflow-hidden group cursor-pointer hover:border-blue-500/50 transition-colors">
-                    <Dumbbell className="absolute top-2 right-2 w-10 h-10 text-blue-500/20 group-hover:scale-110 transition-transform" />
+                <div className="snap-start shrink-0 w-32 h-24 rounded-2xl bg-gradient-to-br from-indigo-600/10 to-background border flex flex-col justify-end p-3 relative overflow-hidden group cursor-pointer hover:border-indigo-600/50 transition-colors">
+                    <Dumbbell className="absolute top-2 right-2 w-10 h-10 text-indigo-600/20 group-hover:scale-110 transition-transform" />
                     <span className="font-bold text-sm tracking-tight text-foreground/90">CrossFit<br />Diario</span>
                 </div>
                 <div className="snap-start shrink-0 w-32 h-24 rounded-2xl bg-muted/20 border flex flex-col justify-end p-3 relative overflow-hidden group cursor-pointer hover:border-border/80 transition-colors">
@@ -253,7 +253,7 @@ export default async function DashboardPage() {
             <div>
                 <div className="flex items-center justify-between mb-3">
                     <h3 className="text-lg font-bold">Mis rutinas ({wods.length})</h3>
-                    <Link href="/wods" className="text-xs text-blue-500 font-bold hover:underline">
+                    <Link href="/wods" className="text-xs text-indigo-600 font-bold hover:underline">
                         Ver pasadas
                     </Link>
                 </div>
@@ -261,11 +261,11 @@ export default async function DashboardPage() {
                 {wods.length > 0 ? (
                     <div className="space-y-3">
                         {wods.map((wod) => (
-                            <Card key={wod.id} className="overflow-hidden border-border/50 hover:border-blue-500/30 transition-colors shadow-none bg-card">
+                            <Card key={wod.id} className="overflow-hidden border-border/50 hover:border-indigo-600/30 transition-colors shadow-none bg-card">
                                 <CardHeader className="pb-2 pt-4 bg-muted/5">
                                     <div className="flex justify-between items-start">
                                         <CardTitle className="text-base font-bold">{wod.title}</CardTitle>
-                                        <Badge className="text-[9px] bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 border-0 px-2 py-0 uppercase uppercase font-bold tracking-wider">
+                                        <Badge className="text-[9px] bg-indigo-600/10 text-indigo-600 hover:bg-indigo-600/20 border-0 px-2 py-0 uppercase uppercase font-bold tracking-wider">
                                             Hoy
                                         </Badge>
                                     </div>
@@ -309,7 +309,7 @@ export default async function DashboardPage() {
                         <p className="text-[13px] text-muted-foreground mb-4 leading-relaxed">
                             Aprende la técnica correcta para maximizar la activación de glúteos sin lastimar tu zona lumbar.
                         </p>
-                        <Button variant="secondary" className="w-full bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 font-semibold rounded-xl">
+                        <Button variant="secondary" className="w-full bg-indigo-600/10 text-indigo-600 hover:bg-indigo-600/20 font-semibold rounded-xl">
                             Explorar
                         </Button>
                     </CardContent>

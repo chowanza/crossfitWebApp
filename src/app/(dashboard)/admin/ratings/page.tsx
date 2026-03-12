@@ -75,19 +75,19 @@ export default async function AdminRatingsPage() {
             <div className="grid grid-cols-3 gap-4">
                 <Card className="border-border bg-muted/10 text-center">
                     <CardContent className="pt-6">
-                        <p className="text-2xl font-bold text-blue-500">{globalAvg}</p>
+                        <p className="text-2xl font-bold text-indigo-600">{globalAvg}</p>
                         <p className="text-xs text-muted-foreground mt-1">Promedio ⭐</p>
                     </CardContent>
                 </Card>
                 <Card className="border-border bg-muted/10 text-center">
                     <CardContent className="pt-6">
-                        <p className="text-2xl font-bold text-blue-500">{ratings.length}</p>
+                        <p className="text-2xl font-bold text-indigo-600">{ratings.length}</p>
                         <p className="text-xs text-muted-foreground mt-1">Total votos</p>
                     </CardContent>
                 </Card>
                 <Card className="border-border bg-muted/10 text-center">
                     <CardContent className="pt-6">
-                        <p className="text-2xl font-bold text-blue-500">
+                        <p className="text-2xl font-bold text-indigo-600">
                             {chartData.length}
                         </p>
                         <p className="text-xs text-muted-foreground mt-1">Meses</p>

@@ -67,8 +67,8 @@ export function MobileBurgerMenu({ fullName, role, avatarUrl }: MobileBurgerMenu
             <SheetContent side="left" className="w-[80vw] sm:w-[350px] p-0 flex flex-col pt-10">
                 <SheetHeader className="p-4 text-left border-b border-border">
                     <SheetTitle className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm shadow-blue-500/20 text-sm font-black text-white">
-                            IF
+                        <div className="flex h-10 w-auto items-center justify-center">
+                            <img src="/logo.png" alt="Logo" className="h-full w-full object-contain" />
                         </div>
                         <div>
                             <span className="text-lg font-bold leading-tight tracking-tight block">Iron Fit</span>
@@ -92,11 +92,11 @@ export function MobileBurgerMenu({ fullName, role, avatarUrl }: MobileBurgerMenu
                                 className={cn(
                                     "flex items-center gap-3 rounded-lg px-3 py-3 text-sm transition-all duration-200",
                                     isActive
-                                        ? "bg-blue-500/10 text-blue-500 font-semibold"
+                                        ? "bg-indigo-600/10 text-indigo-600 font-semibold"
                                         : "text-muted-foreground font-medium hover:bg-accent hover:text-foreground"
                                 )}
                             >
-                                <Icon className={cn("h-5 w-5", isActive ? "text-blue-500" : "text-muted-foreground/70")} />
+                                <Icon className={cn("h-5 w-5", isActive ? "text-indigo-600" : "text-muted-foreground/70")} />
                                 {item.label}
                             </Link>
                         );
@@ -112,7 +112,7 @@ export function MobileBurgerMenu({ fullName, role, avatarUrl }: MobileBurgerMenu
                                 <img src={avatarUrl} alt={fullName} className="h-full w-full object-cover" />
                             </div>
                         ) : (
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-500/10 text-xs font-bold text-blue-500 shadow-sm">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-600/10 text-xs font-bold text-indigo-600 shadow-sm">
                                 {fullName
                                     .split(" ")
                                     .map((n) => n[0])

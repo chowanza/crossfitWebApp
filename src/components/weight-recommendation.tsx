@@ -30,9 +30,9 @@ export function WeightRecommendation({
     const entries = Object.values(bestByMovement).slice(0, 6);
 
     return (
-        <Card className="bg-muted/10 border-blue-500/20">
+        <Card className="bg-muted/10 border-indigo-600/20">
             <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold text-blue-500 flex items-center gap-2">
+                <CardTitle className="text-sm font-semibold text-indigo-600 flex items-center gap-2">
                     <span>💡</span> Pesos Sugeridos ({sectionType.replace("_", " ")})
                 </CardTitle>
             </CardHeader>

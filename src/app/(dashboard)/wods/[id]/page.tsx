@@ -121,14 +121,14 @@ export default async function WodDetailPage({
                         return (
                             <div key={sec.id} className="space-y-4">
                                 <div className="flex items-center gap-3">
-                                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500 text-white font-bold">
+                                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-white font-bold">
                                         {index + 1}
                                     </div>
                                     <h3 className="text-xl font-bold uppercase tracking-wide">
                                         {sec.section_type.replace("_", " ")}
                                     </h3>
                                     {sec.time_cap_seconds && (
-                                        <Badge variant="outline" className="border-blue-500/50 text-blue-500 bg-blue-500/10">
+                                        <Badge variant="outline" className="border-indigo-600/50 text-indigo-600 bg-indigo-600/10">
                                             TC: {Math.floor(sec.time_cap_seconds / 60)} min
                                         </Badge>
                                     )}
@@ -218,14 +218,14 @@ export default async function WodDetailPage({
                                                     {secResults.map((r, i) => {
                                                         const isMe = r.user_id === user?.id;
                                                         return (
-                                                            <TableRow key={r.id} className={isMe ? "bg-blue-500/10" : ""}>
+                                                            <TableRow key={r.id} className={isMe ? "bg-indigo-600/10" : ""}>
                                                                 <TableCell className="text-muted-foreground font-mono">{i + 1}</TableCell>
                                                                 <TableCell>
                                                                     <div className="flex items-center gap-2">
-                                                                        <span className={`font-medium ${isMe ? "text-blue-500" : ""}`}>
+                                                                        <span className={`font-medium ${isMe ? "text-indigo-600" : ""}`}>
                                                                             {r.profiles?.full_name || "Atleta"}
                                                                         </span>
-                                                                        {r.rx && <Badge className="h-4 px-1 text-[9px] bg-blue-500">RX</Badge>}
+                                                                        {r.rx && <Badge className="h-4 px-1 text-[9px] bg-indigo-600">RX</Badge>}
                                                                     </div>
                                                                 </TableCell>
                                                                 <TableCell className="font-mono font-medium">{r.score_value}</TableCell>
@@ -258,7 +258,7 @@ export default async function WodDetailPage({
             <Card className="border-border/50 bg-muted/10">
                 <CardHeader className="pb-3 border-b border-border/50">
                     <CardTitle className="text-lg flex items-center gap-2">
-                        <MessageSquare className="w-5 h-5 text-blue-500" />
+                        <MessageSquare className="w-5 h-5 text-indigo-600" />
                         Feedback del Día
                     </CardTitle>
                 </CardHeader>

@@ -92,7 +92,7 @@ export function ScoreForm({ wodId, sectionId, existingResult }: ScoreFormProps) 
                     type="button"
                     onClick={() => setRx(!rx)}
                     className={`rounded-lg px-4 py-2 text-sm font-bold transition-colors flex items-center gap-1 ${rx
-                        ? "bg-blue-500 text-white"
+                        ? "bg-indigo-600 text-white"
                         : "bg-muted text-muted-foreground hover:bg-muted/80"
                         }`}
                 >
@@ -129,7 +129,7 @@ export function ScoreForm({ wodId, sectionId, existingResult }: ScoreFormProps) 
             <Button
                 type="submit"
                 isLoading={loading}
-                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold"
+                className="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold"
             >
                 {loading
                     ? "Guardando..."

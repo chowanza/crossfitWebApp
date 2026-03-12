@@ -32,7 +32,7 @@ export default async function CoachesPage() {
                         <Link href={`/coaches/${coach.id}`} key={coach.id}>
                             <div className="relative group overflow-hidden rounded-xl border border-border bg-card shadow-sm hover:shadow-md transition-all duration-300">
                                 <div className="p-6 flex flex-col items-center text-center space-y-4">
-                                    <div className="h-24 w-24 rounded-full overflow-hidden border-4 border-muted flex shrink-0 items-center justify-center bg-blue-500/10 text-3xl font-bold text-blue-500">
+                                    <div className="h-24 w-24 rounded-full overflow-hidden border-4 border-muted flex shrink-0 items-center justify-center bg-indigo-600/10 text-3xl font-bold text-indigo-600">
                                         {coach.avatar_url ? (
                                             <img src={coach.avatar_url} alt={coach.full_name || "Coach"} className="h-full w-full object-cover" />
                                         ) : (
@@ -40,8 +40,8 @@ export default async function CoachesPage() {
                                         )}
                                     </div>
                                     <div>
-                                        <h3 className="text-xl font-bold group-hover:text-blue-500 transition-colors">{coach.full_name || "Entrenador Asignado"}</h3>
-                                        <p className="text-sm font-medium text-blue-500 uppercase tracking-widest mt-1">Coach</p>
+                                        <h3 className="text-xl font-bold group-hover:text-indigo-600 transition-colors">{coach.full_name || "Entrenador Asignado"}</h3>
+                                        <p className="text-sm font-medium text-indigo-600 uppercase tracking-widest mt-1">Coach</p>
                                     </div>
                                     <div className="text-sm text-muted-foreground space-y-1">
                                         {coach.weight_kg && <p>Peso: {coach.weight_kg} kg</p>}

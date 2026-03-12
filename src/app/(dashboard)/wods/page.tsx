@@ -74,7 +74,7 @@ export default async function WodsPage() {
                                     {date === today ? "Hoy" : date}
                                 </h3>
                                 {date === today && (
-                                    <Badge className="ml-2 bg-blue-500/20 text-blue-500 border-0 text-[10px] px-2 uppercase tracking-wide">
+                                    <Badge className="ml-2 bg-indigo-600/20 text-indigo-600 border-0 text-[10px] px-2 uppercase tracking-wide">
                                         Entrenamiento
                                     </Badge>
                                 )}
@@ -82,10 +82,10 @@ export default async function WodsPage() {
                             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                                 {grouped[date].map((wod) => (
                                     <Link key={wod.id} href={`/wods/${wod.id}`}>
-                                        <Card className="group hover:border-blue-500/50 transition-all shadow-sm hover:shadow h-full flex flex-col justify-between">
+                                        <Card className="group hover:border-indigo-600/50 transition-all shadow-sm hover:shadow h-full flex flex-col justify-between">
                                             <CardHeader className="pb-2 pt-4">
                                                 <div className="flex items-start justify-between gap-4">
-                                                    <CardTitle className="text-base leading-tight group-hover:text-blue-500 transition-colors">
+                                                    <CardTitle className="text-base leading-tight group-hover:text-indigo-600 transition-colors">
                                                         {wod.title}
                                                     </CardTitle>
                                                     <ChevronRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
@@ -100,7 +100,7 @@ export default async function WodsPage() {
                                                         <Badge
                                                             key={i}
                                                             variant="secondary"
-                                                            className="text-[9px] px-1.5 font-medium bg-muted/80 text-muted-foreground group-hover:bg-blue-500/10 group-hover:text-blue-500 transition-colors"
+                                                            className="text-[9px] px-1.5 font-medium bg-muted/80 text-muted-foreground group-hover:bg-indigo-600/10 group-hover:text-indigo-600 transition-colors"
                                                         >
                                                             {sec.section_type}
                                                         </Badge>

@@ -232,7 +232,7 @@ export default function AdminWodBuilder() {
             {/* SECTIONS */}
             <div className="space-y-6">
                 <h2 className="text-xl font-bold flex items-center gap-2">
-                    <Dumbbell className="w-5 h-5 text-blue-500" /> Bloques de Ejercicios
+                    <Dumbbell className="w-5 h-5 text-indigo-600" /> Bloques de Ejercicios
                 </h2>
 
                 {draft.sections.map((section, sIdx) => (
@@ -240,7 +240,7 @@ export default function AdminWodBuilder() {
                         {/* Section Header */}
                         <div className="bg-muted/30 p-4 border-b flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-t-xl">
                             <div className="flex items-center gap-4 flex-1">
-                                <div className="cursor-grab hover:text-blue-500 transition-colors">
+                                <div className="cursor-grab hover:text-indigo-600 transition-colors">
                                     <GripVertical className="w-6 h-6 text-muted-foreground" />
                                 </div>
                                 <div className="space-y-1 w-full md:w-fit">
@@ -249,7 +249,7 @@ export default function AdminWodBuilder() {
                                         value={section.type}
                                         onValueChange={(val) => updateSection(section.id, 'type', val)}
                                     >
-                                        <SelectTrigger className="w-full md:w-[200px] border-blue-500/20 bg-background font-bold text-blue-500">
+                                        <SelectTrigger className="w-full md:w-[200px] border-indigo-600/20 bg-background font-bold text-indigo-600">
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -297,7 +297,7 @@ export default function AdminWodBuilder() {
                             )}
 
                             {section.movements.map((mov, mIdx) => (
-                                <div key={mov.id} className="grid grid-cols-[auto_1fr_80px_80px_auto] gap-3 items-center group bg-background p-2 rounded-lg border border-border hover:border-blue-500/30 transition-colors">
+                                <div key={mov.id} className="grid grid-cols-[auto_1fr_80px_80px_auto] gap-3 items-center group bg-background p-2 rounded-lg border border-border hover:border-indigo-600/30 transition-colors">
                                     <div className="cursor-grab px-1 opacity-50 group-hover:opacity-100 transition-opacity">
                                         <GripVertical className="w-4 h-4" />
                                     </div>
@@ -351,7 +351,7 @@ export default function AdminWodBuilder() {
                                     variant="outline"
                                     size="sm"
                                     onClick={() => addMovement(section.id)}
-                                    className="border-dashed border-2 hover:border-blue-500 hover:text-blue-500 hover:bg-blue-500/5 transition-all text-xs font-semibold"
+                                    className="border-dashed border-2 hover:border-indigo-600 hover:text-indigo-600 hover:bg-indigo-600/5 transition-all text-xs font-semibold"
                                 >
                                     <Plus className="w-3 h-3 mr-1" /> Ejercicio
                                 </Button>

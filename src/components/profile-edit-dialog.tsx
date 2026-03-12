@@ -87,7 +87,7 @@ export function ProfileEditDialog({ profile }: { profile: Profile }) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="h-8 gap-1 border-blue-500/30 text-blue-500 hover:text-blue-600 hover:border-blue-500/50 hover:bg-blue-500/10">
+                <Button variant="outline" size="sm" className="h-8 gap-1 border-indigo-600/30 text-indigo-600 hover:text-blue-600 hover:border-indigo-600/50 hover:bg-indigo-600/10">
                     <Edit2 className="w-3.5 h-3.5" />
                     <span className="hidden sm:inline">Editar Perfil</span>
                 </Button>
@@ -103,7 +103,7 @@ export function ProfileEditDialog({ profile }: { profile: Profile }) {
                 <form onSubmit={handleSubmit} className="space-y-4 pt-4">
                     {/* Avatar Upload */}
                     <div className="flex flex-col items-center gap-4 mb-6">
-                        <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-blue-500/20 bg-muted flex items-center justify-center">
+                        <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-indigo-600/20 bg-muted flex items-center justify-center">
                             {avatarPreview ? (
                                 <img src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />
                             ) : (
@@ -171,7 +171,7 @@ export function ProfileEditDialog({ profile }: { profile: Profile }) {
                         <Button type="button" variant="ghost" onClick={() => setOpen(false)} disabled={loading}>
                             Cancelar
                         </Button>
-                        <Button type="submit" isLoading={loading} className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white">
+                        <Button type="submit" isLoading={loading} className="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white">
                             {loading ? "Guardando..." : "Guardar Cambios"}
                         </Button>
                     </div>

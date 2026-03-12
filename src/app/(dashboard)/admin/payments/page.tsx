@@ -92,7 +92,7 @@ export default async function AdminPaymentsPage({
                 <PaymentForm
                     athletes={athletes}
                     trigger={
-                        <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white">
+                        <Button className="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white">
                             + Registrar Pago
                         </Button>
                     }
@@ -133,7 +133,7 @@ export default async function AdminPaymentsPage({
                         key={f.value}
                         href={f.value === "all" ? "/admin/payments" : `/admin/payments?filter=${f.value}`}
                         className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${currentFilter === f.value
-                            ? "bg-blue-500/20 text-blue-500"
+                            ? "bg-indigo-600/20 text-indigo-600"
                             : "text-muted-foreground hover:bg-muted hover:text-foreground"
                             }`}
                     >

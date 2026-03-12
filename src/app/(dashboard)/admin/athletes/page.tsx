@@ -6,6 +6,7 @@ import { DeleteAthleteButton } from "@/components/delete-athlete-button";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Users } from "lucide-react";
+import Link from "next/link";
 import {
     Table,
     TableBody,
@@ -50,7 +51,7 @@ export default async function AdminAthletesPage() {
                 <div>
                     <h2 className="text-2xl font-bold">Atletas</h2>
                     <p className="text-muted-foreground text-sm mt-1">
-                        Gestiona los atletas del box. <span className="font-medium text-blue-500">{activeCount} activos</span>
+                        Gestiona los atletas del box. <span className="font-medium text-indigo-600">{activeCount} activos</span>
                         {inactiveCount > 0 && (
                             <span className="text-red-400 ml-2">{inactiveCount} inactivos</span>
                         )}
@@ -58,7 +59,7 @@ export default async function AdminAthletesPage() {
                 </div>
                 <AthleteForm
                     trigger={
-                        <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white">
+                        <Button className="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white">
                             + Nuevo Atleta
                         </Button>
                     }
@@ -82,8 +83,8 @@ export default async function AdminAthletesPage() {
                             {athletes.map((athlete) => (
                                 <TableRow key={athlete.id}>
                                     <TableCell>
-                                        <div className="flex items-center gap-3">
-                                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500/10 text-xs font-bold text-blue-500">
+                                        <Link href={`/admin/athletes/${athlete.id}`} className="flex items-center gap-3 hover:bg-muted/50 p-1 -m-1 rounded-md transition-colors group">
+                                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600/10 text-xs font-bold text-indigo-600">
                                                 {athlete.full_name
                                                     .split(" ")
                                                     .map((n) => n[0])
@@ -91,10 +92,10 @@ export default async function AdminAthletesPage() {
                                                     .slice(0, 2)
                                                     .toUpperCase() || "?"}
                                             </div>
-                                            <span className="font-medium">
+                                            <span className="font-medium group-hover:text-indigo-600 transition-colors">
                                                 {athlete.full_name || "Sin nombre"}
                                             </span>
-                                        </div>
+                                        </Link>
                                     </TableCell>
                                     <TableCell className="text-muted-foreground">
                                         {athlete.weight_kg ? `${athlete.weight_kg} kg` : "—"}

@@ -24,7 +24,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 const CATEGORY_COLORS: Record<string, string> = {
     WEIGHTLIFTING: "border-red-500/30 text-red-500",
-    GYMNASTICS: "border-blue-500/30 text-blue-500",
+    GYMNASTICS: "border-indigo-600/30 text-indigo-600",
     CARDIO: "border-green-500/30 text-green-500",
     OTHER: "border-muted-foreground/30 text-muted-foreground",
 };
@@ -63,7 +63,7 @@ export default async function AdminMovementsPage() {
                 </div>
                 <MovementForm
                     trigger={
-                        <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white">
+                        <Button className="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white">
                             + Nuevo
                         </Button>
                     }

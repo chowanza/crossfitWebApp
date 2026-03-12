@@ -20,7 +20,7 @@ export function MovementMediaDialog({ movementName, mediaUrl }: MovementMediaDia
             <DialogTrigger asChild>
                 <button
                     type="button"
-                    className="inline-flex items-center justify-center text-muted-foreground hover:text-blue-500 transition-colors ml-2"
+                    className="inline-flex items-center justify-center text-muted-foreground hover:text-indigo-600 transition-colors ml-2"
                     title="Ver demostración"
                 >
                     <PlayCircle className="w-5 h-5" />

@@ -261,7 +261,7 @@ export function WodForm({ wod, movements, trigger }: WodFormProps) {
                         <div className="space-y-4">
                             <div className="flex items-center justify-between pb-2 border-b">
                                 <h3 className="text-lg font-semibold flex items-center gap-2">
-                                    <ListPlus className="w-5 h-5 text-blue-500" />
+                                    <ListPlus className="w-5 h-5 text-indigo-600" />
                                     Bloques del WOD
                                 </h3>
                                 <Button
@@ -292,7 +292,7 @@ export function WodForm({ wod, movements, trigger }: WodFormProps) {
                                         className="border rounded-lg p-4 bg-muted/10 space-y-4"
                                     >
                                         <div className="flex items-center justify-between">
-                                            <h4 className="font-medium text-blue-500">
+                                            <h4 className="font-medium text-indigo-600">
                                                 Bloque {sIndex + 1}
                                             </h4>
                                             <Button
@@ -483,7 +483,7 @@ export function WodForm({ wod, movements, trigger }: WodFormProps) {
                         <Button
                             type="submit"
                             isLoading={loading}
-                            className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white"
+                            className="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white"
                         >
                             {loading
                                 ? "Guardando WOD..."

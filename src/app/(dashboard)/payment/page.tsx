@@ -63,7 +63,7 @@ export default async function PaymentBlockedPage() {
                         </div>
                     )}
 
-                    <div className="rounded-lg border border-blue-500/20 bg-blue-500/5 p-4">
+                    <div className="rounded-lg border border-indigo-600/20 bg-indigo-600/5 p-4">
                         <p className="text-sm text-blue-400">
                             Para reactivar tu acceso, comunícate con tu entrenador para
                             registrar tu pago.

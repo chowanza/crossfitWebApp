@@ -67,7 +67,7 @@ export default async function PrsPage() {
                 <PrForm
                     movements={movements}
                     trigger={
-                        <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white">
+                        <Button className="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white">
                             + Nuevo PR
                         </Button>
                     }
@@ -105,14 +105,14 @@ export default async function PrsPage() {
                                                 )}
                                             </h4>
                                             {bestPr && bestPr.reps === 1 && (
-                                                <Badge className="bg-blue-500/20 text-blue-500 border-0 text-[10px]">
+                                                <Badge className="bg-indigo-600/20 text-indigo-600 border-0 text-[10px]">
                                                     1RM
                                                 </Badge>
                                             )}
                                         </div>
                                         {bestPr ? (
                                             <div>
-                                                <p className="text-2xl font-bold text-blue-500">
+                                                <p className="text-2xl font-bold text-indigo-600">
                                                     {bestPr.weight_value}
                                                     <span className="text-sm text-muted-foreground ml-1">kg</span>
                                                 </p>
@@ -134,7 +134,7 @@ export default async function PrsPage() {
                                                     movements={movements}
                                                     defaultMovementId={movement.id}
                                                     trigger={
-                                                        <button className="text-xs text-blue-500 hover:underline mt-1">
+                                                        <button className="text-xs text-indigo-600 hover:underline mt-1">
                                                             Registrar →
                                                         </button>
                                                     }

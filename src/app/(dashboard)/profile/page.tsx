@@ -79,11 +79,11 @@ export default async function ProfilePage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                     {profile.avatar_url ? (
-                        <div className="h-16 w-16 rounded-full overflow-hidden border-2 border-blue-500/20">
+                        <div className="h-16 w-16 rounded-full overflow-hidden border-2 border-indigo-600/20">
                             <img src={profile.avatar_url} alt={profile.full_name} className="w-full h-full object-cover" />
                         </div>
                     ) : (
-                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-xl font-black text-white shadow-sm">
+                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 to-indigo-700 text-xl font-black text-white shadow-sm">
                             {profile.full_name
                                 .split(" ")
                                 .map((n) => n[0])
@@ -98,7 +98,7 @@ export default async function ProfilePage() {
                             variant="outline"
                             className={
                                 profile.role === "ADMIN"
-                                    ? "border-blue-500/30 text-blue-500"
+                                    ? "border-indigo-600/30 text-indigo-600"
                                     : "border-muted-foreground/30 text-muted-foreground"
                             }
                         >
@@ -113,19 +113,19 @@ export default async function ProfilePage() {
             <div className="grid grid-cols-3 gap-4">
                 <Card className="border-border bg-muted/10 text-center">
                     <CardContent className="pt-6">
-                        <p className="text-2xl font-bold text-blue-500">{totalWods ?? 0}</p>
+                        <p className="text-2xl font-bold text-indigo-600">{totalWods ?? 0}</p>
                         <p className="text-xs text-muted-foreground mt-1">WODs</p>
                     </CardContent>
                 </Card>
                 <Card className="border-border bg-muted/10 text-center">
                     <CardContent className="pt-6">
-                        <p className="text-2xl font-bold text-blue-500">{totalPrs ?? 0}</p>
+                        <p className="text-2xl font-bold text-indigo-600">{totalPrs ?? 0}</p>
                         <p className="text-xs text-muted-foreground mt-1">PRs</p>
                     </CardContent>
                 </Card>
                 <Card className="border-border bg-muted/10 text-center">
                     <CardContent className="pt-6">
-                        <p className="text-2xl font-bold text-blue-500">
+                        <p className="text-2xl font-bold text-indigo-600">
                             {profile.is_active ? "✓" : "✗"}
                         </p>
                         <p className="text-xs text-muted-foreground mt-1">

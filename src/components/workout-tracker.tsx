@@ -344,7 +344,7 @@ export function WorkoutTracker({ wod }: { wod: any }) {
                         <Button
                             variant="secondary"
                             onClick={() => addSet(block.id)}
-                            className="w-full bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 shadow-none font-semibold rounded-xl h-10 mt-2"
+                            className="w-full bg-indigo-600/10 text-indigo-600 hover:bg-indigo-600/20 shadow-none font-semibold rounded-xl h-10 mt-2"
                         >
                             + Agregar Serie
                         </Button>
