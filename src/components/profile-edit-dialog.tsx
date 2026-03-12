@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Edit2, Loader2 } from "lucide-react";
+import { Edit2 } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
 
@@ -171,8 +171,7 @@ export function ProfileEditDialog({ profile }: { profile: Profile }) {
                         <Button type="button" variant="ghost" onClick={() => setOpen(false)} disabled={loading}>
                             Cancelar
                         </Button>
-                        <Button type="submit" disabled={loading} className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white">
-                            {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                        <Button type="submit" isLoading={loading} className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white">
                             {loading ? "Guardando..." : "Guardar Cambios"}
                         </Button>
                     </div>

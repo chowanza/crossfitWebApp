@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { login } from "@/actions/auth";
-import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -74,10 +73,9 @@ export default function LoginPage() {
 
                             <Button
                                 type="submit"
-                                disabled={loading}
-                                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold flex items-center justify-center gap-2"
+                                isLoading={loading}
+                                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold"
                             >
-                                {loading && <Loader2 className="w-4 h-4 animate-spin" />}
                                 {loading ? "Ingresando..." : "Ingresar"}
                             </Button>
                         </form>

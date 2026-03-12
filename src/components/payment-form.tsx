@@ -149,7 +149,7 @@ export function PaymentForm({ athletes, trigger, defaultUserId }: PaymentFormPro
                         </Button>
                         <Button
                             type="submit"
-                            disabled={loading}
+                            isLoading={loading}
                             className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white"
                         >
                             {loading ? "Registrando..." : "Registrar Pago"}

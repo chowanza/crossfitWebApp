@@ -16,6 +16,7 @@ import {
     Activity,
     CreditCard,
     Users,
+    Contact,
     LineChart,
     LogOut,
 } from "lucide-react";
@@ -30,6 +31,7 @@ const NAV_ITEMS = [
     { href: "/", label: "Inicio", icon: LayoutDashboard, roles: ["ADMIN", "USER"] as UserRole[] },
     { href: "/wods", label: "Entrenamientos", icon: Dumbbell, roles: ["ADMIN", "USER"] as UserRole[] },
     { href: "/prs", label: "PRs", icon: Trophy, roles: ["ADMIN", "USER"] as UserRole[] },
+    { href: "/coaches", label: "Entrenadores", icon: Contact, roles: ["ADMIN", "USER"] as UserRole[] },
     { href: "/profile", label: "Perfil", icon: User, roles: ["ADMIN", "USER"] as UserRole[] },
     { href: "/admin/movements", label: "Movimientos", icon: Activity, roles: ["ADMIN"] as UserRole[] },
     { href: "/admin/payments", label: "Pagos", icon: CreditCard, roles: ["ADMIN"] as UserRole[] },

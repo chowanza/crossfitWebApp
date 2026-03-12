@@ -96,7 +96,8 @@ export function ClassFeedbackForm({
 
             <Button
                 type="submit"
-                disabled={loading || rating === 0}
+                isLoading={loading}
+                disabled={rating === 0}
                 className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white"
             >
                 {loading

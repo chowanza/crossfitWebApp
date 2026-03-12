@@ -25,6 +25,7 @@ import {
     LineChart,
     LogOut,
     Menu,
+    Contact,
 } from "lucide-react";
 
 interface MobileBurgerMenuProps {
@@ -37,6 +38,7 @@ const NAV_ITEMS = [
     { href: "/", label: "Dashboard", icon: LayoutDashboard, roles: ["ADMIN", "USER"] as UserRole[] },
     { href: "/wods", label: "WODs", icon: Dumbbell, roles: ["ADMIN", "USER"] as UserRole[] },
     { href: "/prs", label: "Mis PRs", icon: Trophy, roles: ["ADMIN", "USER"] as UserRole[] },
+    { href: "/coaches", label: "Entrenadores", icon: Contact, roles: ["ADMIN", "USER"] as UserRole[] },
     { href: "/profile", label: "Mi Perfil", icon: User, roles: ["ADMIN", "USER"] as UserRole[] },
     { href: "/admin/movements", label: "Movimientos", icon: Activity, roles: ["ADMIN"] as UserRole[] },
     { href: "/admin/payments", label: "Pagos", icon: CreditCard, roles: ["ADMIN"] as UserRole[] },
