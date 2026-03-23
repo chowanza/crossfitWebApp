@@ -30,7 +30,7 @@ export default async function AdminAthletesPage() {
         .single();
 
     const profile = profileData as Pick<Profile, "role"> | null;
-    if (profile?.role !== "ADMIN") redirect("/");
+    if (profile?.role !== "ADMIN" && profile?.role !== "SUPERADMIN") redirect("/");
 
     // Obtener todos los atletas (no admins)
     const { data: athletesData } = await supabase

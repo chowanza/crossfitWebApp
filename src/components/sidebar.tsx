@@ -28,15 +28,16 @@ interface SidebarProps {
 }
 
 const NAV_ITEMS = [
-    { href: "/", label: "Inicio", icon: LayoutDashboard, roles: ["ADMIN", "USER"] as UserRole[] },
-    { href: "/wods", label: "Entrenamientos", icon: Dumbbell, roles: ["ADMIN", "USER"] as UserRole[] },
-    { href: "/prs", label: "PRs", icon: Trophy, roles: ["ADMIN", "USER"] as UserRole[] },
-    { href: "/coaches", label: "Entrenadores", icon: Contact, roles: ["ADMIN", "USER"] as UserRole[] },
-    { href: "/profile", label: "Perfil", icon: User, roles: ["ADMIN", "USER"] as UserRole[] },
-    { href: "/admin/movements", label: "Movimientos", icon: Activity, roles: ["ADMIN"] as UserRole[] },
-    { href: "/admin/payments", label: "Pagos", icon: CreditCard, roles: ["ADMIN"] as UserRole[] },
-    { href: "/admin/athletes", label: "Atletas", icon: Users, roles: ["ADMIN"] as UserRole[] },
-    { href: "/admin/ratings", label: "Satisfacción", icon: LineChart, roles: ["ADMIN"] as UserRole[] },
+    { href: "/", label: "Inicio", icon: LayoutDashboard, roles: ["SUPERADMIN", "ADMIN", "USER"] as UserRole[] },
+    { href: "/wods", label: "Entrenamientos", icon: Dumbbell, roles: ["SUPERADMIN", "ADMIN", "USER"] as UserRole[] },
+    { href: "/prs", label: "PRs", icon: Trophy, roles: ["SUPERADMIN", "ADMIN", "USER"] as UserRole[] },
+    { href: "/coaches", label: "Cuerpo Técnico", icon: Contact, roles: ["SUPERADMIN", "ADMIN", "USER"] as UserRole[] },
+    { href: "/profile", label: "Perfil", icon: User, roles: ["SUPERADMIN", "ADMIN", "USER"] as UserRole[] },
+    { href: "/admin/movements", label: "Movimientos", icon: Activity, roles: ["ADMIN", "SUPERADMIN"] as UserRole[] },
+    { href: "/admin/payments", label: "Pagos", icon: CreditCard, roles: ["ADMIN", "SUPERADMIN"] as UserRole[] },
+    { href: "/admin/athletes", label: "Atletas", icon: Users, roles: ["ADMIN", "SUPERADMIN"] as UserRole[] },
+    { href: "/admin/ratings", label: "Satisfacción", icon: LineChart, roles: ["ADMIN", "SUPERADMIN"] as UserRole[] },
+    { href: "/admin/coaches", label: "Gest. Coaches", icon: Contact, roles: ["SUPERADMIN"] as UserRole[] },
 ];
 
 export function Sidebar({ fullName, role, avatarUrl }: SidebarProps) {
@@ -109,7 +110,7 @@ export function Sidebar({ fullName, role, avatarUrl }: SidebarProps) {
                     <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold truncate leading-tight">{fullName || "Usuario"}</p>
                         <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mt-0.5">
-                            {role === "ADMIN" ? "Entrenador" : "Atleta"}
+                            {["ADMIN", "SUPERADMIN"].includes(role) ? "Entrenador" : "Atleta"}
                         </p>
                     </div>
                 </div>

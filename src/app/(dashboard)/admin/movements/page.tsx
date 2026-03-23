@@ -42,7 +42,7 @@ export default async function AdminMovementsPage() {
         .single();
 
     const profile = profileData as Pick<Profile, "role"> | null;
-    if (profile?.role !== "ADMIN") redirect("/");
+    if (profile?.role !== "ADMIN" && profile?.role !== "SUPERADMIN") redirect("/");
 
     const { data: movementsData } = await supabase
         .from("movements")

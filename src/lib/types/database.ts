@@ -4,7 +4,7 @@
 //                  + schema-fase4.sql + schema-wod-refactor.sql
 // ============================================================
 
-export type UserRole = "ADMIN" | "USER";
+export type UserRole = "SUPERADMIN" | "ADMIN" | "USER";
 export type SectionType = "AMRAP" | "EMOM" | "FOR_TIME" | "TABATA" | "STRENGTH" | "CUSTOM";
 export type ScoreType = "TIME" | "REPS" | "ROUNDS" | "WEIGHT" | "CALORIES" | "POINTS";
 export type MovementCategory = "WEIGHTLIFTING" | "GYMNASTICS" | "CARDIO" | "OTHER";
@@ -27,6 +27,7 @@ export interface Database {
                     avatar_url: string | null;
                     weight_kg: number | null;
                     height_cm: number | null;
+                    coach_schedule: string | null;
                     last_payment_date: string | null;
                     is_active: boolean;
                     created_at: string;
@@ -39,6 +40,7 @@ export interface Database {
                     avatar_url?: string | null;
                     weight_kg?: number | null;
                     height_cm?: number | null;
+                    coach_schedule?: string | null;
                     last_payment_date?: string | null;
                     is_active?: boolean;
                     created_at?: string;
@@ -51,6 +53,7 @@ export interface Database {
                     avatar_url?: string | null;
                     weight_kg?: number | null;
                     height_cm?: number | null;
+                    coach_schedule?: string | null;
                     last_payment_date?: string | null;
                     is_active?: boolean;
                     created_at?: string;

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createMovement, updateMovement } from "@/actions/movements";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -51,8 +52,10 @@ export function MovementForm({ movement, trigger }: MovementFormProps) {
 
         if (result?.error) {
             setError(result.error);
+            toast.error("Hubo un error al configurar el movimiento: " + result.error);
             setLoading(false);
         } else {
+            toast.success(isEdit ? "Movimiento actualizado en la base de datos" : "Nuevo movimiento registrado");
             setOpen(false);
             setLoading(false);
         }

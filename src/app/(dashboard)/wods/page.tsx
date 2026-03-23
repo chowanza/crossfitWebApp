@@ -54,7 +54,7 @@ export default async function WodsPage() {
                         Selecciona una fecha para ver los bloques y registrar tu marca.
                     </p>
                 </div>
-                {userRole === "ADMIN" && (
+                {["ADMIN", "SUPERADMIN"].includes(userRole) && (
                     <Link href="/admin/wods">
                         <Button variant="outline" className="shrink-0 gap-2">
                             <Settings className="w-4 h-4" />

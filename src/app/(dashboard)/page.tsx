@@ -29,7 +29,7 @@ export default async function DashboardPage() {
         .single();
 
     const profile = profileData as Profile | null;
-    const isAdmin = profile?.role === "ADMIN";
+    const isAdmin = ["ADMIN", "SUPERADMIN"].includes(profile?.role || "");
     const firstName = profile?.full_name?.split(" ")[0] || "Atleta";
 
     // WOD del día con sus secciones

@@ -31,7 +31,7 @@ export default async function AdminWodsPage() {
         .single();
 
     const profile = profileData as Pick<Profile, "role"> | null;
-    if (profile?.role !== "ADMIN") redirect("/");
+    if (profile?.role !== "ADMIN" && profile?.role !== "SUPERADMIN") redirect("/");
 
     // Obtener movimientos para el formulario
     const { data: movementsData } = await supabase

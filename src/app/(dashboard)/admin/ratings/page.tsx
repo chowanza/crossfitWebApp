@@ -29,7 +29,7 @@ export default async function AdminRatingsPage() {
         .single();
 
     const profile = profileData as Pick<Profile, "role"> | null;
-    if (profile?.role !== "ADMIN") redirect("/");
+    if (profile?.role !== "ADMIN" && profile?.role !== "SUPERADMIN") redirect("/");
 
     // Todos los ratings
     const { data: ratingsData } = await supabase

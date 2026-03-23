@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createAthlete, updateAthlete } from "@/actions/athletes";
+import { createCoach, updateCoach } from "@/actions/coaches";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -16,13 +16,13 @@ import {
 } from "@/components/ui/dialog";
 import type { Profile } from "@/lib/types/database";
 
-interface AthleteFormProps {
+interface CoachFormProps {
     trigger: React.ReactNode;
-    athlete?: Pick<Profile, "id" | "full_name" | "weight_kg" | "height_cm" | "is_active">;
+    coach?: Pick<Profile, "id" | "full_name" | "is_active" | "weight_kg" | "height_cm" | "coach_schedule">;
 }
 
-export function AthleteForm({ trigger, athlete }: AthleteFormProps) {
-    const isEditing = !!athlete;
+export function CoachForm({ trigger, coach }: CoachFormProps) {
+    const isEditing = !!coach;
     const [open, setOpen] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
@@ -32,18 +32,14 @@ export function AthleteForm({ trigger, athlete }: AthleteFormProps) {
         setError(null);
 
         const result = isEditing
-            ? await updateAthlete(athlete!.id, formData)
-            : await createAthlete(formData);
+            ? await updateCoach(coach!.id, formData)
+            : await createCoach(formData);
 
         if (result?.error) {
             setError(result.error);
-            toast.error(result.error);
             setLoading(false);
         } else {
-            const successMessage = isEditing
-                ? "Perfil de atleta actualizado exitosamente."
-                : "Atleta creado exitosamente.";
-            toast.success(successMessage);
+            toast.success("Entrenador guardado exitosamente");
             setOpen(false);
             setLoading(false);
         }
@@ -55,12 +51,12 @@ export function AthleteForm({ trigger, athlete }: AthleteFormProps) {
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle>
-                        {isEditing ? "Editar Atleta" : "Nuevo Atleta"}
+                        {isEditing ? "Editar Entrenador" : "Nuevo Entrenador"}
                     </DialogTitle>
                     <DialogDescription>
                         {isEditing
-                            ? "Modifica los datos del atleta."
-                            : "Crea una cuenta para un nuevo atleta."}
+                            ? "Modifica los datos del entrenador."
+                            : "Crea una cuenta para un nuevo entrenador (ADMIN)."}
                     </DialogDescription>
                 </DialogHeader>
                 <form action={handleSubmit} className="space-y-4">
@@ -68,9 +64,40 @@ export function AthleteForm({ trigger, athlete }: AthleteFormProps) {
                         <Label>Nombre completo</Label>
                         <Input
                             name="full_name"
-                            placeholder="Ej: Juan Pérez"
-                            defaultValue={athlete?.full_name}
+                            placeholder="Ej: Pedro Entrenador"
+                            defaultValue={coach?.full_name}
                             required
+                        />
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label>Peso (kg)</Label>
+                            <Input
+                                name="weight_kg"
+                                type="number"
+                                step="0.1"
+                                placeholder="Ej: 75"
+                                defaultValue={coach?.weight_kg || ""}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Estatura (cm)</Label>
+                            <Input
+                                name="height_cm"
+                                type="number"
+                                placeholder="Ej: 175"
+                                defaultValue={coach?.height_cm || ""}
+                            />
+                        </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                        <Label>Horario de Clases</Label>
+                        <Input
+                            name="coach_schedule"
+                            placeholder="Ej: Lunes a Viernes 7:00 AM - 12:00 PM"
+                            defaultValue={coach?.coach_schedule || ""}
                         />
                     </div>
 
@@ -81,7 +108,7 @@ export function AthleteForm({ trigger, athlete }: AthleteFormProps) {
                                 <Input
                                     name="email"
                                     type="email"
-                                    placeholder="atleta@email.com"
+                                    placeholder="coach@email.com"
                                     required
                                 />
                             </div>
@@ -98,41 +125,18 @@ export function AthleteForm({ trigger, athlete }: AthleteFormProps) {
                         </>
                     )}
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label>Peso (kg)</Label>
-                            <Input
-                                name="weight_kg"
-                                type="number"
-                                step="0.1"
-                                placeholder="Ej: 75"
-                                defaultValue={athlete?.weight_kg ?? ""}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label>Altura (cm)</Label>
-                            <Input
-                                name="height_cm"
-                                type="number"
-                                step="0.1"
-                                placeholder="Ej: 175"
-                                defaultValue={athlete?.height_cm ?? ""}
-                            />
-                        </div>
-                    </div>
-
                     {isEditing && (
                         <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/20">
                             <div>
                                 <Label htmlFor="is_active">Activo en la plataforma</Label>
-                                <p className="text-xs text-muted-foreground mt-0.5">Permite o restringe su acceso al sistema</p>
+                                <p className="text-xs text-muted-foreground mt-0.5">Permite o restringe su acceso</p>
                             </div>
                             <input
                                 type="checkbox"
                                 id="is_active"
                                 name="is_active"
                                 value="true"
-                                defaultChecked={athlete?.is_active ?? true}
+                                defaultChecked={coach?.is_active ?? true}
                                 className="h-5 w-5 rounded border-input accent-indigo-600"
                             />
                         </div>
@@ -154,7 +158,7 @@ export function AthleteForm({ trigger, athlete }: AthleteFormProps) {
                         </Button>
                         <Button
                             type="submit"
-                            isLoading={loading}
+                            disabled={loading}
                             className="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white"
                         >
                             {loading
@@ -163,7 +167,7 @@ export function AthleteForm({ trigger, athlete }: AthleteFormProps) {
                                     : "Creando..."
                                 : isEditing
                                     ? "Guardar"
-                                    : "Crear Atleta"}
+                                    : "Crear Entrenador"}
                         </Button>
                     </div>
                 </form>

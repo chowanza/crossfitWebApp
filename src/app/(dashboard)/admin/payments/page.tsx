@@ -1,8 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import type { Profile, Payment } from "@/lib/types/database";
 import { PaymentForm } from "@/components/payment-form";
 import { PaymentStatusBadge } from "@/components/payment-status-badge";
+import { PaymentActions } from "@/components/payment-actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CreditCard } from "lucide-react";
@@ -18,6 +20,9 @@ import {
 interface PaymentWithProfile extends Payment {
     profiles: Pick<Profile, "full_name"> | null;
 }
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function AdminPaymentsPage({
     searchParams,
@@ -38,7 +43,8 @@ export default async function AdminPaymentsPage({
         .single();
 
     const profile = profileData as Pick<Profile, "role"> | null;
-    if (profile?.role !== "ADMIN") redirect("/");
+    const isSuperAdmin = profile?.role === "SUPERADMIN";
+    if (profile?.role !== "ADMIN" && !isSuperAdmin) redirect("/");
 
     // Todos los atletas (para el form)
     const { data: athletesData } = await supabase
@@ -49,10 +55,12 @@ export default async function AdminPaymentsPage({
 
     const athletes = (athletesData || []) as Pick<Profile, "id" | "full_name">[];
 
+    const adminClient = createAdminClient();
+
     // Pagos con filtro opcional
-    let query = supabase
+    let query = adminClient
         .from("payments")
-        .select("*, profiles(full_name)")
+        .select("*, profiles!payments_user_id_fkey(full_name)")
         .order("created_at", { ascending: false })
         .limit(100);
 
@@ -64,16 +72,16 @@ export default async function AdminPaymentsPage({
         query = query.eq("status", "PENDING");
     }
 
-    const { data: paymentsData } = await query;
+    const { data: paymentsData, error: paymentsError } = await query;
     const payments = (paymentsData || []) as PaymentWithProfile[];
 
     // Stats rápidas
-    const { count: overdueCount } = await supabase
+    const { count: overdueCount } = await adminClient
         .from("payments")
         .select("*", { count: "exact", head: true })
         .eq("status", "OVERDUE");
 
-    const { count: pendingCount } = await supabase
+    const { count: pendingCount } = await adminClient
         .from("payments")
         .select("*", { count: "exact", head: true })
         .eq("status", "PENDING");
@@ -143,7 +151,14 @@ export default async function AdminPaymentsPage({
             </div>
 
             {/* Tabla */}
-            {payments.length > 0 ? (
+            {paymentsError ? (
+                <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-6 text-red-500 text-center">
+                    <p className="font-semibold text-lg">Error de base de datos silencioso detectado:</p>
+                    <pre className="text-sm mt-2 text-left bg-black/50 p-4 rounded overflow-x-auto">
+                        {JSON.stringify(paymentsError, null, 2)}
+                    </pre>
+                </div>
+            ) : payments.length > 0 ? (
                 <div className="rounded-lg border border-border overflow-hidden">
                     <Table>
                         <TableHeader>
@@ -154,6 +169,9 @@ export default async function AdminPaymentsPage({
                                 <TableHead className="text-muted-foreground">Estado</TableHead>
                                 <TableHead className="text-muted-foreground hidden md:table-cell">Fecha</TableHead>
                                 <TableHead className="text-muted-foreground hidden md:table-cell">Notas</TableHead>
+                                {isSuperAdmin && (
+                                    <TableHead className="text-muted-foreground text-right w-[140px]">Acciones</TableHead>
+                                )}
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -177,6 +195,11 @@ export default async function AdminPaymentsPage({
                                     <TableCell className="text-muted-foreground/80 text-sm max-w-xs truncate hidden md:table-cell">
                                         {payment.notes}
                                     </TableCell>
+                                    {isSuperAdmin && (
+                                        <TableCell className="text-right">
+                                            <PaymentActions id={payment.id} currentStatus={payment.status} />
+                                        </TableCell>
+                                    )}
                                 </TableRow>
                             ))}
                         </TableBody>

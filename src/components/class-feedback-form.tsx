@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Star, CheckCircle2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface ClassFeedbackFormProps {
     wodId: string;
@@ -35,8 +36,10 @@ export function ClassFeedbackForm({
         const result = await submitClassFeedback(formData);
         if (result?.error) {
             setError(result.error);
+            toast.error("Hubo un problema: " + result.error);
         } else {
             setSuccess(true);
+            toast.success("¡Gracias por tu reseña! Tu opinión ha sido guardada.");
         }
         setLoading(false);
     }

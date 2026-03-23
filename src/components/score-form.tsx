@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { logSectionResult } from "@/actions/results";
+import { toast } from "sonner";
 import { Check, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,8 +50,10 @@ export function ScoreForm({ wodId, sectionId, existingResult }: ScoreFormProps) 
         const result = await logSectionResult(formData);
         if (result?.error) {
             setError(result.error);
+            toast.error(result.error);
         } else {
             setSuccess(true);
+            toast.success("¡Puntaje registrado! Has completado esta sección.");
         }
         setLoading(false);
     }

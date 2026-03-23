@@ -33,16 +33,15 @@ export default async function AthleteProfilePage({
         .eq("id", user.id)
         .single();
 
-    if (currentUserProfile?.role !== "ADMIN") {
+    if (currentUserProfile?.role !== "ADMIN" && currentUserProfile?.role !== "SUPERADMIN") {
         redirect("/");
     }
 
-    // Buscamos el perfil del atleta
+    // Buscamos el perfil del usuario (atleta o entrenador)
     const { data } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", id)
-        .eq("role", "USER")
         .single();
 
     const profile = data as Profile | null;
@@ -83,31 +82,15 @@ export default async function AthleteProfilePage({
         movements: Pick<Movement, "name"> | null;
     })[];
 
-    // Actividad de WODs por semana (últimas 8 semanas)
+    // Actividad de WODs (Historial completo)
     const { data: wodResultsData } = await supabase
         .from("wod_results")
-        .select("created_at")
+        .select("*, wods(title, date)")
         .eq("user_id", id)
-        .order("created_at", { ascending: true });
+        .order("created_at", { ascending: false });
 
-    const wodResults = (wodResultsData || []) as { created_at: string }[];
-
-    // Agrupar por semana
-    const weeklyData: Record<string, number> = {};
-    wodResults.forEach((r) => {
-        const date = new Date(r.created_at);
-        const weekStart = new Date(date);
-        weekStart.setDate(date.getDate() - date.getDay());
-        const key = weekStart.toLocaleDateString("es-VE", {
-            day: "2-digit",
-            month: "short",
-        });
-        weeklyData[key] = (weeklyData[key] || 0) + 1;
-    });
-
-    const activityData = Object.entries(weeklyData)
-        .slice(-8)
-        .map(([week, count]) => ({ week, count }));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const wodActivity = (wodResultsData || []) as any[];
 
     return (
         <div className="max-w-2xl mx-auto space-y-8">
@@ -136,12 +119,12 @@ export default async function AthleteProfilePage({
                         </div>
                     )}
                     <div>
-                        <h2 className="text-2xl font-bold">{profile.full_name || "Atleta"}</h2>
+                        <h2 className="text-2xl font-bold">{profile.full_name || "Usuario"}</h2>
                         <Badge
                             variant="outline"
                             className="border-muted-foreground/30 text-muted-foreground mt-1"
                         >
-                            Atleta
+                            {profile.role === "USER" ? "Atleta" : "Entrenador"}
                         </Badge>
                     </div>
                 </div>
@@ -185,13 +168,47 @@ export default async function AthleteProfilePage({
                 </CardContent>
             </Card>
 
-            {/* Gráfica de Actividad */}
+            {/* Historial de Actividad */}
             <Card className="border-border bg-muted/10">
                 <CardHeader>
-                    <CardTitle className="text-base">🏃 Actividad Semanal</CardTitle>
+                    <CardTitle className="text-base">📅 Historial de WODs</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <WodActivityChart data={activityData} />
+                    <div className="max-h-[400px] overflow-y-auto space-y-3 pr-2 scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent">
+                        {wodActivity.length === 0 ? (
+                            <p className="text-sm text-muted-foreground text-center py-8">
+                                Completa WODs para ver tu actividad aquí.
+                            </p>
+                        ) : (
+                            wodActivity.map((record) => (
+                                <div key={record.id} className="p-3 rounded-lg border border-border bg-card hover:border-indigo-500/50 transition-colors">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <div className="font-semibold text-sm line-clamp-1 pr-4">
+                                            {record.wods?.title || "WOD Eliminado"}
+                                        </div>
+                                        <div className="text-xs text-muted-foreground whitespace-nowrap">
+                                            {new Date(record.created_at).toLocaleDateString("es-VE", {
+                                                month: "short",
+                                                day: "numeric",
+                                                year: "numeric"
+                                            })}
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-sm">
+                                        <span className="text-indigo-400 font-bold">{record.score}</span>
+                                        {record.is_rx && (
+                                            <Badge variant="outline" className="text-[10px] h-4 leading-none border-amber-500 text-amber-500 bg-amber-500/10 px-1 py-0 rounded">RX</Badge>
+                                        )}
+                                    </div>
+                                    {record.notes && (
+                                        <p className="text-xs text-muted-foreground mt-2 italic border-l-2 border-indigo-500/30 pl-2">
+                                            "{record.notes}"
+                                        </p>
+                                    )}
+                                </div>
+                            ))
+                        )}
+                    </div>
                 </CardContent>
             </Card>
 
@@ -215,6 +232,17 @@ export default async function AthleteProfilePage({
                         </div>
                     </div>
                     <Separator />
+                    {profile.role !== "USER" && (
+                        <>
+                            <div>
+                                <p className="text-sm text-muted-foreground">Horario de Encargado</p>
+                                <p className="text-lg font-medium whitespace-pre-wrap">
+                                    {profile.coach_schedule ?? "No asignado"}
+                                </p>
+                            </div>
+                            <Separator />
+                        </>
+                    )}
                     <div>
                         <p className="text-sm text-muted-foreground">Último pago</p>
                         <p className="text-lg font-medium">

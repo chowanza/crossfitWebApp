@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { logPersonalRecord } from "@/actions/prs";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -41,8 +42,10 @@ export function PrForm({ movements, trigger, defaultMovementId }: PrFormProps) {
         const result = await logPersonalRecord(formData);
         if (result?.error) {
             setError(result.error);
+            toast.error(result.error);
             setLoading(false);
         } else {
+            toast.success("Récord personal registrado en el historial");
             setOpen(false);
             setLoading(false);
         }

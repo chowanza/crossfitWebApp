@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createWod, updateWod } from "@/actions/wods";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -197,8 +198,10 @@ export function WodForm({ wod, movements, trigger }: WodFormProps) {
 
         if (result?.error) {
             setError(result.error);
+            toast.error(result.error);
             setLoading(false);
         } else {
+            toast.success(isEdit ? "Estructura del WOD actualizada" : "WOD guardado exitosamente");
             setOpen(false);
             setLoading(false);
             if (!isEdit) {
