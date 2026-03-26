@@ -3,11 +3,11 @@ import { redirect } from "next/navigation";
 import type { Profile, PersonalRecord, Movement } from "@/lib/types/database";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { PrProgressChart } from "@/components/charts/pr-progress-chart";
-import { WodActivityChart } from "@/components/charts/wod-activity-chart";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Activity, Trophy, Users, CalendarPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default async function AthleteProfilePage({
@@ -82,15 +82,41 @@ export default async function AthleteProfilePage({
         movements: Pick<Movement, "name"> | null;
     })[];
 
-    // Actividad de WODs (Historial completo)
-    const { data: wodResultsData } = await supabase
+    // Historial de WODs Completados (estilo Instagram)
+    const { data: userResults } = await supabase
         .from("wod_results")
-        .select("*, wods(title, date)")
-        .eq("user_id", id)
-        .order("created_at", { ascending: false });
+        .select("section_id, score_value, score_type, wod_sections!inner(wod_id)")
+        .eq("user_id", id);
+    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const wodIds = Array.from(new Set((userResults || []).map((r: any) => r.wod_sections?.wod_id).filter(Boolean)));
+    const userResultsMap = new Map();
+    (userResults || []).forEach((r) => userResultsMap.set(r.section_id, r));
+
+    // Fetch the specific completed WODs
+    const { data: completedWodsData } = await supabase
+        .from("wods")
+        .select(`
+            *,
+            coach:profiles!wods_created_by_fkey(full_name),
+            wod_sections(
+                id,
+                section_type,
+                description,
+                time_cap_seconds,
+                wod_section_movements(
+                    id,
+                    reps,
+                    weight_kg,
+                    movements(name)
+                )
+            )
+        `)
+        .in("id", wodIds.length > 0 ? wodIds : ["00000000-0000-0000-0000-000000000000"])
+        .order("date", { ascending: false });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const wodActivity = (wodResultsData || []) as any[];
+    const completedWods = (completedWodsData || []) as any[];
 
     return (
         <div className="max-w-2xl mx-auto space-y-8">
@@ -105,9 +131,21 @@ export default async function AthleteProfilePage({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                     {profile.avatar_url ? (
-                        <div className="h-16 w-16 rounded-full overflow-hidden border-2 border-indigo-600/20">
-                            <img src={profile.avatar_url} alt={profile.full_name} className="w-full h-full object-cover" />
-                        </div>
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <div className="h-16 w-16 rounded-full overflow-hidden border-2 border-indigo-600/20 cursor-pointer hover:border-indigo-600/50 transition-colors shadow-sm">
+                                    <img src={profile.avatar_url} alt={profile.full_name} className="w-full h-full object-cover" />
+                                </div>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-sm p-0 border-0 bg-transparent shadow-none">
+                                <DialogHeader className="sr-only">
+                                    <DialogTitle>Foto de {profile.full_name}</DialogTitle>
+                                </DialogHeader>
+                                <div className="rounded-2xl overflow-hidden shadow-2xl bg-black/50 backdrop-blur-sm">
+                                    <img src={profile.avatar_url} alt={profile.full_name} className="w-full h-auto object-contain" />
+                                </div>
+                            </DialogContent>
+                        </Dialog>
                     ) : (
                         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 to-indigo-700 text-xl font-black text-white shadow-sm">
                             {profile.full_name
@@ -122,9 +160,15 @@ export default async function AthleteProfilePage({
                         <h2 className="text-2xl font-bold">{profile.full_name || "Usuario"}</h2>
                         <Badge
                             variant="outline"
-                            className="border-muted-foreground/30 text-muted-foreground mt-1"
+                            className={
+                                profile.role === "SUPERADMIN"
+                                    ? "border-amber-500/50 text-amber-600 bg-amber-50/50 font-bold mt-1"
+                                    : profile.role === "ADMIN"
+                                        ? "border-indigo-600/30 text-indigo-600 mt-1"
+                                        : "border-muted-foreground/30 text-muted-foreground mt-1"
+                            }
                         >
-                            {profile.role === "USER" ? "Atleta" : "Entrenador"}
+                            {profile.role === "SUPERADMIN" ? "Superadmin" : profile.role === "ADMIN" ? "Entrenador" : "Atleta"}
                         </Badge>
                     </div>
                 </div>
@@ -158,6 +202,150 @@ export default async function AthleteProfilePage({
 
             <Separator />
 
+            {/* WOD Feed (Instagram Style) */}
+            <div>
+                <div className="flex items-center justify-between mb-3 mt-4">
+                    <h3 className="text-lg font-bold text-foreground/90">Historial de Entrenamientos</h3>
+                </div>
+
+                {completedWods.length > 0 ? (
+                    <div className="space-y-4">
+                        {completedWods.map((wod) => {
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            const wodScores = wod.wod_sections?.map((s: any) => {
+                                const r = userResultsMap.get(s.id);
+                                return r ? { ...r, section_type: s.section_type } : null;
+                            }).filter(Boolean);
+
+                            const wodDate = new Date(wod.date);
+                            const formatter = new Intl.DateTimeFormat("es-ES", { weekday: "long", day: "numeric", month: "long" });
+                            const displayDate = formatter.format(new Date(wodDate.getTime() + wodDate.getTimezoneOffset() * 60000));
+
+                            return (
+                                <Link href={`/wods/${wod.id}`} key={wod.id} className="block group">
+                                    <Card className="overflow-hidden border-border/50 shadow-sm bg-card group-hover:border-indigo-600/50 group-hover:shadow-md transition-all">
+                                        <CardHeader className="pb-2 pt-4 border-b bg-muted/5 group-hover:bg-indigo-50/10 transition-colors">
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <CardTitle className="text-base font-bold">{wod.title}</CardTitle>
+                                                <p className="text-xs text-muted-foreground mt-1 capitalize">
+                                                    {displayDate}
+                                                </p>
+                                            </div>
+                                            <Badge className="bg-muted text-muted-foreground border-0 uppercase font-bold">
+                                                Completado
+                                            </Badge>
+                                        </div>
+                                        <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground font-medium flex-wrap">
+                                            <span className="flex items-center gap-1.5 bg-background border px-2 py-1 rounded-md shrink-0">
+                                                <Users className="w-3.5 h-3.5 text-indigo-600" />
+                                                Coach: {wod.coach?.full_name?.split(" ")[0] || "Staff"}
+                                            </span>
+                                            <span className="flex items-center gap-1.5 bg-background border px-2 py-1 rounded-md shrink-0">
+                                                <Activity className="w-3.5 h-3.5 text-indigo-600" />
+                                                {wod.wod_sections?.length || 0} bloques
+                                            </span>
+                                            {wod.wod_sections?.map((sec: any, i: number) => (
+                                                <Badge
+                                                    key={i}
+                                                    variant="secondary"
+                                                    className="text-[9px] px-1.5 font-medium bg-muted text-muted-foreground uppercase"
+                                                >
+                                                    {sec.section_type}
+                                                </Badge>
+                                            ))}
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent className="pt-4 pb-4">
+                                        {wod.notes && (
+                                            <div className="mb-4">
+                                                <p className="text-sm text-foreground/85 line-clamp-3 leading-relaxed whitespace-pre-wrap">
+                                                    {wod.notes}
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        <div className="space-y-3 mb-4">
+                                            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                                            {wod.wod_sections?.map((sec: any, idx: number) => {
+                                                const score = userResultsMap.get(sec.id);
+                                                return (
+                                                    <div key={sec.id} className="rounded-xl border border-border/50 bg-background/50 overflow-hidden shadow-sm">
+                                                        <div className="bg-muted/30 px-3 py-2 flex items-center justify-between">
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="bg-green-600/10 text-green-700 font-bold border border-green-600/20 px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wider">
+                                                                    {sec.section_type}
+                                                                </span>
+                                                            </div>
+                                                            {sec.time_cap_seconds && (
+                                                                <div className="text-xs text-muted-foreground font-semibold flex gap-1.5">
+                                                                    <span>{Math.floor(sec.time_cap_seconds / 60)}' TC</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+
+                                                        {sec.wod_section_movements && sec.wod_section_movements.length > 0 && (
+                                                            <div className="p-2 border-t border-border/30">
+                                                                <ul className="space-y-1">
+                                                                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                                                                    {sec.wod_section_movements.map((mov: any) => (
+                                                                        <li key={mov.id} className="text-xs flex justify-between items-center bg-muted/20 px-2 py-1.5 rounded-md text-foreground/80">
+                                                                            <span className="font-medium">
+                                                                                <span className="text-indigo-600 font-black mr-1.5">{mov.reps}x</span>
+                                                                                {mov.movements?.name || "Ejercicio"}
+                                                                            </span>
+                                                                            {mov.weight_kg && (
+                                                                                <span className="text-[10px] text-muted-foreground font-bold bg-background border px-1.5 py-0.5 rounded shadow-sm">
+                                                                                    {mov.weight_kg}kg
+                                                                                </span>
+                                                                            )}
+                                                                        </li>
+                                                                    ))}
+                                                                </ul>
+                                                            </div>
+                                                        )}
+
+                                                        {score && (
+                                                            <div className="bg-green-500/10 px-3 py-2 border-t border-green-500/20 flex justify-between items-center">
+                                                                <span className="text-xs font-bold text-green-700 flex items-center gap-1.5">
+                                                                    <Trophy className="w-4 h-4" /> Tu Resultado:
+                                                                </span>
+                                                                <span className="font-bold text-foreground text-sm">
+                                                                    {score.score_value} {score.score_type === 'TIME' ? 'min' : ''}
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+
+                                        <Button variant="outline" className="w-full h-11 shadow-sm font-semibold rounded-xl border-indigo-600/20 text-indigo-600 group-hover:bg-indigo-50 transition-colors">
+                                            Ver detalles de rutina
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                            </Link>
+                            );
+                        })}
+                    </div>
+                ) : (
+                    <Card className="border-dashed bg-muted/5 shadow-none pb-4">
+                        <CardContent className="py-10 flex flex-col items-center justify-center text-center">
+                            <div className="p-3 bg-muted rounded-full mb-3">
+                                <CalendarPlus className="w-6 h-6 text-muted-foreground" />
+                            </div>
+                            <h4 className="font-bold text-sm">Sin Actividad</h4>
+                            <p className="text-xs text-muted-foreground mt-1 max-w-[200px]">
+                                El atleta no ha registrado actividad recientemente.
+                            </p>
+                        </CardContent>
+                    </Card>
+                )}
+            </div>
+
+            <Separator />
+
             {/* Gráfica de Progreso PRs */}
             <Card className="border-border bg-muted/10">
                 <CardHeader>
@@ -167,52 +355,6 @@ export default async function AthleteProfilePage({
                     <PrProgressChart records={prs} />
                 </CardContent>
             </Card>
-
-            {/* Historial de Actividad */}
-            <Card className="border-border bg-muted/10">
-                <CardHeader>
-                    <CardTitle className="text-base">📅 Historial de WODs</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="max-h-[400px] overflow-y-auto space-y-3 pr-2 scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent">
-                        {wodActivity.length === 0 ? (
-                            <p className="text-sm text-muted-foreground text-center py-8">
-                                Completa WODs para ver tu actividad aquí.
-                            </p>
-                        ) : (
-                            wodActivity.map((record) => (
-                                <div key={record.id} className="p-3 rounded-lg border border-border bg-card hover:border-indigo-500/50 transition-colors">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <div className="font-semibold text-sm line-clamp-1 pr-4">
-                                            {record.wods?.title || "WOD Eliminado"}
-                                        </div>
-                                        <div className="text-xs text-muted-foreground whitespace-nowrap">
-                                            {new Date(record.created_at).toLocaleDateString("es-VE", {
-                                                month: "short",
-                                                day: "numeric",
-                                                year: "numeric"
-                                            })}
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-sm">
-                                        <span className="text-indigo-400 font-bold">{record.score}</span>
-                                        {record.is_rx && (
-                                            <Badge variant="outline" className="text-[10px] h-4 leading-none border-amber-500 text-amber-500 bg-amber-500/10 px-1 py-0 rounded">RX</Badge>
-                                        )}
-                                    </div>
-                                    {record.notes && (
-                                        <p className="text-xs text-muted-foreground mt-2 italic border-l-2 border-indigo-500/30 pl-2">
-                                            "{record.notes}"
-                                        </p>
-                                    )}
-                                </div>
-                            ))
-                        )}
-                    </div>
-                </CardContent>
-            </Card>
-
-            <Separator />
 
             {/* Info */}
             <Card className="border-border bg-muted/10">
@@ -244,7 +386,7 @@ export default async function AthleteProfilePage({
                         </>
                     )}
                     <div>
-                        <p className="text-sm text-muted-foreground">Último pago</p>
+                        <p className="text-sm text-muted-foreground">Pago siguiente</p>
                         <p className="text-lg font-medium">
                             {profile.last_payment_date ?? "Sin registro"}
                         </p>

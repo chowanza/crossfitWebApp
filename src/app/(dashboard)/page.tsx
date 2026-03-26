@@ -32,18 +32,28 @@ export default async function DashboardPage() {
     const isAdmin = ["ADMIN", "SUPERADMIN"].includes(profile?.role || "");
     const firstName = profile?.full_name?.split(" ")[0] || "Atleta";
 
-    // WOD del día con sus secciones
+    // WOD Feed (Instagram Style)
     const today = new Date().toISOString().split("T")[0];
-    const { data: todayWods } = await supabase
+    const { data: feedWodsData } = await supabase
         .from("wods")
         .select(`
             *,
-            wod_sections(section_type)
+            coach:profiles!wods_created_by_fkey(full_name),
+            wod_sections(id, section_type)
         `)
-        .eq("date", today)
-        .order("created_at", { ascending: false });
+        .order("date", { ascending: false })
+        .limit(10);
 
-    const wods = (todayWods || []) as any[];
+    const wods = (feedWodsData || []) as any[];
+
+    // Resultados del Atleta para inyectar puntaje en cards
+    const { data: userResults } = await supabase
+        .from("wod_results")
+        .select("section_id, score_value, score_type")
+        .eq("user_id", user!.id);
+    
+    const userResultsMap = new Map();
+    (userResults || []).forEach(r => userResultsMap.set(r.section_id, r));
 
     // Stats rápidas comunes
     const { count: totalWods } = await supabase
@@ -214,25 +224,6 @@ export default async function DashboardPage() {
                 </div>
             </div>
 
-            {/* Offer Banner */}
-            <Card className="bg-card border-border overflow-hidden relative shadow-sm">
-                <div className="absolute -right-10 -top-10 w-32 h-32 bg-indigo-600/10 rounded-full blur-2xl" />
-                <CardHeader className="pb-2">
-                    <CardTitle className="text-xl">Oferta 50%</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4 relative z-10">
-                    <p className="text-sm text-muted-foreground">
-                        ¡Aprovecha nuestros descuentos en planes semestrales!
-                        <span className="font-mono text-[11px] block mt-1.5 text-foreground/80">
-                            Termina en 2d 6hr 55m 6s
-                        </span>
-                    </p>
-                    <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-indigo-600 shadow-md text-white border-0">
-                        Ver más
-                    </Button>
-                </CardContent>
-            </Card>
-
             {/* Horizontal Categories */}
             <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none snap-x -mx-4 px-4 md:mx-0 md:px-0">
                 <div className="snap-start shrink-0 w-32 h-24 rounded-2xl bg-gradient-to-br from-indigo-600/10 to-background border flex flex-col justify-end p-3 relative overflow-hidden group cursor-pointer hover:border-indigo-600/50 transition-colors">
@@ -249,39 +240,75 @@ export default async function DashboardPage() {
                 </div>
             </div>
 
-            {/* WOD de Hoy */}
+            {/* WOD Feed (Instagram Style) */}
             <div>
-                <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-lg font-bold">Mis rutinas ({wods.length})</h3>
-                    <Link href="/wods" className="text-xs text-indigo-600 font-bold hover:underline">
-                        Ver pasadas
-                    </Link>
+                <div className="flex items-center justify-between mb-3 mt-4">
+                    <h3 className="text-lg font-bold">Últimos Entrenamientos</h3>
                 </div>
 
                 {wods.length > 0 ? (
-                    <div className="space-y-3">
-                        {wods.map((wod) => (
-                            <Card key={wod.id} className="overflow-hidden border-border/50 hover:border-indigo-600/30 transition-colors shadow-none bg-card">
-                                <CardHeader className="pb-2 pt-4 bg-muted/5">
-                                    <div className="flex justify-between items-start">
-                                        <CardTitle className="text-base font-bold">{wod.title}</CardTitle>
-                                        <Badge className="text-[9px] bg-indigo-600/10 text-indigo-600 hover:bg-indigo-600/20 border-0 px-2 py-0 uppercase uppercase font-bold tracking-wider">
-                                            Hoy
-                                        </Badge>
-                                    </div>
-                                    <p className="text-[11px] text-muted-foreground uppercase tracking-widest font-semibold mt-1">
-                                        {wod.wod_sections?.map((s: any) => s.section_type).join(" • ") || "WOD"}
-                                    </p>
-                                </CardHeader>
-                                <CardContent className="pt-3 pb-4">
-                                    <Link href={`/tracker/${wod.id}`}>
-                                        <Button className="w-full bg-blue-600 hover:bg-blue-700 h-11 shadow-sm font-semibold rounded-xl">
-                                            Empezar rutina
-                                        </Button>
-                                    </Link>
-                                </CardContent>
-                            </Card>
-                        ))}
+                    <div className="space-y-4">
+                        {wods.map((wod) => {
+                            // Match user results with WOD sections to detect completion & scores
+                            const wodScores = wod.wod_sections?.map((s: any) => userResultsMap.get(s.id)).filter(Boolean);
+                            const isCompleted = wodScores && wod.wod_sections && wodScores.length === wod.wod_sections.length && wod.wod_sections.length > 0;
+
+                            const wodDate = new Date(wod.date);
+                            const formatter = new Intl.DateTimeFormat("es-ES", { weekday: "long", day: "numeric", month: "long" });
+                            const displayDate = formatter.format(new Date(wodDate.getTime() + wodDate.getTimezoneOffset() * 60000));
+
+                            return (
+                                <Card key={wod.id} className="overflow-hidden border-border/50 shadow-sm bg-card hover:border-indigo-600/30 transition-colors">
+                                    <CardHeader className="pb-2 pt-4 border-b bg-muted/5">
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <CardTitle className="text-base font-bold">{wod.title}</CardTitle>
+                                                <p className="text-xs text-muted-foreground mt-1 capitalize">
+                                                    {displayDate}
+                                                </p>
+                                            </div>
+                                            <Badge className={wod.date === today ? "bg-indigo-600/10 text-indigo-600 hover:bg-indigo-600/20 border-0 uppercase font-bold" : "bg-muted text-muted-foreground hover:bg-muted/80 border-0 uppercase font-bold"}>
+                                                {wod.date === today ? "Hoy" : "Completado"}
+                                            </Badge>
+                                        </div>
+                                        <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground font-medium">
+                                            <span className="flex items-center gap-1.5 bg-background border px-2 py-1 rounded-md">
+                                                <Users className="w-3.5 h-3.5 text-indigo-600" />
+                                                Coach: {wod.coach?.full_name?.split(" ")[0] || "Staff"}
+                                            </span>
+                                            <span className="flex items-center gap-1.5 bg-background border px-2 py-1 rounded-md">
+                                                <Activity className="w-3.5 h-3.5 text-indigo-600" />
+                                                {wod.wod_sections?.length || 0} bloques
+                                            </span>
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent className="pt-4 pb-4">
+                                        {wodScores && wodScores.length > 0 && (
+                                            <div className="mb-4 p-3 rounded-xl bg-green-500/10 border border-green-500/20">
+                                                <p className="text-xs font-bold text-green-700 mb-2 flex items-center gap-1.5">
+                                                    <Trophy className="w-3.5 h-3.5" /> Tus Resultados:
+                                                </p>
+                                                <div className="flex flex-col gap-1.5">
+                                                    {wodScores.map((score: any, idx: number) => (
+                                                        <div key={idx} className="flex justify-between items-center text-xs">
+                                                            <span className="text-muted-foreground/80 font-medium">Bloque {idx + 1}</span>
+                                                            <span className="font-bold text-foreground">
+                                                                {score.score_value} {score.score_type === 'TIME' ? 'min' : ''}
+                                                            </span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                        <Link href={`/tracker/${wod.id}`}>
+                                            <Button variant={isCompleted ? "outline" : "default"} className={`w-full h-11 shadow-sm font-semibold rounded-xl ${isCompleted ? "border-indigo-600/20 text-indigo-600" : "bg-blue-600 hover:bg-blue-700 text-white"}`}>
+                                                {isCompleted ? "Ver detalles de rutina" : "Empezar rutina"}
+                                            </Button>
+                                        </Link>
+                                    </CardContent>
+                                </Card>
+                            );
+                        })}
                     </div>
                 ) : (
                     <Card className="border-dashed bg-muted/5 shadow-none">
@@ -291,29 +318,11 @@ export default async function DashboardPage() {
                             </div>
                             <h4 className="font-bold text-sm">Descanso</h4>
                             <p className="text-xs text-muted-foreground mt-1 max-w-[200px]">
-                                No hay WOD asignado hoy. Dedica tiempo a estirar.
+                                No hay entrenamientos recientes para mostrar.
                             </p>
                         </CardContent>
                     </Card>
                 )}
-            </div>
-
-            {/* Tips de Entrenamiento */}
-            <div>
-                <h3 className="text-lg font-bold mb-3">Tips de entrenamiento</h3>
-                <Card className="border-l-4 border-l-blue-500 overflow-hidden shadow-sm bg-card">
-                    <CardHeader className="pb-2 pt-4">
-                        <CardTitle className="text-base font-bold">Mejora tu empuje en Hip Thrust</CardTitle>
-                    </CardHeader>
-                    <CardContent className="pb-4 pt-1">
-                        <p className="text-[13px] text-muted-foreground mb-4 leading-relaxed">
-                            Aprende la técnica correcta para maximizar la activación de glúteos sin lastimar tu zona lumbar.
-                        </p>
-                        <Button variant="secondary" className="w-full bg-indigo-600/10 text-indigo-600 hover:bg-indigo-600/20 font-semibold rounded-xl">
-                            Explorar
-                        </Button>
-                    </CardContent>
-                </Card>
             </div>
         </div>
     );

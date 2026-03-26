@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Users } from "lucide-react";
 import Link from "next/link";
+import { SearchInput } from "@/components/search-input";
 import {
     Table,
     TableBody,
@@ -16,7 +17,9 @@ import {
     TableRow,
 } from "@/components/ui/table";
 
-export default async function AdminAthletesPage() {
+export default async function AdminAthletesPage(props: { searchParams?: Promise<{ query?: string }> }) {
+    const searchParams = await props.searchParams;
+    const query = searchParams?.query || "";
     const supabase = await createClient();
     const {
         data: { user },
@@ -33,11 +36,16 @@ export default async function AdminAthletesPage() {
     if (profile?.role !== "ADMIN" && profile?.role !== "SUPERADMIN") redirect("/");
 
     // Obtener todos los atletas (no admins)
-    const { data: athletesData } = await supabase
+    let req = supabase
         .from("profiles")
         .select("*")
-        .eq("role", "USER")
-        .order("full_name");
+        .eq("role", "USER");
+
+    if (query) {
+        req = req.ilike("full_name", `%${query}%`);
+    }
+
+    const { data: athletesData } = await req.order("full_name");
 
     const athletes = (athletesData || []) as Profile[];
 
@@ -57,13 +65,17 @@ export default async function AdminAthletesPage() {
                         )}
                     </p>
                 </div>
-                <AthleteForm
+                
+                <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+                    <SearchInput placeholder="Buscar por nombre..." />
+                    <AthleteForm
                     trigger={
                         <Button className="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white">
                             + Nuevo Atleta
                         </Button>
                     }
                 />
+                </div>
             </div>
 
             {athletes.length > 0 ? (
@@ -74,7 +86,7 @@ export default async function AdminAthletesPage() {
                                 <TableHead>Nombre</TableHead>
                                 <TableHead>Peso</TableHead>
                                 <TableHead>Altura</TableHead>
-                                <TableHead>Último Pago</TableHead>
+                                <TableHead>Pago Siguiente</TableHead>
                                 <TableHead>Estado</TableHead>
                                 <TableHead className="text-right">Acciones</TableHead>
                             </TableRow>

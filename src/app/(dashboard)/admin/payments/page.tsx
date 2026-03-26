@@ -8,6 +8,7 @@ import { PaymentActions } from "@/components/payment-actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CreditCard } from "lucide-react";
+import { SearchInput } from "@/components/search-input";
 import {
     Table,
     TableBody,
@@ -27,9 +28,9 @@ export const revalidate = 0;
 export default async function AdminPaymentsPage({
     searchParams,
 }: {
-    searchParams: Promise<{ filter?: string }>;
+    searchParams: Promise<{ filter?: string; query?: string }>;
 }) {
-    const { filter } = await searchParams;
+    const { filter, query } = await searchParams;
     const supabase = await createClient();
     const {
         data: { user },
@@ -58,21 +59,35 @@ export default async function AdminPaymentsPage({
     const adminClient = createAdminClient();
 
     // Pagos con filtro opcional
-    let query = adminClient
+    let dbQuery = adminClient
         .from("payments")
         .select("*, profiles!payments_user_id_fkey(full_name)")
         .order("created_at", { ascending: false })
         .limit(100);
 
     if (filter === "overdue") {
-        query = query.eq("status", "OVERDUE");
+        dbQuery = dbQuery.eq("status", "OVERDUE");
     } else if (filter === "paid") {
-        query = query.eq("status", "PAID");
+        dbQuery = dbQuery.eq("status", "PAID");
     } else if (filter === "pending") {
-        query = query.eq("status", "PENDING");
+        dbQuery = dbQuery.eq("status", "PENDING");
     }
 
-    const { data: paymentsData, error: paymentsError } = await query;
+    if (query) {
+        const { data: matchedProfiles } = await adminClient
+            .from("profiles")
+            .select("id")
+            .ilike("full_name", `%${query}%`);
+            
+        const matchedIds = matchedProfiles?.map(p => p.id) || [];
+        if (matchedIds.length > 0) {
+            dbQuery = dbQuery.in("user_id", matchedIds);
+        } else {
+            dbQuery = dbQuery.eq("user_id", "00000000-0000-0000-0000-000000000000"); // UUID dummy
+        }
+    }
+
+    const { data: paymentsData, error: paymentsError } = await dbQuery;
     const payments = (paymentsData || []) as PaymentWithProfile[];
 
     // Stats rápidas
@@ -130,24 +145,29 @@ export default async function AdminPaymentsPage({
             </div>
 
             {/* Filtros */}
-            <div className="flex gap-2 flex-wrap">
-                {[
-                    { value: "all", label: "Todos" },
-                    { value: "overdue", label: "Vencidos" },
-                    { value: "pending", label: "Pendientes" },
-                    { value: "paid", label: "Pagados" },
-                ].map((f) => (
-                    <a
-                        key={f.value}
-                        href={f.value === "all" ? "/admin/payments" : `/admin/payments?filter=${f.value}`}
-                        className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${currentFilter === f.value
-                            ? "bg-indigo-600/20 text-indigo-600"
-                            : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                            }`}
-                    >
-                        {f.label}
-                    </a>
-                ))}
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                <div className="flex gap-2 flex-wrap">
+                    {[
+                        { value: "all", label: "Todos" },
+                        { value: "overdue", label: "Vencidos" },
+                        { value: "pending", label: "Pendientes" },
+                        { value: "paid", label: "Pagados" },
+                    ].map((f) => (
+                        <a
+                            key={f.value}
+                            href={f.value === "all" ? "/admin/payments" : `/admin/payments?filter=${f.value}`}
+                            className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors border shadow-sm ${currentFilter === f.value
+                                ? "bg-indigo-600/10 text-indigo-600 border-indigo-600/30"
+                                : "text-muted-foreground hover:bg-muted hover:text-foreground bg-card"
+                                }`}
+                        >
+                            {f.label}
+                        </a>
+                    ))}
+                </div>
+                <div className="w-full sm:w-auto">
+                    <SearchInput placeholder="Buscar atleta..." />
+                </div>
             </div>
 
             {/* Tabla */}

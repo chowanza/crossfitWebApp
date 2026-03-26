@@ -175,13 +175,40 @@ export function PaymentForm({ athletes, trigger, defaultUserId }: PaymentFormPro
                         </div>
                     </div>
 
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label>Método de Pago</Label>
+                            <select
+                                name="payment_method"
+                                className="flex h-10 w-full rounded-md border border-input bg-muted/50 px-3 py-2 text-sm ring-offset-background outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                required
+                            >
+                                <option value="Efectivo ($)">Efectivo ($)</option>
+                                <option value="Efectivo (Bs)">Efectivo (Bs)</option>
+                                <option value="Zelle">Zelle</option>
+                                <option value="Pago Móvil">Pago Móvil</option>
+                                <option value="Transferencia">Transferencia</option>
+                                <option value="Binance / USDT">Binance / USDT</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Referencia (opc.)</Label>
+                            <Input
+                                name="reference"
+                                placeholder="Ej: 193859"
+                                className="bg-muted/50"
+                            />
+                        </div>
+                    </div>
+
                     <input type="hidden" name="status" value="PAID" />
 
                     <div className="space-y-2">
-                        <Label>Notas (opcional)</Label>
+                        <Label>Concepto Adicional (opcional)</Label>
                         <Textarea
                             name="notes"
-                            placeholder="Método de pago, referencia, etc."
+                            placeholder="Mensualidad adelantada, recargos, inscripciones..."
                             rows={2}
                             className="bg-muted/50 resize-none"
                         />

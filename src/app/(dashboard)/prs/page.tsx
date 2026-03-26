@@ -7,23 +7,30 @@ import { PrForm } from "@/components/pr-form";
 import { MovementMediaDialog } from "@/components/movement-media-dialog";
 import { PrHistoryDialog } from "@/components/pr-history-dialog";
 import { Dumbbell, PersonStanding, Timer, Zap } from "lucide-react";
+import { SearchInput } from "@/components/search-input";
 
 interface PrWithMovement extends PersonalRecord {
     movements: Pick<Movement, "name" | "category"> | null;
 }
 
-export default async function PrsPage() {
+export default async function PrsPage(props: { searchParams?: Promise<{ query?: string }> }) {
+    const searchParams = await props.searchParams;
+    const query = searchParams?.query || "";
     const supabase = await createClient();
     const {
         data: { user },
     } = await supabase.auth.getUser();
 
     // Todos los movimientos
-    const { data: movementsData } = await supabase
+    let req = supabase
         .from("movements")
-        .select("*")
-        .order("category")
-        .order("name");
+        .select("*");
+        
+    if (query) {
+        req = req.ilike("name", `%${query}%`);
+    }
+        
+    const { data: movementsData } = await req.order("category").order("name");
 
     const movements = (movementsData || []) as Movement[];
 
@@ -65,14 +72,17 @@ export default async function PrsPage() {
                         Tus pesos máximos por movimiento.
                     </p>
                 </div>
-                <PrForm
-                    movements={movements}
-                    trigger={
-                        <Button className="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white">
-                            + Nuevo PR
-                        </Button>
-                    }
-                />
+                <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+                    <SearchInput placeholder="Buscar movimiento..." />
+                    <PrForm
+                        movements={movements}
+                        trigger={
+                            <Button className="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white">
+                                + Nuevo PR
+                            </Button>
+                        }
+                    />
+                </div>
             </div>
 
             {categories.map((category) => {
@@ -84,7 +94,7 @@ export default async function PrsPage() {
                 const { label, icon } = categoryInfo[category];
 
                 return (
-                    <div key={category}>
+                    <div key={category} className="mb-8 last:mb-0">
                         <h3 className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
                             {icon} {label}
                         </h3>

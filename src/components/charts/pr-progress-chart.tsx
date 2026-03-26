@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
     LineChart,
     Line,
@@ -11,12 +12,15 @@ import {
     Legend,
 } from "recharts";
 import type { PersonalRecord, Movement } from "@/lib/types/database";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface PrProgressChartProps {
     records: (PersonalRecord & { movements: Pick<Movement, "name"> | null })[];
 }
 
 export function PrProgressChart({ records }: PrProgressChartProps) {
+    const [selectedMovement, setSelectedMovement] = useState<string>("all");
+
     if (records.length === 0) {
         return (
             <div className="rounded-lg border border-border border-dashed py-8 text-center">
@@ -41,12 +45,22 @@ export function PrProgressChart({ records }: PrProgressChartProps) {
         });
     });
 
-    // Tomar los 3 movimientos con más registros
-    const topMovements = Object.entries(byMovement)
-        .sort((a, b) => b[1].length - a[1].length)
-        .slice(0, 3);
+    // Movimientos disponibles para el filtro
+    const availableMovements = Object.keys(byMovement).sort();
 
-    const COLORS = ["#3b82f6", "#3b82f6", "#10b981"];
+    // Determinar qué movimientos renderizar
+    let topMovements: [string, { date: string; weight: number }[]][] = [];
+
+    if (selectedMovement === "all") {
+        // Tomar los 3 movimientos con más registros
+        topMovements = Object.entries(byMovement)
+            .sort((a, b) => b[1].length - a[1].length)
+            .slice(0, 3);
+    } else if (byMovement[selectedMovement]) {
+        topMovements = [[selectedMovement, byMovement[selectedMovement]]];
+    }
+
+    const COLORS = ["#3b82f6", "#10b981", "#8b5cf6", "#f59e0b", "#ec4899", "#14b8a6"];
 
     // Fusionar data en un formato para Recharts
     const allDates = new Set<string>();
@@ -64,49 +78,64 @@ export function PrProgressChart({ records }: PrProgressChartProps) {
     });
 
     return (
-        <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                    <XAxis
-                        dataKey="date"
-                        tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
-                        stroke="hsl(var(--muted-foreground))"
-                    />
-                    <YAxis
-                        tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
-                        stroke="hsl(var(--muted-foreground))"
-                        label={{
-                            value: "kg",
-                            angle: -90,
-                            position: "insideLeft",
-                            style: { fill: "hsl(var(--muted-foreground))" },
-                        }}
-                    />
-                    <Tooltip
-                        contentStyle={{
-                            backgroundColor: "hsl(var(--card))",
-                            border: "1px solid hsl(var(--border))",
-                            borderRadius: "8px",
-                            color: "hsl(var(--foreground))",
-                        }}
-                    />
-                    <Legend
-                        wrapperStyle={{ color: "hsl(var(--muted-foreground))", fontSize: 12 }}
-                    />
-                    {topMovements.map(([name], i) => (
-                        <Line
-                            key={name}
-                            type="monotone"
-                            dataKey={name}
-                            stroke={COLORS[i]}
-                            strokeWidth={2}
-                            dot={{ r: 4, fill: COLORS[i] }}
-                            connectNulls
+        <div className="space-y-4">
+            <div className="flex justify-end">
+                <Select value={selectedMovement} onValueChange={setSelectedMovement}>
+                    <SelectTrigger className="w-[180px] h-8 text-xs bg-muted/20 border-border/50 shadow-none">
+                        <SelectValue placeholder="Filtrar movimiento" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">Principales (Top 3)</SelectItem>
+                        {availableMovements.map(m => (
+                            <SelectItem key={m} value={m}>{m}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
+            <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                        <XAxis
+                            dataKey="date"
+                            tick={{ fill: "var(--color-muted-foreground)", fontSize: 12 }}
+                            stroke="var(--color-muted-foreground)"
                         />
-                    ))}
-                </LineChart>
-            </ResponsiveContainer>
+                        <YAxis
+                            tick={{ fill: "var(--color-muted-foreground)", fontSize: 12 }}
+                            stroke="var(--color-muted-foreground)"
+                            label={{
+                                value: "kg",
+                                angle: -90,
+                                position: "insideLeft",
+                                style: { fill: "var(--color-muted-foreground)" },
+                            }}
+                        />
+                        <Tooltip
+                            contentStyle={{
+                                backgroundColor: "var(--color-card)",
+                                border: "1px solid var(--color-border)",
+                                borderRadius: "8px",
+                                color: "var(--color-foreground)",
+                            }}
+                        />
+                        <Legend
+                            wrapperStyle={{ color: "var(--color-muted-foreground)", fontSize: 12 }}
+                        />
+                        {topMovements.map(([name], i) => (
+                            <Line
+                                key={name}
+                                type="monotone"
+                                dataKey={name}
+                                stroke={COLORS[i % COLORS.length]}
+                                strokeWidth={2}
+                                dot={{ r: 4, fill: COLORS[i % COLORS.length] }}
+                                connectNulls
+                            />
+                        ))}
+                    </LineChart>
+                </ResponsiveContainer>
+            </div>
         </div>
     );
 }

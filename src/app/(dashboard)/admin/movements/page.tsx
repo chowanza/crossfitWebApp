@@ -14,6 +14,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { MovementMediaDialog } from "@/components/movement-media-dialog";
+import { SearchInput } from "@/components/search-input";
 
 const CATEGORY_LABELS: Record<string, string> = {
     WEIGHTLIFTING: "Halterofilia",
@@ -29,7 +30,9 @@ const CATEGORY_COLORS: Record<string, string> = {
     OTHER: "border-muted-foreground/30 text-muted-foreground",
 };
 
-export default async function AdminMovementsPage() {
+export default async function AdminMovementsPage(props: { searchParams?: Promise<{ query?: string }> }) {
+    const searchParams = await props.searchParams;
+    const query = searchParams?.query || "";
     const supabase = await createClient();
     const {
         data: { user },
@@ -44,30 +47,37 @@ export default async function AdminMovementsPage() {
     const profile = profileData as Pick<Profile, "role"> | null;
     if (profile?.role !== "ADMIN" && profile?.role !== "SUPERADMIN") redirect("/");
 
-    const { data: movementsData } = await supabase
+    let req = supabase
         .from("movements")
-        .select("*")
-        .order("category")
-        .order("name");
+        .select("*");
+
+    if (query) {
+        req = req.ilike("name", `%${query}%`);
+    }
+
+    const { data: movementsData } = await req.order("category").order("name");
 
     const movements = (movementsData || []) as Movement[];
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h2 className="text-2xl font-bold">Movimientos</h2>
                     <p className="text-muted-foreground text-sm mt-1">
                         Catálogo de movimientos básicos de CrossFit.
                     </p>
                 </div>
-                <MovementForm
-                    trigger={
-                        <Button className="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white">
-                            + Nuevo
-                        </Button>
-                    }
-                />
+                <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+                    <SearchInput placeholder="Buscar ejercicio..." />
+                    <MovementForm
+                        trigger={
+                            <Button className="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white">
+                                + Nuevo
+                            </Button>
+                        }
+                    />
+                </div>
             </div>
 
             {movements.length > 0 ? (
@@ -108,15 +118,15 @@ export default async function AdminMovementsPage() {
                                     <TableCell className="text-muted-foreground text-sm max-w-xs truncate hidden md:table-cell">
                                         {movement.description}
                                     </TableCell>
-                                    <TableCell className="text-right">
-                                        <div className="flex items-center justify-end gap-2">
+                                    <TableCell className="text-right py-3">
+                                        <div className="flex items-center justify-end flex-wrap gap-1 sm:gap-2">
                                             <MovementForm
                                                 movement={movement}
                                                 trigger={
                                                     <Button
                                                         variant="ghost"
                                                         size="sm"
-                                                        className="text-muted-foreground hover:text-foreground"
+                                                        className="h-8 text-muted-foreground hover:text-foreground px-2"
                                                     >
                                                         Editar
                                                     </Button>

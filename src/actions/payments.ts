@@ -27,7 +27,16 @@ export async function registerPayment(formData: FormData) {
     const amount = parseFloat(formData.get("amount") as string);
     const period_start = formData.get("period_start") as string;
     const period_end = formData.get("period_end") as string;
-    const notes = (formData.get("notes") as string) || "";
+    
+    // Combine form data seamlessly into a descriptive string block
+    const rawNotes = (formData.get("notes") as string) || "";
+    const paymentMethod = formData.get("payment_method") as string;
+    const reference = formData.get("reference") as string;
+
+    let buildNotes = paymentMethod ? `Método: ${paymentMethod}` : "";
+    if (reference) buildNotes += ` | Ref: ${reference}`;
+    if (rawNotes) buildNotes += ` | Concepto: ${rawNotes}`;
+
     const status = (formData.get("status") as PaymentStatus) || "PAID";
 
     if (isNaN(amount) || amount <= 0) {
@@ -41,7 +50,7 @@ export async function registerPayment(formData: FormData) {
         period_start,
         period_end,
         status,
-        notes,
+        notes: buildNotes,
         registered_by: user.id,
     });
 

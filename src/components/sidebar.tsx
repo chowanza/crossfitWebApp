@@ -92,13 +92,13 @@ export function Sidebar({ fullName, role, avatarUrl }: SidebarProps) {
 
             {/* User footer */}
             <div className="p-4 space-y-4">
-                <div className="flex items-center gap-3 px-2">
+                <Link href="/profile" className="flex items-center gap-3 px-2 py-2 -mx-2 rounded-lg hover:bg-accent/50 transition-colors group">
                     {avatarUrl ? (
-                        <div className="h-10 w-10 shrink-0 rounded-full overflow-hidden border border-border">
+                        <div className="h-10 w-10 shrink-0 rounded-full overflow-hidden border border-border group-hover:border-indigo-600/30 transition-colors">
                             <img src={avatarUrl} alt={fullName} className="h-full w-full object-cover" />
                         </div>
                     ) : (
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-600/10 text-xs font-bold text-indigo-600 shadow-sm">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-600/10 text-xs font-bold text-indigo-600 shadow-sm group-hover:bg-indigo-600/20 transition-colors">
                             {fullName
                                 .split(" ")
                                 .map((n) => n[0])
@@ -108,12 +108,12 @@ export function Sidebar({ fullName, role, avatarUrl }: SidebarProps) {
                         </div>
                     )}
                     <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold truncate leading-tight">{fullName || "Usuario"}</p>
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mt-0.5">
-                            {["ADMIN", "SUPERADMIN"].includes(role) ? "Entrenador" : "Atleta"}
+                        <p className="text-sm font-semibold truncate leading-tight group-hover:text-indigo-600 transition-colors">{fullName || "Usuario"}</p>
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
+                            {role === "SUPERADMIN" ? "Superadmin" : role === "ADMIN" ? "Entrenador" : "Atleta"}
                         </p>
                     </div>
-                </div>
+                </Link>
                 <form action={logout}>
                     <Button
                         type="submit"

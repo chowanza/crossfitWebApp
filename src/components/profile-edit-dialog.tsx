@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { updateProfile } from "@/actions/profile";
 import type { Profile } from "@/lib/types/database";
 import {
@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Edit2 } from "lucide-react";
+import { Edit2, Camera, Upload } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
 
@@ -22,6 +22,68 @@ export function ProfileEditDialog({ profile }: { profile: Profile }) {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const [showWebcam, setShowWebcam] = useState(false);
+    const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+
+    // Adjuntar el stream al video cuando se renderice
+
+
+    const startCamera = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+            setMediaStream(stream);
+            setShowWebcam(true);
+        } catch (err) {
+            console.error("No se pudo acceder a la cámara:", err);
+            setError("No se pudo acceder a la cámara. Por favor, verifica los permisos de tu navegador.");
+        }
+    };
+
+    const stopCamera = () => {
+        if (mediaStream) {
+            mediaStream.getTracks().forEach(track => track.stop());
+            setMediaStream(null);
+        }
+        if (videoRef.current) {
+            videoRef.current.srcObject = null;
+        }
+        setShowWebcam(false);
+    };
+
+    useEffect(() => {
+        if (showWebcam && videoRef.current && mediaStream) {
+            videoRef.current.srcObject = mediaStream;
+        }
+    }, [showWebcam, mediaStream]);
+
+    const capturePhoto = () => {
+        if (videoRef.current && canvasRef.current) {
+            const video = videoRef.current;
+            const canvas = canvasRef.current;
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext("2d");
+            if (ctx) {
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                canvas.toBlob((blob) => {
+                    if (blob) {
+                        const file = new File([blob], "camera-photo.jpg", { type: "image/jpeg" });
+                        setAvatarFile(file);
+                        setAvatarPreview(URL.createObjectURL(blob));
+                        stopCamera();
+                    }
+                }, "image/jpeg", 0.9);
+            }
+        }
+    };
+
+    const handleOpenChange = (isOpen: boolean) => {
+        if (!isOpen) stopCamera();
+        setOpen(isOpen);
+    };
 
     const [avatarFile, setAvatarFile] = useState<File | null>(null);
     const [avatarPreview, setAvatarPreview] = useState<string | null>(profile.avatar_url || null);
@@ -85,7 +147,7 @@ export function ProfileEditDialog({ profile }: { profile: Profile }) {
     };
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
                 <Button variant="outline" size="sm" className="h-8 gap-1 border-indigo-600/30 text-indigo-600 hover:text-blue-600 hover:border-indigo-600/50 hover:bg-indigo-600/10">
                     <Edit2 className="w-3.5 h-3.5" />
@@ -101,30 +163,58 @@ export function ProfileEditDialog({ profile }: { profile: Profile }) {
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4 pt-4">
-                    {/* Avatar Upload */}
-                    <div className="flex flex-col items-center gap-4 mb-6">
-                        <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-indigo-600/20 bg-muted flex items-center justify-center">
-                            {avatarPreview ? (
-                                <img src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />
-                            ) : (
-                                <span className="text-3xl font-black text-muted-foreground/50">
-                                    {formData.full_name.charAt(0).toUpperCase()}
-                                </span>
-                            )}
+                    {showWebcam ? (
+                        <div className="flex flex-col items-center gap-4 mb-6 w-full">
+                            <div className="relative w-full max-w-[240px] aspect-square bg-black rounded-full overflow-hidden shadow-inner border-4 border-indigo-600/30">
+                                <video 
+                                    ref={videoRef} 
+                                    autoPlay 
+                                    playsInline 
+                                    className="w-full h-full object-cover scale-x-[-1]"
+                                />
+                                <canvas ref={canvasRef} className="hidden" />
+                            </div>
+                            <div className="flex gap-2 w-full justify-center">
+                                <Button type="button" variant="outline" onClick={stopCamera}>
+                                    Cancelar
+                                </Button>
+                                <Button type="button" className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md" onClick={capturePhoto}>
+                                    📸 Capturar
+                                </Button>
+                            </div>
                         </div>
-                        <div className="flex items-center justify-center w-full">
-                            <Label htmlFor="avatar-upload" className="cursor-pointer bg-muted hover:bg-muted/80 text-foreground px-4 py-2 rounded-md text-sm font-medium transition-colors border">
-                                Cambiar Foto
-                            </Label>
-                            <Input
-                                id="avatar-upload"
-                                type="file"
-                                accept="image/*"
-                                className="hidden"
-                                onChange={handleFileChange}
-                            />
+                    ) : (
+                        <div className="flex flex-col items-center gap-4 mb-6">
+                            <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-indigo-600/20 bg-muted flex items-center justify-center shrink-0">
+                                {avatarPreview ? (
+                                    <img src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />
+                                ) : (
+                                    <span className="text-3xl font-black text-muted-foreground/50">
+                                        {formData.full_name.charAt(0).toUpperCase()}
+                                    </span>
+                                )}
+                            </div>
+                            <div className="flex items-center justify-center gap-3 w-full">
+                                <Label className="cursor-pointer flex-1 max-w-[140px] bg-muted hover:bg-muted/80 text-foreground px-4 py-2 rounded-md text-sm font-medium transition-colors border flex items-center justify-center gap-2">
+                                    <Upload className="w-4 h-4" /> Galería
+                                    <Input
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={handleFileChange}
+                                    />
+                                </Label>
+                                <Button 
+                                    type="button" 
+                                    variant="outline"
+                                    onClick={startCamera}
+                                    className="flex-1 max-w-[140px] bg-indigo-50/50 hover:bg-indigo-100 text-indigo-700 px-4 py-2 rounded-md text-sm font-medium transition-colors border border-indigo-200 flex items-center justify-center gap-2 h-9"
+                                >
+                                    <Camera className="w-4 h-4" /> Cámara
+                                </Button>
+                            </div>
                         </div>
-                    </div>
+                    )}
                     <div className="space-y-2">
                         <Label htmlFor="full_name">Nombre Completo</Label>
                         <Input

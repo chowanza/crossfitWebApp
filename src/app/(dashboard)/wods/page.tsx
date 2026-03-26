@@ -5,8 +5,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { CalendarDays, ChevronRight, Dumbbell, Settings } from "lucide-react";
+import { SearchInput } from "@/components/search-input";
+import { DateInput } from "@/components/date-input";
 
-export default async function WodsPage() {
+export default async function WodsPage(props: { searchParams?: Promise<{ query?: string; date?: string }> }) {
+    const searchParams = await props.searchParams;
+    const query = searchParams?.query || "";
+    const dateQuery = searchParams?.date || "";
+
     const supabase = await createClient();
 
     const {
@@ -24,14 +30,25 @@ export default async function WodsPage() {
     }
 
     // Fetch wods con sections
-    const { data: wodsData } = await supabase
+    let queryBuilder = supabase
         .from("wods")
         .select(`
             *,
             wod_sections(section_type)
         `)
-        .order("date", { ascending: false })
-        .limit(30);
+        .order("date", { ascending: false });
+
+    if (query) {
+        queryBuilder = queryBuilder.or(`title.ilike.%${query}%,notes.ilike.%${query}%`);
+    }
+    if (dateQuery) {
+        queryBuilder = queryBuilder.eq("date", dateQuery);
+    } else if (!query) {
+        // Solo limitar si no hay filtros aplicados
+        queryBuilder = queryBuilder.limit(30);
+    }
+
+    const { data: wodsData } = await queryBuilder;
 
     const wods = (wodsData || []) as any[];
 
@@ -54,14 +71,22 @@ export default async function WodsPage() {
                         Selecciona una fecha para ver los bloques y registrar tu marca.
                     </p>
                 </div>
-                {["ADMIN", "SUPERADMIN"].includes(userRole) && (
-                    <Link href="/admin/wods">
-                        <Button variant="outline" className="shrink-0 gap-2">
-                            <Settings className="w-4 h-4" />
-                            Gestionar WODs
-                        </Button>
-                    </Link>
-                )}
+                <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto mt-4 sm:mt-0">
+                    <div className="w-full sm:w-64 shrink-0">
+                        <SearchInput placeholder="Buscar por título..." />
+                    </div>
+                    <div className="w-full sm:w-48 shrink-0">
+                        <DateInput />
+                    </div>
+                    {["ADMIN", "SUPERADMIN"].includes(userRole) && (
+                        <Link href="/admin/wods" className="w-full sm:w-auto mt-2 sm:mt-0">
+                            <Button variant="outline" className="w-full shrink-0 gap-2 border-indigo-600/30 text-indigo-700 bg-indigo-50/50 hover:bg-indigo-100">
+                                <Settings className="w-4 h-4" />
+                                <span className="sm:hidden lg:inline">Gestionar WODs</span>
+                            </Button>
+                        </Link>
+                    )}
+                </div>
             </div>
 
             {dates.length > 0 ? (

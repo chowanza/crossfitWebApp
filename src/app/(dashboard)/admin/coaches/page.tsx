@@ -7,8 +7,11 @@ import { Contact } from "lucide-react";
 import { CoachForm } from "@/components/coach-form";
 import { Button } from "@/components/ui/button";
 import { DeleteCoachButton } from "@/components/delete-coach-button";
+import { SearchInput } from "@/components/search-input";
 
-export default async function AdminCoachesPage() {
+export default async function AdminCoachesPage(props: { searchParams?: Promise<{ query?: string }> }) {
+    const searchParams = await props.searchParams;
+    const query = searchParams?.query || "";
     const supabase = await createClient();
 
     const {
@@ -31,11 +34,16 @@ export default async function AdminCoachesPage() {
     if (profile?.role !== "SUPERADMIN") redirect("/");
 
     // Obtener todos los coaches incluyendo SUPERADMINS
-    const { data: coachesData } = await supabase
+    let req = supabase
         .from("profiles")
         .select("*")
-        .in("role", ["ADMIN", "SUPERADMIN"])
-        .order("created_at", { ascending: false });
+        .in("role", ["ADMIN", "SUPERADMIN"]);
+
+    if (query) {
+        req = req.ilike("full_name", `%${query}%`);
+    }
+
+    const { data: coachesData } = await req.order("created_at", { ascending: false });
 
     const coaches = (coachesData || []) as Profile[];
 
@@ -48,14 +56,17 @@ export default async function AdminCoachesPage() {
                         Añade, edita o retira accesos al cuerpo técnico del box. {coaches.length} activos.
                     </p>
                 </div>
-                <div className="flex gap-2">
-                    <CoachForm
-                        trigger={
-                            <Button className="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white shadow-sm">
-                                + Nuevo Entrenador
-                            </Button>
-                        }
-                    />
+                <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+                    <SearchInput placeholder="Buscar entrenador..." />
+                    <div className="flex gap-2">
+                        <CoachForm
+                            trigger={
+                                <Button className="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white shadow-sm">
+                                    + Nuevo Entrenador
+                                </Button>
+                            }
+                        />
+                    </div>
                 </div>
             </div>
 
