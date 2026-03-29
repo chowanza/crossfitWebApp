@@ -1,101 +1,187 @@
-# PROYECTO WEB APP CROSSFIT PARA PASANTIA AIBBYS
-## CONVERSACIÓN CON CLIENTE
-1.	Ver el progreso de todos los atletas
-2.	Los clientes pueden registrar sus tiempos cada dia en cada wod
-3.	Poder ver sus estadísticas de mejora o declive en su perfil
-4.	Que arroje recomendaciones
-5.	El entrenador es el que hace la gestión de nuevos usuarios clientes
-6.	Que se pueda gestionar los pagos de la mensualidad notificaciones y restricción de sistema a los 3 dias de deuda
-7.	Modulo de Wods y movimientos básicos donde se puedan registrar los pesos máximos. Que el entrenador pueda preparar los wods desde la app para cada bloque de clase y pueda modificar el peso que va a utilizar cada cliente personalizadamente en los ejercicios que tienen peso. Hay un porcentaje de peso en base al tiempo que dura el ejercicio, etc. 
-8.	Se puede hacer que haya un historial de clases y en cada clase dada haya una sección de comentarios donde puedan dejar un rate y un comment
-9.	Tambien una sección de rate a la app cada mensualidad por estrellitas, con una grafica que muestre que tan influyente ha sido la app para el gym
-## STACK TECNOLÓGICO
-**Frontend/Backend:** Next.js (App Router). Es el estándar.
-**Base de Datos (SQL Online):** Supabase (PostgreSQL).
-## REQUERIMIENTOS
-## Requerimientos Funcionales (RF)
-Son las funciones directas que el sistema debe ejecutar para satisfacer las necesidades del usuario y del gimnasio.
-## Gestión de Usuarios y Perfiles
-•	**RF-01:** El sistema debe permitir al entrenador realizar el alta, baja y modificación de usuarios (atletas).
-•	**RF-02:** El sistema debe diferenciar roles de acceso: Entrenador (administrador) y Atleta (cliente).
-•	**RF-03:** Cada atleta debe tener un perfil donde se visualicen sus estadísticas personales de mejora o declive.
-## Módulo de Entrenamiento (WODs)
-•	**RF-04:** El entrenador debe poder crear y gestionar los WODs (Workout of the Day) diarios por bloques de clase.
-•	**RF-05:** El sistema debe permitir a los atletas registrar sus resultados (tiempos, rondas, repeticiones) cada día.
-•	**RF-06:** El sistema debe permitir el registro de Pesos Máximos (PRs) en movimientos básicos.
-•	**RF-07:** El entrenador debe poder modificar de forma personalizada el peso sugerido para cada cliente en los ejercicios de fuerza.
-•	**RF-08:** El sistema debe calcular recomendaciones de peso basadas en porcentajes y el tiempo de duración del ejercicio.
-## Gestión Administrativa y Pagos
-•	**RF-09:** El sistema debe gestionar el estatus de las mensualidades de los atletas.
-•	**RF-10:** El sistema debe enviar notificaciones de cobro a los usuarios.
-•	**RF-11:** El sistema debe restringir automáticamente el acceso a los atletas que presenten una deuda mayor a 3 días.
-## Feedback e Historial
-•	**RF-12:** El sistema debe mantener un historial de clases dadas.
-•	**RF-13:** Los atletas deben poder dejar un comentario y una calificación (rate) al finalizar cada clase.
-•	**RF-14:** El sistema debe solicitar una calificación mensual de la app mediante un sistema de estrellas.
-•	**RF-15:** El sistema debe generar una gráfica que muestre la influencia de la app en el gimnasio (basado en el feedback).
-## Requerimientos No Funcionales (RNF)
-Son las características de calidad, rendimiento y restricciones que aseguran que el sistema funcione correctamente.
-•	**RNF-01 (Usabilidad):** La interfaz debe ser Mobile-First, optimizada para que los atletas puedan registrar datos rápidamente entre ejercicios.
-•	**RNF-02 (Rendimiento):** El sistema debe soportar una carga mediana de usuarios (concurrencia en horas pico de clase) sin degradar el tiempo de respuesta.
-•	**RNF-03 (Disponibilidad):** La aplicación y la base de datos SQL deben estar disponibles en línea el 99.9% del tiempo.
-•	**RNF-04 (Seguridad):** El acceso a los datos debe estar protegido mediante autenticación. Un atleta no debe poder ver ni editar los registros privados de otro.
-•	**RNF-05 (Escalabilidad):** La arquitectura debe permitir el crecimiento del número de atletas y registros de historial sin necesidad de reescribir el código base.
-•	**RNF-06 (Mantenibilidad):** El código debe seguir las mejores prácticas de Next.js y estar documentado para facilitar futuras actualizaciones.
-## ROADMAP
-Este roadmap está diseñado para tener una versión usable lo antes posible.
-•	**Fase 1: El Núcleo (Semanas 1-2)**
-o	Configurar Next.js + Supabase.
-o	Crear tablas SQL: users, wods, movements, results.
-o	RF-01: Login y Registro (solo por Admin).
-o	RF-02: CRUD de WODs (El entrenador puede crear la clase de mañana).
-•	**Fase 2: La Pizarra Digital (Semanas 3-4)**
-o	RF-03: Vista del atleta para "Loguear score".
-o	RF-04: Vista del entrenador "Leaderboard" del día.
-o	RF-07: Lógica básica de pesos (guardar PRs de movimientos básicos).
-•	**Fase 3: El Negocio (Semanas 5-6)**
-o	RF-06: Integración de estado de pago (tabla payments). Middleware en Next.js que verifique si deuda == true -> redirigir a pantalla de pago.
-o	Sistema de notificaciones (Email/In-app) para cobros.
-•	**Fase 4: Data & Comunidad (Semanas 7-8)**
-o	RF-05: Gráficas con librerías como Recharts para el perfil del usuario.
-o	RF-08 & RF-09: Módulos de feedback y comentarios.
-o	RF-10: (Opcional) Algoritmo simple de recomendación.
+# IRON FIT — CrossFit Web App (Pasantía Aibbys)
+> Documento de contexto para el agente de IA. Actualizado al 28-03-2026.
 
-CONTEXTO AGENTE
-# Contexto del Proyecto: CrossFit Web App (Pasantía Aibbys)
+---
 
-## Rol del Agente
-Actúas como un Ingeniero de Software Senior experto en Next.js, TypeScript y PostgreSQL. Tu objetivo es ayudarme a construir una aplicación de gestión para un box de CrossFit escalable y robusta.
+## ROL DEL AGENTE
+Actúas como un Ingeniero de Software Senior experto en Next.js 15, TypeScript y PostgreSQL/Supabase.
+Tu objetivo es mantener y extender una aplicación de gestión para un box de CrossFit venezolano.
+Siempre genera código modular, limpio y tipado. Prioriza Server Actions sobre fetch manual.
 
-## Stack Tecnológico
-- **Framework:** Next.js 14+ (App Router).
-- **Lenguaje:** TypeScript.
-- **Base de Datos:** PostgreSQL (vía Supabase).
-- **ORM/Query:** Supabase Client (o Prisma si se especifica).
-- **Estilos:** Tailwind CSS + Shadcn/ui.
-- **Estado:** React Server Components (preferido) + Zustand (si es necesario en cliente).
+---
 
-## Reglas de Negocio Principales
-1. **Roles:** Existen dos roles estrictos: `ADMIN` (Entrenador) y `USER` (Atleta).
-2. **Regla de Deuda:** Si un usuario tiene más de 3 días de deuda (`last_payment_date`), el sistema debe bloquear el acceso a registrar WODs (Middleware).
-3. **Privacidad:** Los atletas pueden ver el WOD del día y el leaderboard, pero solo pueden editar su propio perfil y resultados.
+## STACK TECNOLÓGICO (REAL, VERIFICADO)
+| Capa | Tecnología |
+|---|---|
+| Framework | Next.js 15 (App Router) |
+| Lenguaje | TypeScript estricto |
+| Base de datos | Supabase (PostgreSQL) |
+| Estilos | Tailwind CSS v4 + Shadcn/ui |
+| Gráficas | Recharts |
+| Auth | Supabase Auth (SSR con `@supabase/ssr`) |
+| Storage | Supabase Storage (bucket `avatars`) |
+| Estado cliente | useState / useCallback (no Zustand actualmente) |
 
-## Estructura de Datos (SQL Schema Draft)
-- `profiles`: id, role, weight, height, debts_status.
-- `wods`: id, date, description, type (AMRAP, EMOM, FOR TIME).
-- `movements`: id, name, description.
-- `personal_records`: user_id, movement_id, weight_value.
-- `wod_results`: user_id, wod_id, score, comment, verified_by_coach.
-- `payments`: user_id, amount, date, status.
+---
 
-## Instrucciones de Código
-- Prioriza **Server Actions** para mutaciones de datos.
-- Mantén la UI "Mobile First" (botones grandes, inputs claros).
-- Usa tipos estrictos en TypeScript para todas las props y respuestas de DB.
-- Cuando generes código SQL, asegúrate de incluir políticas RLS (Row Level Security).
+## ESTRUCTURA DEL PROYECTO
+```
+src/
+├── actions/          # Server Actions (auth, athletes, coaches, wods, payments, prs, results, ratings, feedback, notifications, profile)
+├── app/
+│   ├── (auth)/       # login, update-password
+│   ├── (dashboard)/  # layout con Sidebar
+│   │   ├── page.tsx              # Dashboard principal (atleta e admin)
+│   │   ├── profile/              # Perfil propio del usuario
+│   │   ├── wods/                 # Feed de WODs del atleta + detalle [id]
+│   │   ├── prs/                  # Gestión de PRs del atleta
+│   │   ├── tracker/              # Workout tracker en vivo
+│   │   ├── coaches/              # Vista pública del cuerpo técnico
+│   │   ├── payment/              # Pantalla de bloqueo por mora
+│   │   └── admin/
+│   │       ├── wods/             # CRUD de WODs + builder avanzado (/builder)
+│   │       ├── athletes/         # CRUD atletas + detalle [id]
+│   │       ├── coaches/          # CRUD entrenadores (solo SUPERADMIN)
+│   │       ├── movements/        # CRUD movimientos base
+│   │       ├── payments/         # Gestión de pagos + filtros de fecha
+│   │       └── ratings/          # Dashboard de satisfacción + filtros
+│   ├── auth/callback/            # Callback de Supabase OAuth
+│   └── payment/                  # Pantalla de suspensión por deuda
+├── components/
+│   ├── charts/       # pr-progress-chart, satisfaction-chart, wod-activity-chart
+│   ├── ui/           # Shadcn primitivas
+│   └── [28 componentes]  # Ver lista abajo
+├── lib/
+│   ├── supabase/     # server, client, admin, middleware
+│   └── types/        # database.ts (tipos generados/manuales)
+└── middleware.ts     # Auth + bloqueo de deuda
+```
 
-## Objetivo Actual
-Estamos siguiendo un roadmap incremental. Revisa la solicitud actual y genera código modular y limpio.
+---
+
+## SCHEMA DE BASE DE DATOS (REAL, VERIFICADO)
+```sql
+-- Tablas activas en Supabase:
+profiles            -- id, role(SUPERADMIN|ADMIN|USER), full_name, avatar_url,
+                    -- weight_kg, height_cm, coach_schedule, last_payment_date,
+                    -- is_active, cedula, phone, birth_date, created_at, updated_at
+
+wods                -- id, title, date, notes, created_by(→profiles), created_at
+wod_sections        -- id, wod_id, section_type(AMRAP|EMOM|FOR_TIME|…), time_cap_seconds,
+                    -- description, order_index
+wod_section_movements -- id, section_id, movement_id, reps, weight_kg, notes, order_index
+
+movements           -- id, name, description, video_url, image_url, category
+personal_records    -- id, user_id, movement_id, weight_value, notes, created_at
+
+wod_results         -- id, user_id, section_id, score_value, score_type(TIME|REPS|WEIGHT|ROUNDS),
+                    -- notes, created_at
+
+payments            -- id, user_id, amount, payment_date, due_date, status(PAID|PENDING|OVERDUE),
+                    -- method, notes, created_by, created_at
+
+notifications       -- id, user_id, title, message, type, is_read, created_at
+
+class_feedback      -- id, user_id, wod_id, rating(1-5), comment, created_at
+app_ratings         -- id, user_id, rating(1-5), comment, period(YYYY-MM), created_at
+```
+
+---
+
+## ROLES Y REGLAS DE NEGOCIO
+| Rol | Acceso |
+|---|---|
+| `SUPERADMIN` | Todo + gestión de coaches (`/admin/coaches`) |
+| `ADMIN` | Gestión de atletas, WODs, pagos, movimientos, ratings |
+| `USER` | Dashboard, feed de WODs, registrar scores, PRs, perfil, feedback |
+
+**Regla de Deuda (middleware.ts):**
+- Si `last_payment_date` tiene más de **3 días** → redirigir a `/payment`
+- 1-3 días de mora → banner de aviso amarillo en dashboard (no bloquea)
+- El campo `last_payment_date` se actualiza al registrar un pago con `status = PAID`
+
+**Privacidad (RLS implícita en código):**
+- Un USER solo puede editar su propio perfil y resultados
+- Los scores de otros atletas son visibles en leaderboard (solo score, no datos personales)
+
+---
+
+## COMPONENTES CLAVE (src/components/)
+| Componente | Función |
+|---|---|
+| `athlete-form.tsx` | Crear/editar atleta (cédula, teléfono, nacimiento, credenciales, físico) |
+| `coach-form.tsx` | Crear/editar entrenador (mismos campos + horario) |
+| `wod-form.tsx` | Formulario complejo de WOD con secciones y movimientos |
+| `workout-tracker.tsx` | Tracker de WOD en tiempo real para el atleta |
+| `score-form.tsx` | Registrar score de una sección del WOD |
+| `pr-form.tsx` | Registrar un nuevo PR de movimiento |
+| `payment-form.tsx` | Registrar/editar pago (admin) |
+| `payment-actions.tsx` | Aprobar/rechazar pagos |
+| `profile-edit-dialog.tsx` | Editar perfil propio (foto, físico, cédula, teléfono, nacimiento) |
+| `notifications.tsx` | Bell de notificaciones in-app con badge |
+| `app-rating-modal.tsx` | Modal mensual para calificar la app (⭐) |
+| `class-feedback-form.tsx` | Comentario + rate al finalizar una clase |
+| `weight-recommendation.tsx` | Muestra peso sugerido según % del PR |
+| `sidebar.tsx` | Navegación lateral (roles) |
+| `search-input.tsx` | Input de búsqueda con URL params |
+| `date-filter.tsx` | Filtro de rango de fechas (URL params) |
+| `charts/` | pr-progress-chart, satisfaction-chart, wod-activity-chart |
+
+---
+
+## ESTADO REAL DE REQUERIMIENTOS
+
+### ✅ IMPLEMENTADO Y FUNCIONANDO
+| RF | Descripción | Dónde |
+|---|---|---|
+| RF-01 | Alta/baja/modificación de atletas | `/admin/athletes` + `athlete-form` |
+| RF-02 | Roles (SUPERADMIN / ADMIN / USER) | `middleware.ts` + sidebar |
+| RF-03 | Perfil con stats, PRs, historial de WODs | `/profile`, `/admin/athletes/[id]` |
+| RF-04 | CRUD WODs diarios por bloques | `/admin/wods` + `wod-form` + builder |
+| RF-05 | Registro de scores del atleta | `score-form`, `workout-tracker` |
+| RF-06 | PRs de movimientos básicos | `/prs`, `pr-form`, `pr-history-dialog` |
+| RF-09 | Gestión de mensualidades | `/admin/payments`, `payment-form` |
+| RF-10 | Notificaciones in-app | `notifications.tsx`, `actions/notifications.ts` |
+| RF-11 | Bloqueo automático >3 días de mora | `middleware.ts` + `/payment` page |
+| RF-12 | Historial de clases por atleta | `/profile` + `/admin/athletes/[id]` |
+| RF-13 | Rate y comentario por clase (class_feedback) | `class-feedback-form.tsx` |
+| RF-14 | Rating mensual de la app (app_ratings) | `app-rating-modal.tsx` |
+| RF-15 | Gráfica de satisfacción | `satisfaction-chart` + `/admin/ratings` |
+
+### ❌ PENDIENTE
+| RF | Descripción | Prioridad |
+|---|---|---|
+| RF-07 | **Pesos personalizados por atleta** — El entrenador asigna un peso diferente a cada atleta en los movimientos de cada WOD. Requiere tabla `athlete_wod_weights` y UI en el builder. | 🔴 Alta |
+| RF-08 | **Algoritmo de recomendación** — Calcular el % de peso sugerido a partir del PR del atleta y la duración del ejercicio. El componente `weight-recommendation.tsx` existe pero el cálculo es básico. | 🟡 Media |
+| — | **Ruta `/auth/signout`** — La página `/payment` usa `<form action="/auth/signout">` pero esa ruta no existe. Usar `logout()` de `actions/auth.ts` | 🔴 Alta (bug) |
+| — | **Email notifications** — Las notificaciones están en BD pero no hay envío por email. Supabase Edge Functions o Resend. | 🟢 Baja |
+
+---
+
+## INSTRUCCIONES DE CÓDIGO
+1. **Server Actions primero** — Todas las mutaciones van en `src/actions/`.
+2. **Tipos desde `src/lib/types/database.ts`** — No usar `any` si hay tipo disponible.
+3. **URL Search Params para filtros** — Ver patrón en `search-input.tsx` y `date-filter.tsx`.
+4. **Mobile-First** — Botones grandes, grids responsive, `hidden md:table-cell` para columnas opcionales.
+5. **SQL nuevo** — Crear `supabase/schema-faseX.sql` y documentar allí, no editar schemas anteriores.
+6. **RLS** — Toda tabla nueva debe definir políticas Row Level Security.
+7. **Formularios con secciones** — Ver `athlete-form.tsx` como referencia de secciones con separadores.
+8. **El sidebar** — No tocar las rutas del sidebar sin verificar que la ruta existe en `app/`.
+
+---
+
+## PRÓXIMOS PASOS RECOMENDADOS (por prioridad)
+1. **Arreglar bug `/auth/signout`** → Convertir el form de la página `/payment` en un Server Action que llame a `logout()`.
+2. **RF-07 Pesos por atleta** → Tabla `athlete_wod_weights(athlete_id, section_movement_id, weight_kg)` + UI en el detalle del WOD para que el coach asigne pesos individuales.
+3. **RF-08 Recomendación** → En el builder de WOD, al asignar un movimiento con peso, mostrar automáticamente el % del PR de cada atleta.
+
+---
+
+## CONTEXTO DEL GYM
+- **Nombre:** Iron Fit Box CrossFit
+- **País:** Venezuela (UTC-4, moneda: USD/Bolívares, cédula de identidad venezolana)
+- **Usuarios típicos:** 10-50 atletas, 1-3 entrenadores, 1 superadmin
+- **Dispositivos:** Principalmente móvil (atletas en el gym entre ejercicios)
 
 crossfitApp
 AibbysCrossfit

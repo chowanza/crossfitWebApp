@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle } from 
 import { Separator } from "@/components/ui/separator";
 import { PrProgressChart } from "@/components/charts/pr-progress-chart";
 import Link from "next/link";
-import { ArrowLeft, Activity, Trophy, Users, CalendarPlus } from "lucide-react";
+import { ArrowLeft, Activity, Trophy, Users, CalendarPlus, Phone, CreditCard, IdCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default async function AthleteProfilePage({
@@ -177,28 +177,78 @@ export default async function AthleteProfilePage({
             {/* Stats */}
             <div className="grid grid-cols-3 gap-4">
                 <Card className="border-border bg-muted/10 text-center">
-                    <CardContent className="pt-6">
+                    <CardContent className="pt-5 pb-4">
                         <p className="text-2xl font-bold text-indigo-600">{totalWods ?? 0}</p>
                         <p className="text-xs text-muted-foreground mt-1">WODs</p>
                     </CardContent>
                 </Card>
                 <Card className="border-border bg-muted/10 text-center">
-                    <CardContent className="pt-6">
+                    <CardContent className="pt-5 pb-4">
                         <p className="text-2xl font-bold text-indigo-600">{totalPrs ?? 0}</p>
                         <p className="text-xs text-muted-foreground mt-1">PRs</p>
                     </CardContent>
                 </Card>
                 <Card className="border-border bg-muted/10 text-center">
-                    <CardContent className="pt-6">
-                        <p className="text-2xl font-bold text-indigo-600">
-                            {profile.is_active ? "✓" : "✗"}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-1">
+                    <CardContent className="pt-5 pb-4">
+                        <Badge variant="outline" className={`mt-1 ${profile.is_active ? "border-green-500/30 text-green-500" : "border-red-500/30 text-red-400"}`}>
                             {profile.is_active ? "Activo" : "Inactivo"}
-                        </p>
+                        </Badge>
+                        <p className="text-xs text-muted-foreground mt-1">Estado</p>
                     </CardContent>
                 </Card>
             </div>
+
+            {/* Tarjeta de Identidad */}
+            <Card className="border-border bg-muted/10">
+                <CardContent className="pt-5 pb-5">
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                        <div>
+                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-1">
+                                <IdCard className="w-3 h-3" /> Cédula
+                            </p>
+                            <p className="font-mono text-sm font-medium">
+                                {profile.cedula || <span className="text-muted-foreground/40 italic">—</span>}
+                            </p>
+                        </div>
+                        <div>
+                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-1">
+                                <Phone className="w-3 h-3" /> Teléfono
+                            </p>
+                            {profile.phone ? (
+                                <a
+                                    href={`https://wa.me/58${profile.phone.replace(/\D/g, "").slice(-10)}`}
+                                    target="_blank" rel="noopener noreferrer"
+                                    className="text-sm font-medium text-green-600 hover:underline"
+                                >
+                                    {profile.phone}
+                                </a>
+                            ) : <p className="text-sm text-muted-foreground/40 italic">—</p>}
+                        </div>
+                        <div>
+                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Nacimiento</p>
+                            <p className="text-sm font-medium">
+                                {profile.birth_date
+                                    ? new Date(profile.birth_date + "T00:00:00").toLocaleDateString("es-VE", { day: "numeric", month: "long", year: "numeric" })
+                                    : <span className="text-muted-foreground/40 italic">—</span>}
+                            </p>
+                        </div>
+                        <div>
+                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-1">
+                                <CreditCard className="w-3 h-3" /> Estado de Pago
+                            </p>
+                            {(() => {
+                                const today = new Date();
+                                const lastPay = profile.last_payment_date ? new Date(profile.last_payment_date) : null;
+                                const diffDays = lastPay ? Math.ceil((today.getTime() - lastPay.getTime()) / (1000 * 60 * 60 * 24)) : null;
+                                if (diffDays === null) return <Badge variant="outline" className="border-gray-400/30 text-gray-400 text-xs">Sin registro</Badge>;
+                                if (diffDays > 3) return <Badge variant="outline" className="border-red-500/30 text-red-500 bg-red-500/10 text-xs">🔴 En mora ({diffDays}d)</Badge>;
+                                if (diffDays > 0) return <Badge variant="outline" className="border-yellow-500/30 text-yellow-500 bg-yellow-500/10 text-xs">🟡 Vence pronto</Badge>;
+                                return <Badge variant="outline" className="border-green-500/30 text-green-500 bg-green-500/10 text-xs">🟢 Al día</Badge>;
+                            })()}
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
 
             <Separator />
 

@@ -93,6 +93,9 @@ export function ProfileEditDialog({ profile }: { profile: Profile }) {
         weight_kg: profile.weight_kg?.toString() || "",
         height_cm: profile.height_cm?.toString() || "",
         avatar_url: profile.avatar_url || "",
+        cedula: profile.cedula || "",
+        phone: profile.phone || "",
+        birth_date: profile.birth_date || "",
     });
 
     const supabase = createClient();
@@ -223,6 +226,39 @@ export function ProfileEditDialog({ profile }: { profile: Profile }) {
                             onChange={(e) => setFormData(prev => ({ ...prev, full_name: e.target.value }))}
                             placeholder="Ej. Luis Pérez"
                             required
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-2">
+                            <Label htmlFor="cedula">Cédula</Label>
+                            <Input
+                                id="cedula"
+                                value={formData.cedula}
+                                onChange={(e) => setFormData(prev => ({ ...prev, cedula: e.target.value }))}
+                                placeholder="Ej. V-12345678"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="phone">Teléfono</Label>
+                            <Input
+                                id="phone"
+                                type="tel"
+                                value={formData.phone}
+                                onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                                placeholder="Ej. 0414-1234567"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="birth_date">Fecha de Nacimiento</Label>
+                        <Input
+                            id="birth_date"
+                            type="date"
+                            value={formData.birth_date}
+                            onChange={(e) => setFormData(prev => ({ ...prev, birth_date: e.target.value }))}
+                            className="[color-scheme:dark]"
                         />
                     </div>
 

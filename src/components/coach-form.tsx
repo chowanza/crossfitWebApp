@@ -18,7 +18,7 @@ import type { Profile } from "@/lib/types/database";
 
 interface CoachFormProps {
     trigger: React.ReactNode;
-    coach?: Pick<Profile, "id" | "full_name" | "is_active" | "weight_kg" | "height_cm" | "coach_schedule">;
+    coach?: Pick<Profile, "id" | "full_name" | "is_active" | "weight_kg" | "height_cm" | "coach_schedule" | "cedula" | "phone" | "birth_date">;
 }
 
 export function CoachForm({ trigger, coach }: CoachFormProps) {
@@ -48,7 +48,7 @@ export function CoachForm({ trigger, coach }: CoachFormProps) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>{trigger}</DialogTrigger>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>
                         {isEditing ? "Editar Entrenador" : "Nuevo Entrenador"}
@@ -60,51 +60,59 @@ export function CoachForm({ trigger, coach }: CoachFormProps) {
                     </DialogDescription>
                 </DialogHeader>
                 <form action={handleSubmit} className="space-y-4">
-                    <div className="space-y-2">
-                        <Label>Nombre completo</Label>
-                        <Input
-                            name="full_name"
-                            placeholder="Ej: Pedro Entrenador"
-                            defaultValue={coach?.full_name}
-                            required
-                        />
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4">
+
+                    {/* Sección: Identidad */}
+                    <div className="space-y-3">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border pb-1">
+                            Datos de Identidad
+                        </p>
                         <div className="space-y-2">
-                            <Label>Peso (kg)</Label>
+                            <Label>Nombre completo <span className="text-red-400">*</span></Label>
                             <Input
-                                name="weight_kg"
-                                type="number"
-                                step="0.1"
-                                placeholder="Ej: 75"
-                                defaultValue={coach?.weight_kg || ""}
+                                name="full_name"
+                                placeholder="Ej: Pedro Entrenador"
+                                defaultValue={coach?.full_name}
+                                required
                             />
                         </div>
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-2">
+                                <Label>Cédula de Identidad</Label>
+                                <Input
+                                    name="cedula"
+                                    placeholder="Ej: V-12345678"
+                                    defaultValue={coach?.cedula ?? ""}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Teléfono / WhatsApp</Label>
+                                <Input
+                                    name="phone"
+                                    type="tel"
+                                    placeholder="Ej: 0414-1234567"
+                                    defaultValue={coach?.phone ?? ""}
+                                />
+                            </div>
+                        </div>
                         <div className="space-y-2">
-                            <Label>Estatura (cm)</Label>
+                            <Label>Fecha de Nacimiento</Label>
                             <Input
-                                name="height_cm"
-                                type="number"
-                                placeholder="Ej: 175"
-                                defaultValue={coach?.height_cm || ""}
+                                name="birth_date"
+                                type="date"
+                                defaultValue={coach?.birth_date ?? ""}
+                                className="[color-scheme:dark]"
                             />
                         </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                        <Label>Horario de Clases</Label>
-                        <Input
-                            name="coach_schedule"
-                            placeholder="Ej: Lunes a Viernes 7:00 AM - 12:00 PM"
-                            defaultValue={coach?.coach_schedule || ""}
-                        />
                     </div>
 
+                    {/* Sección: Acceso (solo al crear) */}
                     {!isEditing && (
-                        <>
+                        <div className="space-y-3">
+                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border pb-1">
+                                Credenciales de Acceso
+                            </p>
                             <div className="space-y-2">
-                                <Label>Email</Label>
+                                <Label>Email <span className="text-red-400">*</span></Label>
                                 <Input
                                     name="email"
                                     type="email"
@@ -113,7 +121,7 @@ export function CoachForm({ trigger, coach }: CoachFormProps) {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label>Contraseña</Label>
+                                <Label>Contraseña <span className="text-red-400">*</span></Label>
                                 <Input
                                     name="password"
                                     type="password"
@@ -122,8 +130,61 @@ export function CoachForm({ trigger, coach }: CoachFormProps) {
                                     required
                                 />
                             </div>
-                        </>
+                        </div>
                     )}
+
+                    {isEditing && (
+                        <div className="space-y-3">
+                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border pb-1">
+                                Seguridad
+                            </p>
+                            <div className="space-y-2">
+                                <Label>Nueva Contraseña (opcional)</Label>
+                                <Input
+                                    name="password"
+                                    type="password"
+                                    placeholder="Dejar en blanco para mantener la actual"
+                                    minLength={6}
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Sección: Físico */}
+                    <div className="space-y-3">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border pb-1">
+                            Datos Físicos y Horario
+                        </p>
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-2">
+                                <Label>Peso (kg)</Label>
+                                <Input
+                                    name="weight_kg"
+                                    type="number"
+                                    step="0.1"
+                                    placeholder="Ej: 75"
+                                    defaultValue={coach?.weight_kg || ""}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Estatura (cm)</Label>
+                                <Input
+                                    name="height_cm"
+                                    type="number"
+                                    placeholder="Ej: 175"
+                                    defaultValue={coach?.height_cm || ""}
+                                />
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Horario de Clases</Label>
+                            <Input
+                                name="coach_schedule"
+                                placeholder="Ej: Lunes a Viernes 7:00 AM - 12:00 PM"
+                                defaultValue={coach?.coach_schedule || ""}
+                            />
+                        </div>
+                    </div>
 
                     {isEditing && (
                         <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/20">
@@ -162,12 +223,8 @@ export function CoachForm({ trigger, coach }: CoachFormProps) {
                             className="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white"
                         >
                             {loading
-                                ? isEditing
-                                    ? "Guardando..."
-                                    : "Creando..."
-                                : isEditing
-                                    ? "Guardar"
-                                    : "Crear Entrenador"}
+                                ? isEditing ? "Guardando..." : "Creando..."
+                                : isEditing ? "Guardar" : "Crear Entrenador"}
                         </Button>
                     </div>
                 </form>

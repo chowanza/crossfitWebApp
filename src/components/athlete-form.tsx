@@ -18,7 +18,7 @@ import type { Profile } from "@/lib/types/database";
 
 interface AthleteFormProps {
     trigger: React.ReactNode;
-    athlete?: Pick<Profile, "id" | "full_name" | "weight_kg" | "height_cm" | "is_active">;
+    athlete?: Pick<Profile, "id" | "full_name" | "weight_kg" | "height_cm" | "is_active" | "cedula" | "phone" | "birth_date">;
 }
 
 export function AthleteForm({ trigger, athlete }: AthleteFormProps) {
@@ -52,7 +52,7 @@ export function AthleteForm({ trigger, athlete }: AthleteFormProps) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>{trigger}</DialogTrigger>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>
                         {isEditing ? "Editar Atleta" : "Nuevo Atleta"}
@@ -64,20 +64,59 @@ export function AthleteForm({ trigger, athlete }: AthleteFormProps) {
                     </DialogDescription>
                 </DialogHeader>
                 <form action={handleSubmit} className="space-y-4">
-                    <div className="space-y-2">
-                        <Label>Nombre completo</Label>
-                        <Input
-                            name="full_name"
-                            placeholder="Ej: Juan Pérez"
-                            defaultValue={athlete?.full_name}
-                            required
-                        />
+
+                    {/* Sección: Identidad */}
+                    <div className="space-y-3">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border pb-1">
+                            Datos de Identidad
+                        </p>
+                        <div className="space-y-2">
+                            <Label>Nombre completo <span className="text-red-400">*</span></Label>
+                            <Input
+                                name="full_name"
+                                placeholder="Ej: Juan Pérez"
+                                defaultValue={athlete?.full_name}
+                                required
+                            />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-2">
+                                <Label>Cédula de Identidad</Label>
+                                <Input
+                                    name="cedula"
+                                    placeholder="Ej: V-12345678"
+                                    defaultValue={athlete?.cedula ?? ""}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Teléfono / WhatsApp</Label>
+                                <Input
+                                    name="phone"
+                                    type="tel"
+                                    placeholder="Ej: 0414-1234567"
+                                    defaultValue={athlete?.phone ?? ""}
+                                />
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Fecha de Nacimiento</Label>
+                            <Input
+                                name="birth_date"
+                                type="date"
+                                defaultValue={athlete?.birth_date ?? ""}
+                                className="[color-scheme:dark]"
+                            />
+                        </div>
                     </div>
 
+                    {/* Sección: Acceso (solo al crear) */}
                     {!isEditing && (
-                        <>
+                        <div className="space-y-3">
+                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border pb-1">
+                                Credenciales de Acceso
+                            </p>
                             <div className="space-y-2">
-                                <Label>Email</Label>
+                                <Label>Email <span className="text-red-400">*</span></Label>
                                 <Input
                                     name="email"
                                     type="email"
@@ -86,7 +125,7 @@ export function AthleteForm({ trigger, athlete }: AthleteFormProps) {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label>Contraseña</Label>
+                                <Label>Contraseña <span className="text-red-400">*</span></Label>
                                 <Input
                                     name="password"
                                     type="password"
@@ -95,29 +134,52 @@ export function AthleteForm({ trigger, athlete }: AthleteFormProps) {
                                     required
                                 />
                             </div>
-                        </>
+                        </div>
                     )}
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label>Peso (kg)</Label>
-                            <Input
-                                name="weight_kg"
-                                type="number"
-                                step="0.1"
-                                placeholder="Ej: 75"
-                                defaultValue={athlete?.weight_kg ?? ""}
-                            />
+                    {isEditing && (
+                        <div className="space-y-3">
+                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border pb-1">
+                                Seguridad
+                            </p>
+                            <div className="space-y-2">
+                                <Label>Nueva Contraseña (opcional)</Label>
+                                <Input
+                                    name="password"
+                                    type="password"
+                                    placeholder="Dejar en blanco para mantener la actual"
+                                    minLength={6}
+                                />
+                            </div>
                         </div>
-                        <div className="space-y-2">
-                            <Label>Altura (cm)</Label>
-                            <Input
-                                name="height_cm"
-                                type="number"
-                                step="0.1"
-                                placeholder="Ej: 175"
-                                defaultValue={athlete?.height_cm ?? ""}
-                            />
+                    )}
+
+                    {/* Sección: Físico */}
+                    <div className="space-y-3">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border pb-1">
+                            Datos Físicos
+                        </p>
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-2">
+                                <Label>Peso (kg)</Label>
+                                <Input
+                                    name="weight_kg"
+                                    type="number"
+                                    step="0.1"
+                                    placeholder="Ej: 75"
+                                    defaultValue={athlete?.weight_kg ?? ""}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Altura (cm)</Label>
+                                <Input
+                                    name="height_cm"
+                                    type="number"
+                                    step="0.1"
+                                    placeholder="Ej: 175"
+                                    defaultValue={athlete?.height_cm ?? ""}
+                                />
+                            </div>
                         </div>
                     </div>
 
@@ -158,12 +220,8 @@ export function AthleteForm({ trigger, athlete }: AthleteFormProps) {
                             className="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white"
                         >
                             {loading
-                                ? isEditing
-                                    ? "Guardando..."
-                                    : "Creando..."
-                                : isEditing
-                                    ? "Guardar"
-                                    : "Crear Atleta"}
+                                ? isEditing ? "Guardando..." : "Creando..."
+                                : isEditing ? "Guardar" : "Crear Atleta"}
                         </Button>
                     </div>
                 </form>

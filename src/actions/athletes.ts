@@ -32,6 +32,9 @@ export async function createAthlete(formData: FormData) {
     const heightCm = formData.get("height_cm")
         ? parseFloat(formData.get("height_cm") as string)
         : null;
+    const cedula = (formData.get("cedula") as string) || null;
+    const phone = (formData.get("phone") as string) || null;
+    const birthDate = (formData.get("birth_date") as string) || null;
 
     if (!email || !password || !fullName) {
         return { error: "Email, contraseña y nombre son obligatorios." };
@@ -69,6 +72,9 @@ export async function createAthlete(formData: FormData) {
             height_cm: heightCm,
             role: "USER",
             is_active: true,
+            cedula,
+            phone,
+            birth_date: birthDate,
         })
         .eq("id", newUser.user.id);
 
@@ -106,8 +112,23 @@ export async function updateAthlete(id: string, formData: FormData) {
         ? parseFloat(formData.get("height_cm") as string)
         : null;
     const isActive = formData.get("is_active") === "true";
+    const password = formData.get("password") as string;
+    const cedula = (formData.get("cedula") as string) || null;
+    const phone = (formData.get("phone") as string) || null;
+    const birthDate = (formData.get("birth_date") as string) || null;
 
     const adminClient = createAdminClient();
+
+    if (password) {
+        if (password.length < 6) {
+            return { error: "La contraseña debe tener al menos 6 caracteres." };
+        }
+        const { error: authError } = await adminClient.auth.admin.updateUserById(id, {
+            password,
+        });
+        if (authError) return { error: `Error al actualizar contraseña: ${authError.message}` };
+    }
+
     const { error } = await adminClient
         .from("profiles")
         .update({
@@ -115,6 +136,9 @@ export async function updateAthlete(id: string, formData: FormData) {
             weight_kg: weightKg,
             height_cm: heightCm,
             is_active: isActive,
+            cedula,
+            phone,
+            birth_date: birthDate,
         })
         .eq("id", id);
 

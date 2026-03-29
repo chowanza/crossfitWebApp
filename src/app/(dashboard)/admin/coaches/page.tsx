@@ -40,7 +40,7 @@ export default async function AdminCoachesPage(props: { searchParams?: Promise<{
         .in("role", ["ADMIN", "SUPERADMIN"]);
 
     if (query) {
-        req = req.ilike("full_name", `%${query}%`);
+        req = req.or(`full_name.ilike.%${query}%,cedula.ilike.%${query}%`);
     }
 
     const { data: coachesData } = await req.order("created_at", { ascending: false });
@@ -76,7 +76,8 @@ export default async function AdminCoachesPage(props: { searchParams?: Promise<{
                         <thead className="bg-muted/50 text-muted-foreground text-xs uppercase font-medium border-b border-border">
                             <tr>
                                 <th className="px-4 py-3 sm:px-6 sm:py-4">Nombre</th>
-                                <th className="px-4 py-3 sm:px-6 sm:py-4 hidden md:table-cell">Métricas</th>
+                                <th className="px-4 py-3 sm:px-6 sm:py-4 hidden md:table-cell">Cédula</th>
+                                <th className="px-4 py-3 sm:px-6 sm:py-4 hidden md:table-cell">Teléfono</th>
                                 <th className="px-4 py-3 sm:px-6 sm:py-4 hidden lg:table-cell">Horario</th>
                                 <th className="px-4 py-3 sm:px-6 sm:py-4 hidden sm:table-cell">Estado</th>
                                 <th className="px-4 py-3 sm:px-6 sm:py-4 text-right">Acciones</th>
@@ -85,7 +86,7 @@ export default async function AdminCoachesPage(props: { searchParams?: Promise<{
                         <tbody className="divide-y divide-border">
                             {coaches.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">
+                                    <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">
                                         No se encontraron entrenadores.
                                     </td>
                                 </tr>
@@ -106,8 +107,15 @@ export default async function AdminCoachesPage(props: { searchParams?: Promise<{
                                                 </Link>
                                             </div>
                                         </td>
+                                        <td className="px-4 py-3 sm:px-6 sm:py-4 hidden md:table-cell text-xs text-muted-foreground font-mono">
+                                            {coach.cedula || <span className="italic text-muted-foreground/40">Sin cédula</span>}
+                                        </td>
                                         <td className="px-4 py-3 sm:px-6 sm:py-4 hidden md:table-cell text-xs text-muted-foreground">
-                                            {coach.height_cm ? `${coach.height_cm} cm` : "-"} / {coach.weight_kg ? `${coach.weight_kg} kg` : "-"}
+                                            {coach.phone ? (
+                                                <a href={`https://wa.me/58${coach.phone.replace(/\D/g, "").slice(-10)}`} target="_blank" rel="noopener noreferrer" className="hover:text-green-500 transition-colors">
+                                                    {coach.phone}
+                                                </a>
+                                            ) : "—"}
                                         </td>
                                         <td className="px-4 py-3 sm:px-6 sm:py-4 hidden lg:table-cell text-xs">
                                             {coach.coach_schedule ? (

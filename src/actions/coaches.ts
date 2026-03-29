@@ -29,6 +29,9 @@ export async function createCoach(formData: FormData) {
     const weightKg = formData.get("weight_kg") ? parseFloat(formData.get("weight_kg") as string) : null;
     const heightCm = formData.get("height_cm") ? parseFloat(formData.get("height_cm") as string) : null;
     const coachSchedule = formData.get("coach_schedule") as string || null;
+    const cedula = (formData.get("cedula") as string) || null;
+    const phone = (formData.get("phone") as string) || null;
+    const birthDate = (formData.get("birth_date") as string) || null;
 
     if (!email || !password || !fullName) {
         return { error: "Email, contraseña y nombre son obligatorios." };
@@ -67,6 +70,9 @@ export async function createCoach(formData: FormData) {
             coach_schedule: coachSchedule,
             role: "ADMIN",
             is_active: true,
+            cedula,
+            phone,
+            birth_date: birthDate,
         })
         .eq("id", newUser.user.id);
 
@@ -102,8 +108,23 @@ export async function updateCoach(id: string, formData: FormData) {
     const heightCm = formData.get("height_cm") ? parseFloat(formData.get("height_cm") as string) : null;
     const isActive = formData.get("is_active") === "true";
     const coachSchedule = formData.get("coach_schedule") as string || null;
+    const password = formData.get("password") as string;
+    const cedula = (formData.get("cedula") as string) || null;
+    const phone = (formData.get("phone") as string) || null;
+    const birthDate = (formData.get("birth_date") as string) || null;
 
     const adminClient = createAdminClient();
+
+    if (password) {
+        if (password.length < 6) {
+            return { error: "La contraseña debe tener al menos 6 caracteres." };
+        }
+        const { error: authError } = await adminClient.auth.admin.updateUserById(id, {
+            password,
+        });
+        if (authError) return { error: `Error al actualizar contraseña: ${authError.message}` };
+    }
+
     const { error } = await adminClient
         .from("profiles")
         .update({
@@ -112,6 +133,9 @@ export async function updateCoach(id: string, formData: FormData) {
             height_cm: heightCm,
             coach_schedule: coachSchedule,
             is_active: isActive,
+            cedula,
+            phone,
+            birth_date: birthDate,
         })
         .eq("id", id);
 

@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle } from 
 import { Separator } from "@/components/ui/separator";
 import { PrProgressChart } from "@/components/charts/pr-progress-chart";
 import { ProfileEditDialog } from "@/components/profile-edit-dialog";
-import { Activity, Trophy, Users, CalendarPlus } from "lucide-react";
+import { Activity, Trophy, Users, CalendarPlus, Phone, CreditCard, IdCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
@@ -152,15 +152,53 @@ export default async function ProfilePage() {
                 </Card>
                 <Card className="border-border bg-muted/10 text-center">
                     <CardContent className="pt-6">
-                        <p className="text-2xl font-bold text-indigo-600">
-                            {profile.is_active ? "✓" : "✗"}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-1">
+                        <Badge variant="outline" className={profile.is_active ? "border-green-500/30 text-green-500" : "border-red-500/30 text-red-400"}>
                             {profile.is_active ? "Activo" : "Inactivo"}
-                        </p>
+                        </Badge>
+                        <p className="text-xs text-muted-foreground mt-1">Cuenta</p>
                     </CardContent>
                 </Card>
             </div>
+
+            {/* Tarjeta de Identidad */}
+            <Card className="border-border bg-muted/10">
+                <CardContent className="pt-5 pb-5">
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                        <div>
+                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-1">
+                                <IdCard className="w-3 h-3" /> Cédula
+                            </p>
+                            <p className="font-mono text-sm font-medium">
+                                {profile.cedula || <span className="text-muted-foreground/40 italic">—</span>}
+                            </p>
+                        </div>
+                        <div>
+                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-1">
+                                <Phone className="w-3 h-3" /> Teléfono
+                            </p>
+                            <p className="text-sm font-medium">
+                                {profile.phone || <span className="text-muted-foreground/40 italic">—</span>}
+                            </p>
+                        </div>
+                        <div>
+                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Nacimiento</p>
+                            <p className="text-sm font-medium">
+                                {profile.birth_date
+                                    ? new Date(profile.birth_date + "T00:00:00").toLocaleDateString("es-VE", { day: "numeric", month: "long", year: "numeric" })
+                                    : <span className="text-muted-foreground/40 italic">—</span>}
+                            </p>
+                        </div>
+                        <div>
+                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-1">
+                                <CreditCard className="w-3 h-3" /> Pago Siguiente
+                            </p>
+                            <p className="text-sm font-medium">
+                                {profile.last_payment_date || <span className="text-muted-foreground/40 italic">Sin registro</span>}
+                            </p>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
 
             <Separator />
 

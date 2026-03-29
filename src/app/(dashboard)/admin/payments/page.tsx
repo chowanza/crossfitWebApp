@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CreditCard } from "lucide-react";
 import { SearchInput } from "@/components/search-input";
+import { DateFilter } from "@/components/date-filter";
 import {
     Table,
     TableBody,
@@ -28,9 +29,9 @@ export const revalidate = 0;
 export default async function AdminPaymentsPage({
     searchParams,
 }: {
-    searchParams: Promise<{ filter?: string; query?: string }>;
+    searchParams: Promise<{ filter?: string; query?: string; dateFrom?: string; dateTo?: string }>;
 }) {
-    const { filter, query } = await searchParams;
+    const { filter, query, dateFrom, dateTo } = await searchParams;
     const supabase = await createClient();
     const {
         data: { user },
@@ -71,6 +72,14 @@ export default async function AdminPaymentsPage({
         dbQuery = dbQuery.eq("status", "PAID");
     } else if (filter === "pending") {
         dbQuery = dbQuery.eq("status", "PENDING");
+    }
+
+    if (dateFrom) {
+        dbQuery = dbQuery.gte("payment_date", dateFrom);
+    }
+
+    if (dateTo) {
+        dbQuery = dbQuery.lte("payment_date", dateTo);
     }
 
     if (query) {
@@ -145,28 +154,33 @@ export default async function AdminPaymentsPage({
             </div>
 
             {/* Filtros */}
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-                <div className="flex gap-2 flex-wrap">
-                    {[
-                        { value: "all", label: "Todos" },
-                        { value: "overdue", label: "Vencidos" },
-                        { value: "pending", label: "Pendientes" },
-                        { value: "paid", label: "Pagados" },
-                    ].map((f) => (
-                        <a
-                            key={f.value}
-                            href={f.value === "all" ? "/admin/payments" : `/admin/payments?filter=${f.value}`}
-                            className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors border shadow-sm ${currentFilter === f.value
-                                ? "bg-indigo-600/10 text-indigo-600 border-indigo-600/30"
-                                : "text-muted-foreground hover:bg-muted hover:text-foreground bg-card"
-                                }`}
-                        >
-                            {f.label}
-                        </a>
-                    ))}
+            <div className="flex flex-col gap-3">
+                <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+                    <div className="flex gap-2 flex-wrap">
+                        {[
+                            { value: "all", label: "Todos" },
+                            { value: "overdue", label: "Vencidos" },
+                            { value: "pending", label: "Pendientes" },
+                            { value: "paid", label: "Pagados" },
+                        ].map((f) => (
+                            <a
+                                key={f.value}
+                                href={f.value === "all" ? "/admin/payments" : `/admin/payments?filter=${f.value}`}
+                                className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors border shadow-sm ${currentFilter === f.value
+                                    ? "bg-indigo-600/10 text-indigo-600 border-indigo-600/30"
+                                    : "text-muted-foreground hover:bg-muted hover:text-foreground bg-card"
+                                    }`}
+                            >
+                                {f.label}
+                            </a>
+                        ))}
+                    </div>
+                    <div className="w-full sm:w-auto">
+                        <SearchInput placeholder="Buscar atleta..." />
+                    </div>
                 </div>
-                <div className="w-full sm:w-auto">
-                    <SearchInput placeholder="Buscar atleta..." />
+                <div className="flex items-center gap-2 p-3 rounded-lg border border-border/50 bg-muted/5">
+                    <DateFilter />
                 </div>
             </div>
 

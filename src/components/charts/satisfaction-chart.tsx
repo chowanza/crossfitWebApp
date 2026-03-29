@@ -35,24 +35,24 @@ export function SatisfactionChart({ data }: SatisfactionChartProps) {
         <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={data}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
                     <XAxis
                         dataKey="period"
-                        tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
-                        stroke="hsl(var(--muted-foreground))"
+                        tick={{ fill: "var(--color-muted-foreground)", fontSize: 11 }}
+                        stroke="var(--color-muted-foreground)"
                     />
                     <YAxis
                         domain={[0, 5]}
                         ticks={[1, 2, 3, 4, 5]}
-                        tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
-                        stroke="hsl(var(--muted-foreground))"
+                        tick={{ fill: "var(--color-muted-foreground)", fontSize: 11 }}
+                        stroke="var(--color-muted-foreground)"
                     />
                     <Tooltip
                         contentStyle={{
-                            backgroundColor: "hsl(var(--card))",
-                            border: "1px solid hsl(var(--border))",
+                            backgroundColor: "var(--color-card)",
+                            border: "1px solid var(--color-border)",
                             borderRadius: "8px",
-                            color: "hsl(var(--foreground))",
+                            color: "var(--color-foreground)",
                         }}
                         formatter={(value) => {
                             const v = Number(value);

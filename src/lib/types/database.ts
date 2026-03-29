@@ -30,6 +30,9 @@ export interface Database {
                     coach_schedule: string | null;
                     last_payment_date: string | null;
                     is_active: boolean;
+                    cedula: string | null;
+                    phone: string | null;
+                    birth_date: string | null;
                     created_at: string;
                     updated_at: string;
                 };
@@ -43,6 +46,9 @@ export interface Database {
                     coach_schedule?: string | null;
                     last_payment_date?: string | null;
                     is_active?: boolean;
+                    cedula?: string | null;
+                    phone?: string | null;
+                    birth_date?: string | null;
                     created_at?: string;
                     updated_at?: string;
                 };
@@ -56,6 +62,9 @@ export interface Database {
                     coach_schedule?: string | null;
                     last_payment_date?: string | null;
                     is_active?: boolean;
+                    cedula?: string | null;
+                    phone?: string | null;
+                    birth_date?: string | null;
                     created_at?: string;
                     updated_at?: string;
                 };

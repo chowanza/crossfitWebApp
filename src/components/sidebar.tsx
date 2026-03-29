@@ -37,7 +37,7 @@ const NAV_ITEMS = [
     { href: "/admin/payments", label: "Pagos", icon: CreditCard, roles: ["ADMIN", "SUPERADMIN"] as UserRole[] },
     { href: "/admin/athletes", label: "Atletas", icon: Users, roles: ["ADMIN", "SUPERADMIN"] as UserRole[] },
     { href: "/admin/ratings", label: "Satisfacción", icon: LineChart, roles: ["ADMIN", "SUPERADMIN"] as UserRole[] },
-    { href: "/admin/coaches", label: "Gest. Coaches", icon: Contact, roles: ["SUPERADMIN"] as UserRole[] },
+    { href: "/admin/coaches", label: "Gestión Coaches", icon: Contact, roles: ["SUPERADMIN"] as UserRole[] },
 ];
 
 export function Sidebar({ fullName, role, avatarUrl }: SidebarProps) {

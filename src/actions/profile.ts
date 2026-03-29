@@ -8,6 +8,9 @@ export async function updateProfile(formData: {
     weight_kg: string;
     height_cm: string;
     avatar_url?: string;
+    cedula?: string;
+    phone?: string;
+    birth_date?: string;
 }) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -16,10 +19,13 @@ export async function updateProfile(formData: {
         return { error: "No autorizado." };
     }
 
-    const updateData: any = {
+    const updateData: Record<string, unknown> = {
         full_name: formData.full_name,
         weight_kg: formData.weight_kg ? parseFloat(formData.weight_kg) : null,
         height_cm: formData.height_cm ? parseFloat(formData.height_cm) : null,
+        cedula: formData.cedula || null,
+        phone: formData.phone || null,
+        birth_date: formData.birth_date || null,
     };
 
     if (formData.avatar_url !== undefined) {

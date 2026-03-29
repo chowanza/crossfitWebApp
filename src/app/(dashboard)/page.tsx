@@ -32,8 +32,25 @@ export default async function DashboardPage() {
     const isAdmin = ["ADMIN", "SUPERADMIN"].includes(profile?.role || "");
     const firstName = profile?.full_name?.split(" ")[0] || "Atleta";
 
+    // Saludo dinámico según hora del día
+    const hour = new Date().getUTCHours() - 4; // Hora Venezuela (UTC-4)
+    const greeting =
+        hour >= 5 && hour < 12 ? "Buenos días" :
+        hour >= 12 && hour < 18 ? "Buenas tardes" :
+        "Buenas noches";
+
+    // Badge de estado de pago dinámico
+    const lastPay = profile?.last_payment_date ? new Date(profile.last_payment_date) : null;
+    const today = new Date();
+    const payDiffDays = lastPay ? Math.ceil((today.getTime() - lastPay.getTime()) / (1000 * 60 * 60 * 24)) : null;
+    const payBadge =
+        payDiffDays === null ? { label: "Activo", color: "text-green-500", bg: "bg-green-500/10", border: "border-green-500/20", dot: "bg-green-500" } :
+        payDiffDays > 3   ? { label: "En mora", color: "text-red-500", bg: "bg-red-500/10", border: "border-red-500/20", dot: "bg-red-500" } :
+        payDiffDays > 0   ? { label: "Vence pronto", color: "text-yellow-500", bg: "bg-yellow-500/10", border: "border-yellow-500/20", dot: "bg-yellow-500" } :
+        { label: "Al día", color: "text-green-500", bg: "bg-green-500/10", border: "border-green-500/20", dot: "bg-green-500" };
+
     // WOD Feed (Instagram Style)
-    const today = new Date().toISOString().split("T")[0];
+    const todayStr = new Date().toISOString().split("T")[0];
     const { data: feedWodsData } = await supabase
         .from("wods")
         .select(`
@@ -212,35 +229,30 @@ export default async function DashboardPage() {
             <div className="flex items-center justify-between">
                 <div>
                     <h2 className="text-2xl font-bold tracking-tight">
-                        Hola, <span className="text-indigo-600">{firstName}</span> 👋
+                        {greeting}, <span className="text-indigo-600">{firstName}</span> 👋
                     </h2>
                     <p className="text-muted-foreground text-sm">
-                        ¿Qué entrenamos hoy?
+                        Tu progreso de hoy en Iron Fit.
                     </p>
                 </div>
-                <div className="flex items-center gap-2 bg-green-500/10 px-3 py-1.5 rounded-full border border-green-500/20">
-                    <div className="w-2 h-2 rounded-full bg-green-500" />
-                    <span className="text-[10px] font-semibold text-green-500">Activo</span>
+                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${payBadge.bg} ${payBadge.border}`}>
+                    <div className={`w-2 h-2 rounded-full ${payBadge.dot}`} />
+                    <span className={`text-[10px] font-semibold ${payBadge.color}`}>{payBadge.label}</span>
                 </div>
             </div>
+            {/* Banner de aviso de pago (solo si vence pronto: 1-3 días) */}
+            {payDiffDays !== null && payDiffDays > 0 && payDiffDays <= 3 && (
+                <div className="flex items-start gap-3 rounded-lg border border-yellow-500/30 bg-yellow-500/5 px-4 py-3">
+                    <span className="text-lg mt-0.5">⚠️</span>
+                    <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-yellow-600">Tu mensualidad vence pronto</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                            Tienes {payDiffDays} {payDiffDays === 1 ? "día" : "días"} de mora. Contáctate con tu entrenador para evitar la suspensión.
+                        </p>
+                    </div>
+                </div>
+            )}
 
-            {/* Horizontal Categories */}
-            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none snap-x -mx-4 px-4 md:mx-0 md:px-0">
-                <div className="snap-start shrink-0 w-32 h-24 rounded-2xl bg-gradient-to-br from-indigo-600/10 to-background border flex flex-col justify-end p-3 relative overflow-hidden group cursor-pointer hover:border-indigo-600/50 transition-colors">
-                    <Dumbbell className="absolute top-2 right-2 w-10 h-10 text-indigo-600/20 group-hover:scale-110 transition-transform" />
-                    <span className="font-bold text-sm tracking-tight text-foreground/90">CrossFit<br />Diario</span>
-                </div>
-                <div className="snap-start shrink-0 w-32 h-24 rounded-2xl bg-muted/20 border flex flex-col justify-end p-3 relative overflow-hidden group cursor-pointer hover:border-border/80 transition-colors">
-                    <Activity className="absolute top-2 right-2 w-10 h-10 text-muted-foreground/20 group-hover:scale-110 transition-transform" />
-                    <span className="font-bold text-sm tracking-tight text-foreground/90">Open<br />Box</span>
-                </div>
-                <div className="snap-start shrink-0 w-32 h-24 rounded-2xl bg-muted/20 border flex flex-col justify-end p-3 relative overflow-hidden group cursor-pointer hover:border-border/80 transition-colors">
-                    <Trophy className="absolute top-2 right-2 w-10 h-10 text-muted-foreground/20 group-hover:scale-110 transition-transform" />
-                    <span className="font-bold text-sm tracking-tight text-foreground/90">Fuerza<br />Extra</span>
-                </div>
-            </div>
-
-            {/* WOD Feed (Instagram Style) */}
             <div>
                 <div className="flex items-center justify-between mb-3 mt-4">
                     <h3 className="text-lg font-bold">Últimos Entrenamientos</h3>
@@ -267,8 +279,8 @@ export default async function DashboardPage() {
                                                     {displayDate}
                                                 </p>
                                             </div>
-                                            <Badge className={wod.date === today ? "bg-indigo-600/10 text-indigo-600 hover:bg-indigo-600/20 border-0 uppercase font-bold" : "bg-muted text-muted-foreground hover:bg-muted/80 border-0 uppercase font-bold"}>
-                                                {wod.date === today ? "Hoy" : "Completado"}
+                                            <Badge className={wod.date === todayStr ? "bg-indigo-600/10 text-indigo-600 hover:bg-indigo-600/20 border-0 uppercase font-bold" : "bg-muted text-muted-foreground hover:bg-muted/80 border-0 uppercase font-bold"}>
+                                                {wod.date === todayStr ? "Hoy" : "Completado"}
                                             </Badge>
                                         </div>
                                         <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground font-medium">

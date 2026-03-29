@@ -42,7 +42,7 @@ export default async function AdminAthletesPage(props: { searchParams?: Promise<
         .eq("role", "USER");
 
     if (query) {
-        req = req.ilike("full_name", `%${query}%`);
+        req = req.or(`full_name.ilike.%${query}%,cedula.ilike.%${query}%`);
     }
 
     const { data: athletesData } = await req.order("full_name");
@@ -84,9 +84,9 @@ export default async function AdminAthletesPage(props: { searchParams?: Promise<
                         <TableHeader>
                             <TableRow className="hover:bg-transparent">
                                 <TableHead>Nombre</TableHead>
-                                <TableHead>Peso</TableHead>
-                                <TableHead>Altura</TableHead>
-                                <TableHead>Pago Siguiente</TableHead>
+                                <TableHead>Cédula</TableHead>
+                                <TableHead>Teléfono</TableHead>
+                                <TableHead className="hidden lg:table-cell">Pago Siguiente</TableHead>
                                 <TableHead>Estado</TableHead>
                                 <TableHead className="text-right">Acciones</TableHead>
                             </TableRow>
@@ -109,13 +109,17 @@ export default async function AdminAthletesPage(props: { searchParams?: Promise<
                                             </span>
                                         </Link>
                                     </TableCell>
-                                    <TableCell className="text-muted-foreground">
-                                        {athlete.weight_kg ? `${athlete.weight_kg} kg` : "—"}
-                                    </TableCell>
-                                    <TableCell className="text-muted-foreground">
-                                        {athlete.height_cm ? `${athlete.height_cm} cm` : "—"}
+                                    <TableCell className="text-muted-foreground font-mono text-sm">
+                                        {athlete.cedula || <span className="text-muted-foreground/40 italic">Sin cédula</span>}
                                     </TableCell>
                                     <TableCell className="text-muted-foreground text-sm">
+                                        {athlete.phone ? (
+                                            <a href={`https://wa.me/58${athlete.phone.replace(/\D/g, "").slice(-10)}`} target="_blank" rel="noopener noreferrer" className="hover:text-green-500 transition-colors flex items-center gap-1">
+                                                {athlete.phone}
+                                            </a>
+                                        ) : "—"}
+                                    </TableCell>
+                                    <TableCell className="text-muted-foreground text-sm hidden lg:table-cell">
                                         {athlete.last_payment_date ?? "—"}
                                     </TableCell>
                                     <TableCell>
