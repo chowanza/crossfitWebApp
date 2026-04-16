@@ -5,7 +5,9 @@ import { updatePassword } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { KeyRound } from "lucide-react";
+import { KeyRound, ShieldCheck } from "lucide-react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 import {
     Card,
     CardContent,
@@ -15,18 +17,17 @@ import {
 } from "@/components/ui/card";
 
 export default function UpdatePasswordPage() {
-    const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const router = useRouter();
 
     async function handleSubmit(formData: FormData) {
         setLoading(true);
-        setError(null);
         
         const password = formData.get("password") as string;
         const confirmStr = formData.get("confirmPassword") as string;
         
         if (password !== confirmStr) {
-            setError("Las contraseñas no coinciden.");
+            toast.error("Las contraseñas no coinciden.");
             setLoading(false);
             return;
         }
@@ -34,31 +35,42 @@ export default function UpdatePasswordPage() {
         const result = await updatePassword(formData);
         
         if (result?.error) {
-            setError(result.error);
+            toast.error(result.error);
             setLoading(false);
+        } else {
+            toast.success("¡Contraseña actualizada con éxito!");
+            router.push("/");
         }
-        // If success, the action calls redirect("/") automatically
     }
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-background">
-            <div className="w-full max-w-md px-4">
-                <Card>
-                    <CardHeader className="text-center space-y-2">
-                        <div className="mx-auto mb-2 flex h-16 w-16 items-center justify-center bg-indigo-600/10 rounded-full">
-                            <KeyRound className="h-8 w-8 text-indigo-600" />
+        <div className="flex min-h-screen items-center justify-center p-4 bg-background relative overflow-hidden">
+            {/* Background Blobs */}
+            <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-[120px] pointer-events-none" />
+
+            <div className="w-full max-w-md relative z-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <Card className="border-border shadow-2xl bg-card/60 backdrop-blur-xl">
+                    <CardHeader className="text-center space-y-3 pb-6">
+                        <div className="relative mb-2">
+                            <div className="absolute inset-0 bg-indigo-500/20 rounded-full blur-xl animate-pulse" />
+                            <div className="mx-auto bg-gradient-to-tr from-indigo-500/20 to-violet-500/10 p-4 rounded-full relative border border-indigo-500/30 shadow-inner w-16 h-16 flex items-center justify-center">
+                                <KeyRound className="h-8 w-8 text-indigo-400" />
+                            </div>
                         </div>
-                        <CardTitle className="text-2xl font-bold">
-                            Nueva contraseña
-                        </CardTitle>
-                        <CardDescription>
-                            Crea una nueva contraseña segura para tu cuenta.
-                        </CardDescription>
+                        <div className="pt-2">
+                            <CardTitle className="text-3xl font-black tracking-tight">
+                                Nueva Contraseña
+                            </CardTitle>
+                            <CardDescription className="text-base mt-2 text-muted-foreground">
+                                Crea una clave segura. Evita usar la misma contraseña de otros sitios.
+                            </CardDescription>
+                        </div>
                     </CardHeader>
                     <CardContent>
-                        <form action={handleSubmit} className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="password">Nueva contraseña</Label>
+                        <form action={handleSubmit} className="space-y-6">
+                            <div className="space-y-2 text-left">
+                                <Label htmlFor="password" className="text-sm font-semibold text-foreground/80">Nueva contraseña</Label>
                                 <Input
                                     id="password"
                                     name="password"
@@ -66,11 +78,12 @@ export default function UpdatePasswordPage() {
                                     placeholder="••••••••"
                                     minLength={6}
                                     required
+                                    className="h-12 bg-background/50 border-border/50 focus:border-indigo-500 focus:ring-indigo-500/20 transition-all px-4 text-md font-mono tracking-widest"
                                 />
                             </div>
                             
-                            <div className="space-y-2">
-                                <Label htmlFor="confirmPassword">Confirmar contraseña</Label>
+                            <div className="space-y-2 text-left">
+                                <Label htmlFor="confirmPassword" className="text-sm font-semibold text-foreground/80">Confirmar contraseña</Label>
                                 <Input
                                     id="confirmPassword"
                                     name="confirmPassword"
@@ -78,21 +91,25 @@ export default function UpdatePasswordPage() {
                                     placeholder="••••••••"
                                     minLength={6}
                                     required
+                                    className="h-12 bg-background/50 border-border/50 focus:border-indigo-500 focus:ring-indigo-500/20 transition-all px-4 text-md font-mono tracking-widest"
                                 />
                             </div>
 
-                            {error && (
-                                <div className="rounded-md bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400 text-center">
-                                    {error}
-                                </div>
-                            )}
-
                             <Button
                                 type="submit"
-                                isLoading={loading}
-                                className="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold h-11 mt-2"
+                                disabled={loading}
+                                className="w-full h-12 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-md shadow-lg shadow-indigo-500/25 transition-all group overflow-hidden relative"
                             >
-                                {loading ? "Guardando..." : "Actualizar contraseña"}
+                                <span className="relative z-10 flex items-center justify-center gap-2">
+                                    {loading ? (
+                                        "Guardando..."
+                                    ) : (
+                                        <>
+                                            Guardar y continuar
+                                            <ShieldCheck className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                        </>
+                                    )}
+                                </span>
                             </Button>
                         </form>
                     </CardContent>

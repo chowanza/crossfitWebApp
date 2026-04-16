@@ -104,5 +104,5 @@ export async function updatePassword(formData: FormData) {
         return { error: error.message };
     }
 
-    redirect("/");
+    return { success: true };
 }
