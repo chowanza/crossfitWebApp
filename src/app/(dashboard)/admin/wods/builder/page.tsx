@@ -20,6 +20,7 @@ import { createWod } from "@/actions/wods";
 import type { SectionType } from "@/lib/types/database";
 import type { WodDraft, WodSectionDraft, WodMovementDraft } from "@/lib/types/wod-builder";
 import { createClient } from "@/lib/supabase/client";
+import { AthleteWeightDialog } from "@/components/athlete-weight-dialog";
 
 // DB Models
 interface Movement {
@@ -42,6 +43,7 @@ export default function AdminWodBuilder() {
 
     // Global Dependencies
     const [movementsDB, setMovementsDB] = useState<Movement[]>([]);
+    const [athletesDB, setAthletesDB] = useState<{id: string, full_name: string}[]>([]);
 
     // Core Form State
     const [draft, setDraft] = useState<WodDraft>({
@@ -56,11 +58,14 @@ export default function AdminWodBuilder() {
 
     // Fetch catalog on mount
     useEffect(() => {
-        async function loadMovements() {
+        async function loadData() {
             const { data } = await supabase.from("movements").select("id, name").order("name");
             if (data) setMovementsDB(data);
+
+            const { data: ath } = await supabase.from("profiles").select("id, full_name").eq("role", "USER").order("full_name");
+            if (ath) setAthletesDB(ath);
         }
-        loadMovements();
+        loadData();
     }, []);
 
     // ===== MUTATORS =====
@@ -156,6 +161,7 @@ export default function AdminWodBuilder() {
                     weight_kg: typeof m.weight_kg === "string" ? parseFloat(m.weight_kg) || null : m.weight_kg || null,
                     notes: "",
                     order_index: m.order_index,
+                    athlete_weights: m.athlete_weights || [],
                 }))
             }))
         };
@@ -287,17 +293,17 @@ export default function AdminWodBuilder() {
                                     No hay ejercicios en este bloque.
                                 </p>
                             ) : (
-                                <div className="grid grid-cols-[auto_1fr_80px_80px_auto] gap-3 items-center text-xs font-semibold text-muted-foreground px-2 mb-2">
+                                <div className="grid grid-cols-[auto_1fr_80px_110px_auto] gap-3 items-center text-xs font-semibold text-muted-foreground px-2 mb-2">
                                     <div></div>
                                     <div>EJERCICIO</div>
                                     <div className="text-center">REPS/SEC</div>
-                                    <div className="text-center">PESO (kg)</div>
+                                    <div className="text-center pl-2">PESO (kg)</div>
                                     <div></div>
                                 </div>
                             )}
 
                             {section.movements.map((mov, mIdx) => (
-                                <div key={mov.id} className="grid grid-cols-[auto_1fr_80px_80px_auto] gap-3 items-center group bg-background p-2 rounded-lg border border-border hover:border-indigo-600/30 transition-colors">
+                                <div key={mov.id} className="grid grid-cols-[auto_1fr_80px_110px_auto] gap-3 items-center group bg-background p-2 rounded-lg border border-border hover:border-indigo-600/30 transition-colors">
                                     <div className="cursor-grab px-1 opacity-50 group-hover:opacity-100 transition-opacity">
                                         <GripVertical className="w-4 h-4" />
                                     </div>
@@ -328,13 +334,18 @@ export default function AdminWodBuilder() {
                                         />
                                     </div>
 
-                                    <div>
+                                    <div className="flex items-center gap-1">
                                         <Input
                                             type="number"
                                             placeholder="Lbs/Kg"
-                                            className="h-9 text-center font-mono shadow-none"
+                                            className="h-9 w-[60px] text-center font-mono shadow-none px-1"
                                             value={mov.weight_kg}
                                             onChange={(e) => updateMovement(section.id, mov.id, 'weight_kg', e.target.value)}
+                                        />
+                                        <AthleteWeightDialog 
+                                            athletes={athletesDB}
+                                            value={mov.athlete_weights || []}
+                                            onChange={(weights) => updateMovement(section.id, mov.id, 'athlete_weights', weights)}
                                         />
                                     </div>
 

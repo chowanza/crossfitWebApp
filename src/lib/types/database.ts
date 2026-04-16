@@ -197,6 +197,45 @@ export interface Database {
                     }
                 ];
             };
+            athlete_wod_weights: {
+                Row: {
+                    id: string;
+                    athlete_id: string;
+                    section_movement_id: string;
+                    weight_kg: number;
+                    created_at: string;
+                };
+                Insert: {
+                    id?: string;
+                    athlete_id: string;
+                    section_movement_id: string;
+                    weight_kg: number;
+                    created_at?: string;
+                };
+                Update: {
+                    id?: string;
+                    athlete_id?: string;
+                    section_movement_id?: string;
+                    weight_kg?: number;
+                    created_at?: string;
+                };
+                Relationships: [
+                    {
+                        foreignKeyName: "athlete_wod_weights_athlete_id_fkey";
+                        columns: ["athlete_id"];
+                        isOneToOne: false;
+                        referencedRelation: "profiles";
+                        referencedColumns: ["id"];
+                    },
+                    {
+                        foreignKeyName: "athlete_wod_weights_section_movement_id_fkey";
+                        columns: ["section_movement_id"];
+                        isOneToOne: false;
+                        referencedRelation: "wod_section_movements";
+                        referencedColumns: ["id"];
+                    }
+                ];
+            };
             movements: {
                 Row: {
                     id: string;
@@ -508,6 +547,7 @@ export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 export type Wod = Database["public"]["Tables"]["wods"]["Row"];
 export type WodSection = Database["public"]["Tables"]["wod_sections"]["Row"];
 export type WodSectionMovement = Database["public"]["Tables"]["wod_section_movements"]["Row"];
+export type AthleteWodWeight = Database["public"]["Tables"]["athlete_wod_weights"]["Row"];
 export type Movement = Database["public"]["Tables"]["movements"]["Row"];
 export type WodResult = Database["public"]["Tables"]["wod_results"]["Row"];
 export type PersonalRecord = Database["public"]["Tables"]["personal_records"]["Row"];
@@ -515,3 +555,4 @@ export type Payment = Database["public"]["Tables"]["payments"]["Row"];
 export type Notification = Database["public"]["Tables"]["notifications"]["Row"];
 export type ClassSession = Database["public"]["Tables"]["class_sessions"]["Row"];
 export type AppRating = Database["public"]["Tables"]["app_ratings"]["Row"];
+

@@ -57,6 +57,7 @@ export default async function WodDetailPage({
 
     // Get section IDs to fetch all results
     const sectionIds = sections.map((s: any) => s.id);
+    const movIds = sections.flatMap((s: any) => (s.wod_section_movements || []).map((m: any) => m.id));
 
     // Resultados p/ todas las secciones del WOD
     const { data: resultsData } = await supabase
@@ -66,6 +67,15 @@ export default async function WodDetailPage({
         .order("created_at", { ascending: true });
 
     const results = (resultsData || []) as WodResultWithProfile[];
+
+    // Pesos personalizados
+    const { data: customWeightsData } = movIds.length > 0 ? await supabase
+        .from("athlete_wod_weights")
+        .select("section_movement_id, weight_kg")
+        .eq("athlete_id", user!.id)
+        .in("section_movement_id", movIds) : { data: [] };
+    
+    const customWeights = customWeightsData || [];
 
     // Feedback del usuario
     const { data: feedbackData } = await supabase
@@ -149,10 +159,14 @@ export default async function WodDetailPage({
 
                                             {movs.length > 0 ? (
                                                 <ul className="space-y-2">
-                                                    {movs.map((m: any) => (
+                                                    {movs.map((m: any) => {
+                                                        const customWeight = customWeights.find(cw => cw.section_movement_id === m.id)?.weight_kg;
+                                                        const finalWeight = customWeight !== undefined ? customWeight : m.weight_kg;
+                                                        
+                                                        return (
                                                         <li key={m.id} className="flex flex-col border-b last:border-0 pb-2 mb-2 last:mb-0 last:pb-0">
                                                             <div className="flex justify-between items-start">
-                                                                <span className="font-semibold flex items-center">
+                                                                <span className="font-semibold flex items-center gap-1.5">
                                                                     {m.reps ? `${m.reps}x ` : ""}
                                                                     {m.movements?.name || "Movimiento"}
                                                                     {m.movements?.media_url && (
@@ -162,9 +176,10 @@ export default async function WodDetailPage({
                                                                         />
                                                                     )}
                                                                 </span>
-                                                                {m.weight_kg && (
-                                                                    <span className="text-sm bg-muted px-2 py-0.5 rounded font-mono">
-                                                                        {m.weight_kg} kg
+                                                                {finalWeight !== null && (
+                                                                    <span className={`text-sm px-2 py-0.5 rounded font-mono flex items-center gap-1 ${customWeight !== undefined ? "bg-indigo-600/10 text-indigo-700 border border-indigo-600/30" : "bg-muted"}`}>
+                                                                        {finalWeight} kg 
+                                                                        {customWeight !== undefined && <span className="text-[10px] font-bold uppercase text-indigo-600 ml-1" title="Asignado por tu coach">📋</span>}
                                                                     </span>
                                                                 )}
                                                             </div>
@@ -174,7 +189,7 @@ export default async function WodDetailPage({
                                                                 </span>
                                                             )}
                                                         </li>
-                                                    ))}
+                                                    )})}
                                                 </ul>
                                             ) : (
                                                 <p className="text-sm text-muted-foreground italic">

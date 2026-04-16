@@ -6,6 +6,7 @@ export interface WodMovementDraft {
     reps: string | number; // String allows empty state in inputs
     weight_kg: string | number;
     order_index: number;
+    athlete_weights?: { athlete_id: string; weight_kg: number }[]; // Custom weights per user
 }
 
 export interface WodSectionDraft {

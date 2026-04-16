@@ -15,6 +15,7 @@ interface SectionInput {
         weight_kg: number | null;
         notes: string;
         order_index: number;
+        athlete_weights?: { athlete_id: string; weight_kg: number }[];
     }[];
 }
 
@@ -72,11 +73,35 @@ export async function createWod(data: {
                 order_index: m.order_index,
             }));
 
-            const { error: movError } = await supabase
+            const { data: insertedMovsData, error: movError } = await supabase
                 .from("wod_section_movements")
-                .insert(movs);
+                .insert(movs)
+                .select();
 
-            if (movError) return { error: movError.message };
+            const insertedMovs = insertedMovsData as any[] | null;
+
+            if (movError || !insertedMovs) return { error: movError?.message || "Error al crear movimientos." };
+
+            const customWeights: any[] = [];
+            for (const m of section.movements) {
+                if (m.athlete_weights && m.athlete_weights.length > 0) {
+                    const saved = insertedMovs.find((dbM: any) => dbM.order_index === m.order_index && dbM.movement_id === m.movement_id);
+                    if (saved) {
+                        for (const aw of m.athlete_weights) {
+                            customWeights.push({
+                                section_movement_id: saved.id,
+                                athlete_id: aw.athlete_id,
+                                weight_kg: aw.weight_kg
+                            });
+                        }
+                    }
+                }
+            }
+
+            if (customWeights.length > 0) {
+                const { error: wError } = await supabase.from("athlete_wod_weights").insert(customWeights);
+                if (wError) return { error: wError.message };
+            }
         }
     }
 
@@ -133,11 +158,35 @@ export async function updateWod(
                 order_index: m.order_index,
             }));
 
-            const { error: movError } = await supabase
+            const { data: insertedMovsData, error: movError } = await supabase
                 .from("wod_section_movements")
-                .insert(movs);
+                .insert(movs)
+                .select();
 
-            if (movError) return { error: movError.message };
+            const insertedMovs = insertedMovsData as any[] | null;
+
+            if (movError || !insertedMovs) return { error: movError?.message || "Error al crear movimientos." };
+
+            const customWeights: any[] = [];
+            for (const m of section.movements) {
+                if (m.athlete_weights && m.athlete_weights.length > 0) {
+                    const saved = insertedMovs.find((dbM: any) => dbM.order_index === m.order_index && dbM.movement_id === m.movement_id);
+                    if (saved) {
+                        for (const aw of m.athlete_weights) {
+                            customWeights.push({
+                                section_movement_id: saved.id,
+                                athlete_id: aw.athlete_id,
+                                weight_kg: aw.weight_kg
+                            });
+                        }
+                    }
+                }
+            }
+
+            if (customWeights.length > 0) {
+                const { error: wError } = await supabase.from("athlete_wod_weights").insert(customWeights);
+                if (wError) return { error: wError.message };
+            }
         }
     }
 
