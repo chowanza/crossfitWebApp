@@ -1,8 +1,9 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { sendPasswordResetEmail } from "@/lib/email";
 import { redirect } from "next/navigation";
-import { headers } from "next/headers";
 
 export async function login(formData: FormData) {
     const supabase = await createClient();
@@ -29,20 +30,59 @@ export async function logout() {
 }
 
 export async function resetPassword(formData: FormData) {
-    const supabase = await createClient();
+    const adminSupabase = createAdminClient();
     const email = formData.get("email") as string;
-    
-    // We try to get the origin to form the absolute URL. In Next14 headers() is sync, Next15 async.
-    // To be safe we will assume process.env.NEXT_PUBLIC_SITE_URL or fallback to a relative path
-    // if allowed, but Supabase requires an absolute URL for redirectTo.
-    const origin = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${origin}/auth/callback?next=/update-password`,
+    if (!email) {
+        return { error: "Por favor ingresa tu correo electrónico." };
+    }
+
+    // 1. Generar el link de restablecimiento sin que Supabase envíe el email.
+    //    Requiere service_role key. El link ya incluye el token seguro.
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    const { data: linkData, error: linkError } = await adminSupabase.auth.admin.generateLink({
+        type: "recovery",
+        email,
+        options: {
+            redirectTo: `${siteUrl}/auth/callback?next=/update-password`,
+        },
     });
 
-    if (error) {
-        return { error: error.message };
+    if (linkError) {
+        // Para seguridad, no revelar si el email existe o no en el sistema.
+        // Retornamos éxito igualmente (comportamiento estándar de auth).
+        console.error("[Auth] Error generando link de recovery:", linkError.message);
+        return { success: true };
+    }
+
+    // 2. Obtener el nombre del perfil para personalizar el email.
+    const userId = linkData.user?.id;
+    let firstName = "Atleta";
+
+    if (userId) {
+        const { data: profile } = await adminSupabase
+            .from("profiles")
+            .select("full_name")
+            .eq("id", userId)
+            .single();
+
+        if (profile?.full_name) {
+            firstName = profile.full_name.split(" ")[0];
+        }
+    }
+
+    // 3. Enviar el email con Resend usando el link generado por Supabase.
+    const resetLink = linkData.properties?.action_link;
+
+    if (!resetLink) {
+        return { error: "No se pudo generar el enlace de recuperación. Intenta nuevamente." };
+    }
+
+    try {
+        await sendPasswordResetEmail({ to: email, resetLink, firstName });
+    } catch (err) {
+        console.error("[Resend] Error:", err);
+        return { error: "Hubo un problema al enviar el correo. Intenta en unos minutos." };
     }
 
     return { success: true };
