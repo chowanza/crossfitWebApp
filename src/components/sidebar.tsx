@@ -20,6 +20,7 @@ import {
     LineChart,
     LogOut,
 } from "lucide-react";
+import { LogoutButton } from "@/components/logout-button";
 
 interface SidebarProps {
     fullName: string;
@@ -115,14 +116,7 @@ export function Sidebar({ fullName, role, avatarUrl }: SidebarProps) {
                     </div>
                 </Link>
                 <form action={logout}>
-                    <Button
-                        type="submit"
-                        variant="ghost"
-                        className="w-full justify-start gap-3 text-muted-foreground hover:text-red-500 hover:bg-red-500/10"
-                    >
-                        <LogOut className="h-4 w-4" />
-                        Cerrar sesión
-                    </Button>
+                    <LogoutButton />
                 </form>
             </div>
         </aside>
