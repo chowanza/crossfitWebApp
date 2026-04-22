@@ -5,15 +5,19 @@ import { Users, Save } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import type { SectionType } from "@/lib/types/database";
+import { getWeightRecommendation } from "@/lib/recommendations";
 
 interface AthleteWeightDialogProps {
     athletes: { id: string; full_name: string }[];
     value: { athlete_id: string; weight_kg: number | string }[];
     onChange: (weights: { athlete_id: string; weight_kg: number | string }[]) => void;
+    movementId?: string;
+    sectionType?: SectionType;
+    prsData?: {user_id: string, movement_id: string, weight_value: number}[];
 }
 
-export function AthleteWeightDialog({ athletes, value = [], onChange }: AthleteWeightDialogProps) {
+export function AthleteWeightDialog({ athletes, value = [], onChange, movementId, sectionType, prsData }: AthleteWeightDialogProps) {
     const [open, setOpen] = useState(false);
     const [localOverrides, setLocalOverrides] = useState<{ [key: string]: string | number }>(() => {
         const initial: { [key: string]: string | number } = {};
@@ -46,6 +50,13 @@ export function AthleteWeightDialog({ athletes, value = [], onChange }: AthleteW
         setOpen(false);
     };
 
+    const getAthletePR = (athleteId: string) => {
+        if (!movementId || !prsData) return null;
+        const prs = prsData.filter(pr => pr.user_id === athleteId && pr.movement_id === movementId);
+        if (prs.length === 0) return null;
+        return Math.max(...prs.map(pr => pr.weight_value));
+    };
+
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
@@ -70,20 +81,32 @@ export function AthleteWeightDialog({ athletes, value = [], onChange }: AthleteW
                 </DialogHeader>
 
                 <div className="flex-1 overflow-y-auto p-5 space-y-4">
-                    {athletes.map(ath => (
-                        <div key={ath.id} className="flex items-center justify-between gap-4">
-                            <span className="text-sm font-medium">{ath.full_name}</span>
+                    {athletes.map(ath => {
+                        const pr = getAthletePR(ath.id);
+                        const recommendation = (pr && sectionType) ? getWeightRecommendation(pr, sectionType) : null;
+                        
+                        return (
+                        <div key={ath.id} className="flex items-center justify-between gap-4 border-b last:border-0 pb-3 last:pb-0">
+                            <div className="flex flex-col">
+                                <span className="text-sm font-medium">{ath.full_name}</span>
+                                {pr !== null && (
+                                    <span className="text-[10px] text-muted-foreground mt-0.5">
+                                        PR: {pr}kg 
+                                        {recommendation && <span className="text-indigo-600 font-medium ml-1">→ Sugerido: {recommendation.suggestedWeight}kg ({recommendation.percentage}%)</span>}
+                                    </span>
+                                )}
+                            </div>
                             <div className="flex items-center gap-2">
                                 <Input
                                     type="number"
-                                    placeholder="Peso (Kg/Lbs)"
+                                    placeholder={recommendation ? String(recommendation.suggestedWeight) : "Peso (Kg)"}
                                     className="w-24 h-8 text-right font-mono"
                                     value={localOverrides[ath.id] || ""}
                                     onChange={e => setLocalOverrides(prev => ({ ...prev, [ath.id]: e.target.value }))}
                                 />
                             </div>
                         </div>
-                    ))}
+                    )})}
                     {athletes.length === 0 && (
                         <p className="text-sm text-center text-muted-foreground py-4">No hay atletas registrados aún.</p>
                     )}

@@ -16,6 +16,7 @@ import {
 import { ScoreForm } from "@/components/score-form";
 import { ClassFeedbackForm } from "@/components/class-feedback-form";
 import { MovementMediaDialog } from "@/components/movement-media-dialog";
+import { WeightRecommendation } from "@/components/weight-recommendation";
 import { MessageSquare, Star } from "lucide-react";
 
 interface WodResultWithProfile extends WodResult {
@@ -87,6 +88,13 @@ export default async function WodDetailPage({
 
     const myFeedback = feedbackData as ClassSession | null;
 
+    // PRs del usuario
+    const { data: userPrsData } = await supabase
+        .from("personal_records")
+        .select("*, movements(name)")
+        .eq("user_id", user!.id);
+    const userPrs = (userPrsData || []) as any[];
+
     // Rating promedio
     const { data: allFeedback } = await supabase
         .from("class_sessions")
@@ -143,6 +151,12 @@ export default async function WodDetailPage({
                                         </Badge>
                                     )}
                                 </div>
+
+                                {/* Recomendación de pesos para este bloque */}
+                                <WeightRecommendation 
+                                    sectionType={sec.section_type} 
+                                    userPrs={userPrs.filter(pr => movs.some((m: any) => m.movement_id === pr.movement_id))} 
+                                />
 
                                 <div className="grid md:grid-cols-2 gap-6">
                                     {/* Bloque Info */}

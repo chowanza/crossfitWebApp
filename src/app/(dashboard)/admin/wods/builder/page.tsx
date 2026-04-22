@@ -44,6 +44,7 @@ export default function AdminWodBuilder() {
     // Global Dependencies
     const [movementsDB, setMovementsDB] = useState<Movement[]>([]);
     const [athletesDB, setAthletesDB] = useState<{id: string, full_name: string}[]>([]);
+    const [prsDB, setPrsDB] = useState<{user_id: string, movement_id: string, weight_value: number}[]>([]);
 
     // Core Form State
     const [draft, setDraft] = useState<WodDraft>({
@@ -64,6 +65,9 @@ export default function AdminWodBuilder() {
 
             const { data: ath } = await supabase.from("profiles").select("id, full_name").eq("role", "USER").order("full_name");
             if (ath) setAthletesDB(ath);
+
+            const { data: prs } = await supabase.from("personal_records").select("user_id, movement_id, weight_value");
+            if (prs) setPrsDB(prs);
         }
         loadData();
     }, []);
@@ -346,6 +350,9 @@ export default function AdminWodBuilder() {
                                             athletes={athletesDB}
                                             value={mov.athlete_weights || []}
                                             onChange={(weights) => updateMovement(section.id, mov.id, 'athlete_weights', weights)}
+                                            movementId={mov.movement_id}
+                                            sectionType={section.type}
+                                            prsData={prsDB}
                                         />
                                     </div>
 
