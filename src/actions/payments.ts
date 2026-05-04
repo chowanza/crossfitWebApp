@@ -222,6 +222,21 @@ export async function reportAthletePayment(formData: FormData) {
         }));
 
         await adminClient.from("notifications").insert(notifications);
+
+        // Enviar email a cada SUPERADMIN
+        const { sendPaymentReceiptEmailToAdmin } = await import("@/lib/email");
+        for (const sa of superAdmins) {
+            const { data: userAuth } = await adminClient.auth.admin.getUserById(sa.id);
+            if (userAuth?.user?.email && receiptUrl) {
+                await sendPaymentReceiptEmailToAdmin({
+                    adminEmail: userAuth.user.email,
+                    athleteName,
+                    amount,
+                    receiptUrl,
+                    notes: buildNotes,
+                });
+            }
+        }
     }
 
     revalidatePath("/admin/payments");

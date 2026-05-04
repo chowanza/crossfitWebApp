@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 
 // Rutas que no requieren autenticación.
-const PUBLIC_ROUTES = ["/login", "/auth/callback", "/forgot-password", "/update-password"];
+const PUBLIC_ROUTES = ["/login", "/auth/callback", "/forgot-password", "/update-password", "/register", "/pending-approval"];
 
 export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
@@ -22,15 +22,22 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(loginUrl);
     }
 
-    // 4. Verificar estado de deuda para atletas (no admins).
+    // 4. Verificar estado de cuenta y deuda para atletas.
     const { data: profile } = await supabase
         .from("profiles")
-        .select("role, last_payment_date")
+        .select("role, last_payment_date, is_active")
         .eq("id", user.id)
         .single();
 
-    if (profile && profile.role === "USER") {
-        const isPaymentPage = pathname.startsWith("/payment");
+    if (profile) {
+        if (profile.is_active === false) {
+            const pendingUrl = request.nextUrl.clone();
+            pendingUrl.pathname = "/pending-approval";
+            return NextResponse.redirect(pendingUrl);
+        }
+
+        if (profile.role === "USER") {
+            const isPaymentPage = pathname.startsWith("/payment");
 
         // Si no tiene ningún pago registrado, no bloquear aún
         // (usuario nuevo sin historial de pagos).
@@ -49,6 +56,7 @@ export async function middleware(request: NextRequest) {
                 paymentUrl.pathname = "/payment";
                 return NextResponse.redirect(paymentUrl);
             }
+        }
         }
     }
 

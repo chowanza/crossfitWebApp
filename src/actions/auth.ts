@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { sendPasswordResetEmail } from "@/lib/email";
+import { sendPasswordResetEmail, sendNewRegistrationEmailToAdmin } from "@/lib/email";
 import { redirect } from "next/navigation";
 
 export async function login(formData: FormData) {
@@ -50,6 +50,30 @@ export async function register(formData: FormData) {
 
     if (error) {
         return { error: error.message };
+    }
+
+    if (data.user) {
+        const adminClient = createAdminClient();
+        
+        // 1. Forzar estado inactivo para el nuevo perfil
+        await adminClient.from("profiles").update({ is_active: false }).eq("id", data.user.id);
+
+        // 2. Notificar por email a todos los SUPERADMINS
+        const { data: superAdmins } = await adminClient.from("profiles").select("id").eq("role", "SUPERADMIN");
+        
+        if (superAdmins) {
+            for (const sa of superAdmins) {
+                const { data: userAuth } = await adminClient.auth.admin.getUserById(sa.id);
+                if (userAuth?.user?.email) {
+                    await sendNewRegistrationEmailToAdmin({
+                        adminEmail: userAuth.user.email,
+                        athleteName: fullName,
+                        athleteEmail: email,
+                        athleteId: data.user.id,
+                    });
+                }
+            }
+        }
     }
 
     return { success: true };

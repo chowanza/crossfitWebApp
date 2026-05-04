@@ -153,3 +153,121 @@ function buildPasswordResetHtml({
 </html>
   `.trim();
 }
+// ============================================================
+// Email: Notificación de Nuevo Registro al Admin
+// ============================================================
+export async function sendNewRegistrationEmailToAdmin({
+    adminEmail,
+    athleteName,
+    athleteEmail,
+    athleteId,
+    athletePhone,
+}: {
+    adminEmail: string;
+    athleteName: string;
+    athleteEmail: string;
+    athleteId: string;
+    athletePhone?: string;
+}) {
+    const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASSWORD,
+        },
+    });
+
+    try {
+        const info = await transporter.sendMail({
+            from: process.env.SMTP_USER ? `"Iron Fit" <${process.env.SMTP_USER}>` : '"Iron Fit" <no-reply@ironfit.com>',
+            to: adminEmail,
+            subject: `🚀 Nuevo atleta registrado: ${athleteName}`,
+            html: buildNewRegistrationHtml({ athleteName, athleteEmail, athleteId, athletePhone }),
+        });
+        return info;
+    } catch (error) {
+        console.error("[Nodemailer] Error enviando email de nuevo registro:", error);
+    }
+}
+
+function buildNewRegistrationHtml({ athleteName, athleteEmail, athleteId, athletePhone }: { athleteName: string, athleteEmail: string, athleteId: string, athletePhone?: string }) {
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    const actionUrl = `${siteUrl}/admin/athletes/${athleteId}`;
+    
+    return `
+    <div style="font-family: sans-serif; padding: 20px; color: #333;">
+        <h2>Nuevo Registro en Iron Fit</h2>
+        <p>Un nuevo atleta se ha registrado y está a la espera de aprobación.</p>
+        <ul>
+            <li><strong>Nombre:</strong> ${athleteName}</li>
+            <li><strong>Email:</strong> ${athleteEmail}</li>
+            <li><strong>Teléfono:</strong> ${athletePhone || "No proporcionado"}</li>
+        </ul>
+        <p>
+            <a href="${actionUrl}" style="display:inline-block; padding: 10px 20px; background-color: #4f46e5; color: #fff; text-decoration: none; border-radius: 5px;">
+                Revisar y Activar Atleta
+            </a>
+        </p>
+        <p>Por favor ingresa al panel de administración para verificar y activar su cuenta.</p>
+        <br>
+        <p>Equipo Iron Fit</p>
+    </div>
+    `;
+}
+
+// ============================================================
+// Email: Comprobante de Pago al Admin
+// ============================================================
+export async function sendPaymentReceiptEmailToAdmin({
+    adminEmail,
+    athleteName,
+    amount,
+    receiptUrl,
+    notes,
+}: {
+    adminEmail: string;
+    athleteName: string;
+    amount: number;
+    receiptUrl: string;
+    notes: string;
+}) {
+    const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASSWORD,
+        },
+    });
+
+    try {
+        const info = await transporter.sendMail({
+            from: process.env.SMTP_USER ? `"Iron Fit" <${process.env.SMTP_USER}>` : '"Iron Fit" <no-reply@ironfit.com>',
+            to: adminEmail,
+            subject: `💰 Nuevo pago reportado por ${athleteName}`,
+            html: buildPaymentReceiptHtml({ athleteName, amount, receiptUrl, notes }),
+        });
+        return info;
+    } catch (error) {
+        console.error("[Nodemailer] Error enviando email de comprobante:", error);
+    }
+}
+
+function buildPaymentReceiptHtml({ athleteName, amount, receiptUrl, notes }: { athleteName: string, amount: number, receiptUrl: string, notes: string }) {
+    const fullUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/receipts/${receiptUrl}`;
+    return `
+    <div style="font-family: sans-serif; padding: 20px; color: #333;">
+        <h2>Nuevo Pago Reportado</h2>
+        <p><strong>${athleteName}</strong> ha subido un comprobante de pago.</p>
+        <ul>
+            <li><strong>Monto:</strong> $${amount}</li>
+            <li><strong>Detalles:</strong> ${notes}</li>
+        </ul>
+        <p>
+            <a href="${fullUrl}" style="display:inline-block; padding: 10px 20px; background-color: #4f46e5; color: #fff; text-decoration: none; border-radius: 5px;">
+                Ver Comprobante
+            </a>
+        </p>
+        <p>Ingresa al panel de administración de pagos para aprobarlo.</p>
+    </div>
+    `;
+}
