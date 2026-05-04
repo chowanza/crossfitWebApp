@@ -203,6 +203,7 @@ export default async function AdminPaymentsPage({
                                 <TableHead className="text-muted-foreground">Estado</TableHead>
                                 <TableHead className="text-muted-foreground hidden md:table-cell">Fecha</TableHead>
                                 <TableHead className="text-muted-foreground hidden md:table-cell">Notas</TableHead>
+                                <TableHead className="text-muted-foreground hidden md:table-cell">Comp.</TableHead>
                                 {isSuperAdmin && (
                                     <TableHead className="text-muted-foreground text-right w-[140px]">Acciones</TableHead>
                                 )}
@@ -228,6 +229,20 @@ export default async function AdminPaymentsPage({
                                     </TableCell>
                                     <TableCell className="text-muted-foreground/80 text-sm max-w-xs truncate hidden md:table-cell">
                                         {payment.notes}
+                                    </TableCell>
+                                    <TableCell className="text-muted-foreground/80 text-sm hidden md:table-cell">
+                                        {payment.receipt_url ? (
+                                            <a 
+                                                href={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/receipts/${payment.receipt_url}`} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer"
+                                                className="text-indigo-500 hover:text-indigo-400 underline font-medium"
+                                            >
+                                                Ver
+                                            </a>
+                                        ) : (
+                                            "—"
+                                        )}
                                     </TableCell>
                                     {isSuperAdmin && (
                                         <TableCell className="text-right">

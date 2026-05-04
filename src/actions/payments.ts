@@ -145,3 +145,86 @@ export async function deletePayment(id: string) {
     revalidatePath("/admin/payments");
     return { success: true };
 }
+
+export async function reportAthletePayment(formData: FormData) {
+    const supabase = await createClient();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) return { error: "No autenticado." };
+
+    const amount = parseFloat(formData.get("amount") as string);
+    const period_start = formData.get("period_start") as string;
+    const period_end = formData.get("period_end") as string;
+    const rawNotes = (formData.get("notes") as string) || "";
+    const paymentMethod = formData.get("payment_method") as string;
+    const reference = formData.get("reference") as string;
+    const receiptFile = formData.get("receipt_file") as File | null;
+
+    let buildNotes = paymentMethod ? `Método: ${paymentMethod}` : "";
+    if (reference) buildNotes += ` | Ref: ${reference}`;
+    if (rawNotes) buildNotes += ` | Concepto: ${rawNotes}`;
+
+    if (isNaN(amount) || amount <= 0) {
+        return { error: "El monto debe ser un número positivo." };
+    }
+
+    let receiptUrl = null;
+
+    if (receiptFile && receiptFile.size > 0) {
+        const fileExt = receiptFile.name.split('.').pop();
+        const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+
+        const { error: uploadError, data: uploadData } = await supabase.storage
+            .from("receipts")
+            .upload(fileName, receiptFile);
+
+        if (uploadError) {
+            return { error: `Error subiendo el comprobante: ${uploadError.message}` };
+        }
+        
+        receiptUrl = uploadData.path;
+    }
+
+    const adminClient = createAdminClient();
+    
+    // Crear el pago como PENDING
+    const { error, data: newPayment } = await adminClient.from("payments").insert({
+        user_id: user.id,
+        amount,
+        period_start,
+        period_end,
+        status: "PENDING",
+        notes: buildNotes,
+        receipt_url: receiptUrl
+    }).select().single();
+    
+    if (error) return { error: error.message };
+
+    // Notificar al SUPERADMIN
+    // Primero, obtener el id del SUPERADMIN
+    const { data: superAdmins } = await adminClient
+        .from("profiles")
+        .select("id")
+        .eq("role", "SUPERADMIN");
+
+    if (superAdmins) {
+        const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", user.id).single();
+        const athleteName = profile?.full_name || "Un atleta";
+
+        const notifications = superAdmins.map(sa => ({
+            user_id: sa.id,
+            type: "PAYMENT" as any,
+            title: "Nuevo comprobante de pago",
+            message: `${athleteName} ha reportado un pago por $${amount}. Verifica y aprueba.`,
+            link: "/admin/payments",
+        }));
+
+        await adminClient.from("notifications").insert(notifications);
+    }
+
+    revalidatePath("/admin/payments");
+    revalidatePath("/profile");
+    return { success: true };
+}

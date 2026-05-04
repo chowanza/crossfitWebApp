@@ -19,8 +19,8 @@ export async function createAthlete(formData: FormData) {
         .eq("id", user.id)
         .single();
 
-    if (profile?.role !== "ADMIN" && profile?.role !== "SUPERADMIN") {
-        return { error: "Solo los administradores pueden crear atletas." };
+    if (profile?.role !== "SUPERADMIN") {
+        return { error: "Solo el SUPERADMIN puede crear atletas nuevos." };
     }
 
     const email = formData.get("email") as string;

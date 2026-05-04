@@ -40,6 +40,20 @@ export default async function AdminWodsPage() {
         .order("name");
     const movements = (movementsData || []) as Movement[];
 
+    // Obtener atletas
+    const { data: athletesData } = await supabase
+        .from("profiles")
+        .select("id, full_name")
+        .eq("role", "USER")
+        .order("full_name");
+    const athletes = (athletesData || []) as { id: string; full_name: string }[];
+
+    // Obtener PRs
+    const { data: prsDataResult } = await supabase
+        .from("personal_records")
+        .select("user_id, movement_id, weight_value");
+    const prsData = (prsDataResult || []) as { user_id: string; movement_id: string; weight_value: number }[];
+
     // Obtener WODs con sus secciones y movimientos
     const { data: wodsData } = await supabase
         .from("wods")
@@ -47,7 +61,10 @@ export default async function AdminWodsPage() {
             *,
             wod_sections (
                 *,
-                wod_section_movements (*)
+                wod_section_movements (
+                    *,
+                    athlete_wod_weights (*)
+                )
             )
         `)
         .order("date", { ascending: false })
@@ -117,6 +134,8 @@ export default async function AdminWodsPage() {
                                             <WodForm
                                                 wod={wod}
                                                 movements={movements}
+                                                athletes={athletes}
+                                                prsData={prsData}
                                                 trigger={
                                                     <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
                                                         Editar

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { login } from "@/actions/auth";
+import { register } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,18 +13,25 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
-export default function LoginPage() {
+export default function RegisterPage() {
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const router = useRouter();
 
     async function handleSubmit(formData: FormData) {
         setLoading(true);
         setError(null);
-        const result = await login(formData);
+        const result = await register(formData);
+        
         if (result?.error) {
             setError(result.error);
             setLoading(false);
+        } else {
+            toast.success("Registro exitoso. Revisa tu correo para verificar tu cuenta.");
+            router.push("/login");
         }
     }
 
@@ -37,14 +44,24 @@ export default function LoginPage() {
                             <img src="/logo.png" alt="Logo" className="h-full w-full object-contain drop-shadow-lg" />
                         </div>
                         <CardTitle className="text-2xl font-bold">
-                            Iron Fit Venezuela
+                            Crear Cuenta
                         </CardTitle>
                         <CardDescription>
-                            Inicia sesión con tu cuenta
+                            Únete a Iron Fit Venezuela
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <form action={handleSubmit} className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="full_name">Nombre Completo</Label>
+                                <Input
+                                    id="full_name"
+                                    name="full_name"
+                                    type="text"
+                                    placeholder="Ej: Juan Pérez"
+                                    required
+                                />
+                            </div>
                             <div className="space-y-2">
                                 <Label htmlFor="email">Email</Label>
                                 <Input
@@ -56,12 +73,7 @@ export default function LoginPage() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                    <Label htmlFor="password">Contraseña</Label>
-                                    <Link href="/forgot-password" className="text-xs text-indigo-600 hover:text-indigo-500 hover:underline font-medium transition-colors">
-                                        ¿Olvidaste tu contraseña?
-                                    </Link>
-                                </div>
+                                <Label htmlFor="password">Contraseña</Label>
                                 <Input
                                     id="password"
                                     name="password"
@@ -82,15 +94,15 @@ export default function LoginPage() {
                                 isLoading={loading}
                                 className="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold"
                             >
-                                {loading ? "Ingresando..." : "Ingresar"}
+                                {loading ? "Creando cuenta..." : "Registrarme"}
                             </Button>
                         </form>
                     </CardContent>
                 </Card>
                 <p className="mt-4 text-center text-sm text-muted-foreground">
-                    ¿No tienes cuenta?{" "}
-                    <Link href="/register" className="text-indigo-600 hover:text-indigo-500 hover:underline font-medium transition-colors">
-                        Regístrate aquí
+                    ¿Ya tienes cuenta?{" "}
+                    <Link href="/login" className="text-indigo-600 hover:text-indigo-500 hover:underline font-medium transition-colors">
+                        Inicia sesión aquí
                     </Link>
                 </p>
             </div>

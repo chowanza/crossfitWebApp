@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import type { Movement, SectionType } from "@/lib/types/database";
 import { Plus, Trash2, ListPlus } from "lucide-react";
+import { AthleteWeightDialog } from "@/components/athlete-weight-dialog";
 
 // Define the incoming nested WOD structure
 interface NestedWod {
@@ -43,6 +44,7 @@ interface NestedWod {
             weight_kg: number | null;
             notes: string;
             order_index: number;
+            athlete_wod_weights?: { athlete_id: string; weight_kg: number }[];
         }[];
     }[];
 }
@@ -50,6 +52,8 @@ interface NestedWod {
 interface WodFormProps {
     wod?: NestedWod;
     movements: Movement[];
+    athletes?: { id: string; full_name: string }[];
+    prsData?: { user_id: string; movement_id: string; weight_value: number }[];
     trigger: React.ReactNode;
 }
 
@@ -60,6 +64,7 @@ interface TempMovement {
     weight_kg: number | null;
     notes: string;
     order_index: number;
+    athlete_weights: { athlete_id: string; weight_kg: number }[];
 }
 
 interface TempSection {
@@ -79,7 +84,7 @@ const SECTION_TYPES: { value: SectionType; label: string }[] = [
     { value: "CUSTOM", label: "Custom (Personalizado)" },
 ];
 
-export function WodForm({ wod, movements, trigger }: WodFormProps) {
+export function WodForm({ wod, movements, athletes = [], prsData = [], trigger }: WodFormProps) {
     const [open, setOpen] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
@@ -103,6 +108,7 @@ export function WodForm({ wod, movements, trigger }: WodFormProps) {
                         weight_kg: m.weight_kg,
                         notes: m.notes || "",
                         order_index: m.order_index,
+                        athlete_weights: m.athlete_wod_weights || [],
                     })),
             }))
         : [];
@@ -150,6 +156,7 @@ export function WodForm({ wod, movements, trigger }: WodFormProps) {
                     weight_kg: null,
                     notes: "",
                     order_index: sec.movements.length,
+                    athlete_weights: [],
                 },
             ],
         });
@@ -422,20 +429,30 @@ export function WodForm({ wod, movements, trigger }: WodFormProps) {
                                                                     })
                                                                 }
                                                             />
-                                                            <Input
-                                                                type="number"
-                                                                step="0.1"
-                                                                placeholder="Peso KG"
-                                                                className="h-8 text-xs"
-                                                                value={mov.weight_kg || ""}
-                                                                onChange={(e) =>
-                                                                    updateMovement(sIndex, mIndex, {
-                                                                        weight_kg: e.target.value
-                                                                            ? parseFloat(e.target.value)
-                                                                            : null,
-                                                                    })
-                                                                }
-                                                            />
+                                                            <div className="flex items-center gap-1">
+                                                                <Input
+                                                                    type="number"
+                                                                    step="0.1"
+                                                                    placeholder="Peso KG"
+                                                                    className="h-8 text-xs w-[60px]"
+                                                                    value={mov.weight_kg || ""}
+                                                                    onChange={(e) =>
+                                                                        updateMovement(sIndex, mIndex, {
+                                                                            weight_kg: e.target.value
+                                                                                ? parseFloat(e.target.value)
+                                                                                : null,
+                                                                        })
+                                                                    }
+                                                                />
+                                                                <AthleteWeightDialog 
+                                                                    athletes={athletes}
+                                                                    value={mov.athlete_weights}
+                                                                    onChange={(weights) => updateMovement(sIndex, mIndex, { athlete_weights: weights as { athlete_id: string; weight_kg: number }[] })}
+                                                                    movementId={mov.movement_id}
+                                                                    sectionType={section.section_type}
+                                                                    prsData={prsData}
+                                                                />
+                                                            </div>
                                                         </div>
                                                         <div className="w-full md:w-1/3 flex gap-2">
                                                             <Input

@@ -226,7 +226,7 @@ export default async function DashboardPage() {
     return (
         <div className="space-y-6 pb-20">
             {/* Intro Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-4">
                 <div>
                     <h2 className="text-2xl font-bold tracking-tight">
                         {greeting}, <span className="text-indigo-600">{firstName}</span> 👋
@@ -235,9 +235,19 @@ export default async function DashboardPage() {
                         Tu progreso de hoy en Iron Fit.
                     </p>
                 </div>
-                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${payBadge.bg} ${payBadge.border}`}>
-                    <div className={`w-2 h-2 rounded-full ${payBadge.dot}`} />
-                    <span className={`text-[10px] font-semibold ${payBadge.color}`}>{payBadge.label}</span>
+                <div className="flex items-center gap-3">
+                    <ReportPaymentForm 
+                        trigger={
+                            <Button variant="outline" size="sm" className="h-8 text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-indigo-200">
+                                <Upload className="w-3.5 h-3.5 mr-1.5" />
+                                Reportar Pago
+                            </Button>
+                        }
+                    />
+                    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${payBadge.bg} ${payBadge.border}`}>
+                        <div className={`w-2 h-2 rounded-full ${payBadge.dot}`} />
+                        <span className={`text-[10px] font-semibold ${payBadge.color}`}>{payBadge.label}</span>
+                    </div>
                 </div>
             </div>
             {/* Banner de aviso de pago (solo si vence pronto: 1-3 días) */}
@@ -247,7 +257,7 @@ export default async function DashboardPage() {
                     <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-yellow-600">Tu mensualidad vence pronto</p>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                            Tienes {payDiffDays} {payDiffDays === 1 ? "día" : "días"} de mora. Contáctate con tu entrenador para evitar la suspensión.
+                            Tienes {payDiffDays} {payDiffDays === 1 ? "día" : "días"} de mora. Sube tu comprobante o contáctate con tu entrenador.
                         </p>
                     </div>
                 </div>
