@@ -7,8 +7,9 @@ import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle } from 
 import { Separator } from "@/components/ui/separator";
 import { PrProgressChart } from "@/components/charts/pr-progress-chart";
 import Link from "next/link";
-import { ArrowLeft, Activity, Trophy, Users, CalendarPlus, Phone, CreditCard, IdCard } from "lucide-react";
+import { ArrowLeft, Activity, Trophy, Users, CalendarPlus, Phone, CreditCard, IdCard, Edit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AthleteForm } from "@/components/athlete-form";
 
 export default async function AthleteProfilePage({
     params,
@@ -171,6 +172,18 @@ export default async function AthleteProfilePage({
                             {profile.role === "SUPERADMIN" ? "Superadmin" : profile.role === "ADMIN" ? "Entrenador" : "Atleta"}
                         </Badge>
                     </div>
+                </div>
+                
+                <div>
+                    <AthleteForm
+                        athlete={profile}
+                        trigger={
+                            <Button variant="outline" size="sm" className="h-9 gap-1.5 border-indigo-600/30 text-indigo-600 hover:bg-indigo-600/10">
+                                <Edit2 className="w-4 h-4" />
+                                <span>Editar Perfil</span>
+                            </Button>
+                        }
+                    />
                 </div>
             </div>
 

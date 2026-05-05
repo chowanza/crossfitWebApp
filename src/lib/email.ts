@@ -191,7 +191,16 @@ export async function sendNewRegistrationEmailToAdmin({
 }
 
 function buildNewRegistrationHtml({ athleteName, athleteEmail, athleteId, athletePhone }: { athleteName: string, athleteEmail: string, athleteId: string, athletePhone?: string }) {
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    // 1. Usa la variable explícita si existe (ideal para localhost o custom domains).
+    // 2. Si no, usa la URL automática de Vercel (ideal para producción).
+    // 3. Fallback a localhost.
+    const vercelUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL;
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL 
+        ? process.env.NEXT_PUBLIC_SITE_URL 
+        : vercelUrl 
+            ? `https://${vercelUrl}` 
+            : "http://localhost:3000";
+            
     const actionUrl = `${siteUrl}/admin/athletes/${athleteId}`;
     
     return `
