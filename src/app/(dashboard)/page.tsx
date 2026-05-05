@@ -13,8 +13,10 @@ import {
     Trophy,
     Users,
     ChevronRight,
-    Play
+    Play,
+    Upload
 } from "lucide-react";
+import { ReportPaymentForm } from "@/components/report-payment-form";
 
 export default async function DashboardPage() {
     const supabase = await createClient();
