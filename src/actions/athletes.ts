@@ -144,6 +144,13 @@ export async function updateAthlete(id: string, formData: FormData) {
 
     if (error) return { error: error.message };
 
+    // Si se activa el atleta, también confirmamos su email en Auth automáticamente
+    if (isActive) {
+        await adminClient.auth.admin.updateUserById(id, { 
+            email_confirm: true 
+        });
+    }
+
     revalidatePath("/admin/athletes");
     return { success: true };
 }
@@ -173,5 +180,34 @@ export async function deleteAthlete(id: string) {
     if (error) return { error: error.message };
 
     revalidatePath("/admin/athletes");
+    return { success: true };
+}
+
+export async function confirmAthleteEmail(id: string) {
+    const supabase = await createClient();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) return { error: "No autenticado." };
+
+    const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+
+    if (profile?.role !== "ADMIN" && profile?.role !== "SUPERADMIN") {
+        return { error: "Solo los administradores pueden confirmar emails." };
+    }
+
+    const adminClient = createAdminClient();
+    const { error } = await adminClient.auth.admin.updateUserById(id, {
+        email_confirm: true,
+    });
+
+    if (error) return { error: error.message };
+
+    revalidatePath(`/admin/athletes/${id}`);
     return { success: true };
 }

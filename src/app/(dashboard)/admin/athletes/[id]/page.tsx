@@ -10,6 +10,9 @@ import Link from "next/link";
 import { ArrowLeft, Activity, Trophy, Users, CalendarPlus, Phone, CreditCard, IdCard, Edit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AthleteForm } from "@/components/athlete-form";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { Mail, MailCheck, MailWarning } from "lucide-react";
+import { confirmAthleteEmail } from "@/actions/athletes";
 
 export default async function AthleteProfilePage({
     params,
@@ -46,6 +49,12 @@ export default async function AthleteProfilePage({
         .single();
 
     const profile = data as Profile | null;
+
+    // Buscamos datos de Auth para ver si el email está confirmado
+    const adminClient = createAdminClient();
+    const { data: authData } = await adminClient.auth.admin.getUserById(id);
+    const isEmailConfirmed = !!authData.user?.email_confirmed_at;
+    const email = authData.user?.email;
 
     if (!profile) {
         return (
@@ -188,7 +197,7 @@ export default async function AthleteProfilePage({
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <Card className="border-border bg-muted/10 text-center">
                     <CardContent className="pt-5 pb-4">
                         <p className="text-2xl font-bold text-indigo-600">{totalWods ?? 0}</p>
@@ -207,6 +216,32 @@ export default async function AthleteProfilePage({
                             {profile.is_active ? "Activo" : "Inactivo"}
                         </Badge>
                         <p className="text-xs text-muted-foreground mt-1">Estado</p>
+                    </CardContent>
+                </Card>
+                <Card className="border-border bg-muted/10 text-center">
+                    <CardContent className="pt-5 pb-4 flex flex-col items-center">
+                        <div className="flex items-center gap-2">
+                            {isEmailConfirmed ? (
+                                <Badge variant="outline" className="border-green-500/30 text-green-500 flex gap-1 items-center">
+                                    <MailCheck className="w-3 h-3" /> Verificado
+                                </Badge>
+                            ) : (
+                                <Badge variant="outline" className="border-yellow-500/30 text-yellow-500 flex gap-1 items-center">
+                                    <MailWarning className="w-3 h-3" /> Pendiente
+                                </Badge>
+                            )}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">Email</p>
+                        {!isEmailConfirmed && (
+                            <form action={async () => {
+                                "use server";
+                                await confirmAthleteEmail(id);
+                            }}>
+                                <Button type="submit" variant="link" className="h-auto p-0 text-[10px] text-indigo-600 hover:text-indigo-700">
+                                    Confirmar ahora
+                                </Button>
+                            </form>
+                        )}
                     </CardContent>
                 </Card>
             </div>
