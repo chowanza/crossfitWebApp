@@ -63,7 +63,7 @@ RETURNS TRIGGER AS $$
 BEGIN
   IF NEW.status = 'PAID' THEN
     UPDATE public.profiles
-    SET last_payment_date = NEW.payment_date
+    SET last_payment_date = NEW.period_end
     WHERE id = NEW.user_id;
   END IF;
   RETURN NEW;

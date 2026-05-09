@@ -10,6 +10,7 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Clock } from "lucide-react";
+import { logout } from "@/actions/auth";
 
 export default function PendingApprovalPage() {
     return (
@@ -35,12 +36,20 @@ export default function PendingApprovalPage() {
                             Te hemos enviado un correo para verificar tu email (por favor revisa tu bandeja de Spam). Una vez confirmado y aprobado por el equipo, podrás iniciar sesión.
                         </p>
                         
-                        <div className="pt-4">
-                            <Link href="/login">
+                        <div className="pt-4 space-y-2">
+                            <Link href="/login" className="block">
                                 <Button variant="outline" className="w-full">
-                                    Volver al Inicio
+                                    Verificar Estado
                                 </Button>
                             </Link>
+                            <form action={logout}>
+                                <button
+                                    type="submit"
+                                    className="text-xs text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2"
+                                >
+                                    Cerrar sesión
+                                </button>
+                            </form>
                         </div>
                     </CardContent>
                 </Card>

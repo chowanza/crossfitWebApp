@@ -30,33 +30,35 @@ export async function middleware(request: NextRequest) {
         .single();
 
     if (profile) {
-        if (profile.is_active === false) {
+        // 4.1. Bloqueo por falta de activación del Admin (Email no confirmado/aprobado)
+        if (profile.is_active !== true) {
             const pendingUrl = request.nextUrl.clone();
             pendingUrl.pathname = "/pending-approval";
             return NextResponse.redirect(pendingUrl);
         }
 
+        // 4.2. Bloqueo por deuda para atletas
         if (profile.role === "USER") {
             const isPaymentPage = pathname.startsWith("/payment");
 
-        // Si no tiene ningún pago registrado, no bloquear aún
-        // (usuario nuevo sin historial de pagos).
-        if (profile.last_payment_date) {
-            const lastPayment = new Date(profile.last_payment_date);
-            const now = new Date();
-            const diffDays = Math.floor(
-                (now.getTime() - lastPayment.getTime()) / (1000 * 60 * 60 * 24)
-            );
+            // Solo bloqueamos si hay una fecha de vencimiento registrada.
+            // Si last_payment_date es null, es un usuario nuevo activado manualmente
+            // por el admin pero sin pagos aún registrados.
+            if (profile.last_payment_date) {
+                const expirationDate = new Date(profile.last_payment_date);
+                const now = new Date();
+                
+                // Calculamos la diferencia en días
+                const diffTime = now.getTime() - expirationDate.getTime();
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-            // Bloqueo estricto: más de 3 días desde el último pago registrado.
-            // El trigger de BD actualiza last_payment_date automáticamente
-            // cuando se registra un pago con status = 'PAID'.
-            if (diffDays > 3 && !isPaymentPage) {
-                const paymentUrl = request.nextUrl.clone();
-                paymentUrl.pathname = "/payment";
-                return NextResponse.redirect(paymentUrl);
+                // Bloqueo estricto: más de 3 días de mora.
+                if (diffDays > 3 && !isPaymentPage) {
+                    const paymentUrl = request.nextUrl.clone();
+                    paymentUrl.pathname = "/payment";
+                    return NextResponse.redirect(paymentUrl);
+                }
             }
-        }
         }
     }
 
