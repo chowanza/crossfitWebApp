@@ -211,3 +211,63 @@ export async function confirmAthleteEmail(id: string) {
     revalidatePath(`/admin/athletes/${id}`);
     return { success: true };
 }
+
+export async function activateAthlete(id: string) {
+    const supabase = await createClient();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) return { error: "No autenticado." };
+
+    const { data: callerProfile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+
+    if (callerProfile?.role !== "ADMIN" && callerProfile?.role !== "SUPERADMIN") {
+        return { error: "Solo los administradores pueden activar atletas." };
+    }
+
+    const adminClient = createAdminClient();
+
+    // 1. Activar en la tabla profiles y confirmar email en Auth
+    const { error: profileError } = await adminClient
+        .from("profiles")
+        .update({ is_active: true })
+        .eq("id", id);
+
+    if (profileError) return { error: profileError.message };
+
+    await adminClient.auth.admin.updateUserById(id, { email_confirm: true });
+
+    // 2. Obtener datos del atleta para el email y la notificación
+    const { data: athleteAuth } = await adminClient.auth.admin.getUserById(id);
+    const { data: athleteProfile } = await adminClient
+        .from("profiles")
+        .select("full_name")
+        .eq("id", id)
+        .single();
+
+    const athleteName = athleteProfile?.full_name || "Atleta";
+    const athleteEmail = athleteAuth?.user?.email;
+
+    // 3. Enviar email de bienvenida al atleta
+    if (athleteEmail) {
+        const { sendAccountActivatedEmailToAthlete } = await import("@/lib/email");
+        await sendAccountActivatedEmailToAthlete({ athleteEmail, athleteName });
+    }
+
+    // 4. Notificación in-app al atleta
+    await adminClient.from("notifications").insert({
+        user_id: id,
+        type: "SYSTEM",
+        title: "🚀 ¡Cuenta activada!",
+        message: "Tu cuenta ha sido activada por el administrador. ¡Bienvenido a Iron Fit!",
+    });
+
+    revalidatePath("/admin/athletes");
+    return { success: true };
+}
+

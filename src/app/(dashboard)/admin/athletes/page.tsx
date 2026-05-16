@@ -3,9 +3,10 @@ import { redirect } from "next/navigation";
 import type { Profile } from "@/lib/types/database";
 import { AthleteForm } from "@/components/athlete-form";
 import { DeleteAthleteButton } from "@/components/delete-athlete-button";
+import { ActivateAthleteButton } from "@/components/activate-athlete-button";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Users } from "lucide-react";
+import { Users, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { SearchInput } from "@/components/search-input";
 import {
@@ -35,11 +36,26 @@ export default async function AdminAthletesPage(props: { searchParams?: Promise<
     const profile = profileData as Pick<Profile, "role"> | null;
     if (profile?.role !== "ADMIN" && profile?.role !== "SUPERADMIN") redirect("/");
 
-    // Obtener todos los atletas (no admins)
+    const isSuperAdmin = profile?.role === "SUPERADMIN";
+
+    // Atletas inactivos pendientes de activacion (solo para SUPERADMIN)
+    const { data: pendingAthletesData } = isSuperAdmin
+        ? await supabase
+            .from("profiles")
+            .select("*")
+            .eq("role", "USER")
+            .eq("is_active", false)
+            .order("created_at", { ascending: true })
+        : { data: [] };
+
+    const pendingAthletes = (pendingAthletesData || []) as Profile[];
+
+    // Atletas activos (con filtro de busqueda)
     let req = supabase
         .from("profiles")
         .select("*")
-        .eq("role", "USER");
+        .eq("role", "USER")
+        .eq("is_active", true);
 
     if (query) {
         req = req.or(`full_name.ilike.%${query}%,cedula.ilike.%${query}%`);
@@ -50,8 +66,8 @@ export default async function AdminAthletesPage(props: { searchParams?: Promise<
     const athletes = (athletesData || []) as Profile[];
 
     // Stats
-    const activeCount = athletes.filter((a) => a.is_active).length;
-    const inactiveCount = athletes.length - activeCount;
+    const activeCount = athletes.length;
+    const inactiveCount = pendingAthletes.length;
 
     return (
         <div className="space-y-6">
@@ -61,7 +77,7 @@ export default async function AdminAthletesPage(props: { searchParams?: Promise<
                     <p className="text-muted-foreground text-sm mt-1">
                         Gestiona los atletas del box. <span className="font-medium text-indigo-600">{activeCount} activos</span>
                         {inactiveCount > 0 && (
-                            <span className="text-red-400 ml-2">{inactiveCount} inactivos</span>
+                            <span className="text-yellow-400 ml-2">{inactiveCount} pendientes de activacion</span>
                         )}
                     </p>
                 </div>
@@ -77,6 +93,64 @@ export default async function AdminAthletesPage(props: { searchParams?: Promise<
                 />
                 </div>
             </div>
+
+            {/* Seccion: Atletas nuevos pendientes (solo SUPERADMIN) */}
+            {isSuperAdmin && pendingAthletes.length > 0 && (
+                <div className="rounded-xl border border-blue-500/30 bg-blue-500/5 overflow-hidden">
+                    <div className="flex items-center gap-3 px-4 py-3 bg-blue-500/10 border-b border-blue-500/20">
+                        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-500/20">
+                            <UserPlus className="h-4 w-4 text-blue-400" />
+                        </div>
+                        <div>
+                            <p className="text-sm font-semibold text-blue-300">Atletas nuevos &mdash; pendientes de activacion</p>
+                            <p className="text-xs text-blue-400/70">{pendingAthletes.length} cuenta{pendingAthletes.length !== 1 ? "s" : ""} esperando aprobacion</p>
+                        </div>
+                    </div>
+                    <div className="divide-y divide-border/50">
+                        {pendingAthletes.map((athlete) => (
+                            <div key={athlete.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-4">
+                                <div className="flex items-start gap-3 min-w-0">
+                                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-600/10 text-xs font-bold text-blue-400">
+                                        {(athlete.full_name || "?").split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
+                                    </div>
+                                    <div className="min-w-0">
+                                        <p className="font-semibold text-foreground text-sm">{athlete.full_name || "Sin nombre"}</p>
+                                        <div className="flex flex-wrap gap-2 mt-0.5">
+                                            {athlete.cedula && (
+                                                <span className="text-xs text-muted-foreground font-mono">CI: {athlete.cedula}</span>
+                                            )}
+                                            {athlete.phone && (
+                                                <a
+                                                    href={`https://wa.me/58${athlete.phone.replace(/\D/g, "").slice(-10)}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-xs text-green-500 hover:text-green-400"
+                                                >
+                                                    {athlete.phone}
+                                                </a>
+                                            )}
+                                            <span className="text-xs text-muted-foreground/60">
+                                                Registrado: {new Date(athlete.created_at).toLocaleDateString("es-VE")}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2 shrink-0 pl-12 sm:pl-0">
+                                    <Link href={`/admin/athletes/${athlete.id}`}>
+                                        <Button variant="ghost" size="sm" className="h-8 px-3 text-xs">
+                                            Ver perfil
+                                        </Button>
+                                    </Link>
+                                    <ActivateAthleteButton
+                                        athleteId={athlete.id}
+                                        athleteName={athlete.full_name || "Atleta"}
+                                    />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {athletes.length > 0 ? (
                 <div className="rounded-lg border border-border overflow-hidden">

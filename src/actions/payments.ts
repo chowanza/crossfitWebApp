@@ -95,7 +95,7 @@ export async function updatePaymentStatus(id: string, status: PaymentStatus) {
         .from("payments")
         .update({ status })
         .eq("id", id)
-        .select("user_id, period_end")
+        .select("user_id, period_end, amount")
         .single();
 
     if (error) return { error: error.message };
@@ -105,11 +105,52 @@ export async function updatePaymentStatus(id: string, status: PaymentStatus) {
             .from("profiles")
             .update({ last_payment_date: paymentData.period_end, is_active: true })
             .eq("id", paymentData.user_id);
+
+        // Notificar al atleta por email
+        const { sendPaymentConfirmedEmailToAthlete } = await import("@/lib/email");
+        const { data: athleteAuth } = await adminClient.auth.admin.getUserById(paymentData.user_id);
+        const { data: athleteProfile } = await adminClient.from("profiles").select("full_name").eq("id", paymentData.user_id).single();
+        if (athleteAuth?.user?.email) {
+            await sendPaymentConfirmedEmailToAthlete({
+                athleteEmail: athleteAuth.user.email,
+                athleteName: athleteProfile?.full_name || "Atleta",
+                amount: paymentData.amount,
+            });
+        }
+
+        // Notificación in-app al atleta
+        await adminClient.from("notifications").insert({
+            user_id: paymentData.user_id,
+            type: "PAYMENT",
+            title: "✅ Pago confirmado",
+            message: `Tu pago de $${paymentData.amount} ha sido aprobado. ¡Tu membresía está activa!`,
+        });
+
     } else if (status === "OVERDUE" && paymentData) {
         await adminClient
             .from("profiles")
             .update({ is_active: false })
             .eq("id", paymentData.user_id);
+
+        // Notificar al atleta por email
+        const { sendPaymentRejectedEmailToAthlete } = await import("@/lib/email");
+        const { data: athleteAuth } = await adminClient.auth.admin.getUserById(paymentData.user_id);
+        const { data: athleteProfile } = await adminClient.from("profiles").select("full_name").eq("id", paymentData.user_id).single();
+        if (athleteAuth?.user?.email) {
+            await sendPaymentRejectedEmailToAthlete({
+                athleteEmail: athleteAuth.user.email,
+                athleteName: athleteProfile?.full_name || "Atleta",
+                amount: paymentData.amount,
+            });
+        }
+
+        // Notificación in-app al atleta
+        await adminClient.from("notifications").insert({
+            user_id: paymentData.user_id,
+            type: "PAYMENT",
+            title: "⚠️ Comprobante no procesado",
+            message: `Tu comprobante de pago de $${paymentData.amount} no pudo ser verificado. Contacta al administrador.`,
+        });
     }
 
     revalidatePath("/admin/payments");
@@ -223,11 +264,11 @@ export async function reportAthletePayment(formData: FormData) {
 
         await adminClient.from("notifications").insert(notifications);
 
-        // Enviar email a cada SUPERADMIN
+        // Enviar email a cada SUPERADMIN (siempre, con o sin comprobante)
         const { sendPaymentReceiptEmailToAdmin } = await import("@/lib/email");
         for (const sa of superAdmins) {
             const { data: userAuth } = await adminClient.auth.admin.getUserById(sa.id);
-            if (userAuth?.user?.email && receiptUrl) {
+            if (userAuth?.user?.email) {
                 await sendPaymentReceiptEmailToAdmin({
                     adminEmail: userAuth.user.email,
                     athleteName,

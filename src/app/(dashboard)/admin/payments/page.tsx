@@ -5,9 +5,10 @@ import type { Profile, Payment } from "@/lib/types/database";
 import { PaymentForm } from "@/components/payment-form";
 import { PaymentStatusBadge } from "@/components/payment-status-badge";
 import { PaymentActions } from "@/components/payment-actions";
+import { PendingPaymentActions } from "@/components/pending-payment-actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { CreditCard } from "lucide-react";
+import { CreditCard, Clock, CheckCircle2 } from "lucide-react";
 import { SearchInput } from "@/components/search-input";
 import { DateFilter } from "@/components/date-filter";
 import {
@@ -99,7 +100,6 @@ export default async function AdminPaymentsPage({
     const { data: paymentsData, error: paymentsError } = await dbQuery;
     const payments = (paymentsData || []) as PaymentWithProfile[];
 
-    // Stats rápidas
     const { count: overdueCount } = await adminClient
         .from("payments")
         .select("*", { count: "exact", head: true })
@@ -109,6 +109,17 @@ export default async function AdminPaymentsPage({
         .from("payments")
         .select("*", { count: "exact", head: true })
         .eq("status", "PENDING");
+
+    // Pagos pendientes de confirmación (para la sección destacada)
+    const { data: pendingPaymentsData } = isSuperAdmin
+        ? await adminClient
+            .from("payments")
+            .select("*, profiles!payments_user_id_fkey(full_name)")
+            .eq("status", "PENDING")
+            .order("created_at", { ascending: true })
+        : { data: [] };
+
+    const pendingPayments = (pendingPaymentsData || []) as PaymentWithProfile[];
 
     const currentFilter = filter || "all";
 
@@ -130,6 +141,69 @@ export default async function AdminPaymentsPage({
                     }
                 />
             </div>
+
+            {/* Sección: Pagos por confirmar (solo SUPERADMIN) */}
+            {isSuperAdmin && pendingPayments.length > 0 && (
+                <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/5 overflow-hidden">
+                    <div className="flex items-center gap-3 px-4 py-3 bg-yellow-500/10 border-b border-yellow-500/20">
+                        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-yellow-500/20">
+                            <Clock className="h-4 w-4 text-yellow-400" />
+                        </div>
+                        <div>
+                            <p className="text-sm font-semibold text-yellow-300">Pagos por confirmar</p>
+                            <p className="text-xs text-yellow-500/80">{pendingPayments.length} comprobante{pendingPayments.length !== 1 ? "s" : ""} de atleta{pendingPayments.length !== 1 ? "s" : ""} esperando verificación</p>
+                        </div>
+                    </div>
+                    <div className="divide-y divide-border/50">
+                        {pendingPayments.map((payment) => (
+                            <div key={payment.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-4">
+                                <div className="flex items-start gap-3 min-w-0">
+                                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-600/10 text-xs font-bold text-indigo-400">
+                                        {(payment.profiles?.full_name || "?").split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
+                                    </div>
+                                    <div className="min-w-0">
+                                        <p className="font-semibold text-foreground text-sm">{payment.profiles?.full_name || "Atleta"}</p>
+                                        <p className="text-xs text-muted-foreground">
+                                            <span className="text-green-400 font-mono font-semibold">${payment.amount}</span>
+                                            {payment.period_start && payment.period_end && (
+                                                <span className="ml-2">· {payment.period_start} → {payment.period_end}</span>
+                                            )}
+                                        </p>
+                                        {payment.notes && (
+                                            <p className="text-xs text-muted-foreground/70 truncate max-w-xs mt-0.5">{payment.notes}</p>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3 shrink-0 pl-12 sm:pl-0">
+                                    {payment.receipt_url && (
+                                        <a
+                                            href={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/receipts/${payment.receipt_url}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-xs text-indigo-400 hover:text-indigo-300 underline font-medium"
+                                        >
+                                            Ver comp.
+                                        </a>
+                                    )}
+                                    <PendingPaymentActions
+                                        id={payment.id}
+                                        athleteName={payment.profiles?.full_name || "Atleta"}
+                                        amount={payment.amount}
+                                    />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Si no hay pendientes, mostrar badge de todo al día (solo SUPERADMIN) */}
+            {isSuperAdmin && pendingPayments.length === 0 && (
+                <div className="flex items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-4 py-3">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                    <p className="text-sm text-emerald-400 font-medium">Sin pagos pendientes de confirmación — todo al día.</p>
+                </div>
+            )}
 
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
