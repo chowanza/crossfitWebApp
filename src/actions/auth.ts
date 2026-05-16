@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { sendPasswordResetEmail, sendNewRegistrationEmailToAdmin } from "@/lib/email";
+import { sendPasswordResetEmail, sendNewRegistrationEmailToAdmin, sendRegistrationPendingEmailToAthlete } from "@/lib/email";
 import { redirect } from "next/navigation";
 
 export async function login(formData: FormData) {
@@ -24,8 +24,6 @@ export async function login(formData: FormData) {
 }
 
 export async function register(formData: FormData) {
-    const supabase = await createClient();
-
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
     const fullName = formData.get("full_name") as string;
@@ -38,14 +36,15 @@ export async function register(formData: FormData) {
         return { error: "La contraseña debe tener al menos 6 caracteres." };
     }
 
-    const { data, error } = await supabase.auth.signUp({
+    // Usar adminClient para crear el usuario SIN enviar el email de confirmación de Supabase
+    // (evita el email en inglés "Confirm your signup")
+    const adminClient = createAdminClient();
+
+    const { data, error } = await adminClient.auth.admin.createUser({
         email,
         password,
-        options: {
-            data: {
-                full_name: fullName,
-            },
-        },
+        email_confirm: false,  // No confirmar email todavía — el admin lo activa
+        user_metadata: { full_name: fullName },
     });
 
     if (error) {
@@ -53,14 +52,18 @@ export async function register(formData: FormData) {
     }
 
     if (data.user) {
-        const adminClient = createAdminClient();
-        
-        // 1. Forzar estado inactivo para el nuevo perfil
-        await adminClient.from("profiles").update({ is_active: false }).eq("id", data.user.id);
+        // 1. Forzar estado inactivo
+        await adminClient.from("profiles").update({
+            is_active: false,
+            full_name: fullName,
+        }).eq("id", data.user.id);
 
-        // 2. Notificar por email a todos los SUPERADMINS
+        // 2. Enviar email al atleta: "Tu registro fue recibido, espera activación"
+        await sendRegistrationPendingEmailToAthlete({ athleteEmail: email, athleteName: fullName });
+
+        // 3. Notificar por email a todos los SUPERADMINS
         const { data: superAdmins } = await adminClient.from("profiles").select("id").eq("role", "SUPERADMIN");
-        
+
         if (superAdmins) {
             for (const sa of superAdmins) {
                 const { data: userAuth } = await adminClient.auth.admin.getUserById(sa.id);

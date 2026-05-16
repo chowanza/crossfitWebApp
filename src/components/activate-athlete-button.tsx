@@ -15,13 +15,12 @@ export function ActivateAthleteButton({ athleteId, athleteName }: ActivateAthlet
     const [loading, setLoading] = useState(false);
 
     async function handleActivate() {
-        if (!confirm(`¿Activar la cuenta de ${athleteName}? Se le enviará un correo de bienvenida.`)) return;
         setLoading(true);
         const result = await activateAthlete(athleteId);
         if (result?.error) {
             toast.error("Error al activar: " + result.error);
         } else {
-            toast.success(`✅ ${athleteName} ha sido activado. Se envió correo de bienvenida.`);
+            toast.success(`✅ ${athleteName} activado. Se envió correo de bienvenida.`);
         }
         setLoading(false);
     }
