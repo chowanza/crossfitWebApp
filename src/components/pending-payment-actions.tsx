@@ -16,7 +16,6 @@ export function PendingPaymentActions({ id, athleteName, amount }: PendingPaymen
     const [loading, setLoading] = useState<"approve" | "reject" | null>(null);
 
     async function handleApprove() {
-        if (!confirm(`¿Confirmar el pago de $${amount} de ${athleteName}? Se le notificará por correo.`)) return;
         setLoading("approve");
         const result = await updatePaymentStatus(id, "PAID");
         if (result?.error) {
@@ -28,7 +27,6 @@ export function PendingPaymentActions({ id, athleteName, amount }: PendingPaymen
     }
 
     async function handleReject() {
-        if (!confirm(`¿Rechazar el comprobante de $${amount} de ${athleteName}? El atleta será notificado.`)) return;
         setLoading("reject");
         const result = await updatePaymentStatus(id, "OVERDUE");
         if (result?.error) {
