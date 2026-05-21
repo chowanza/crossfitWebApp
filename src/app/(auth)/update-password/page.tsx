@@ -23,18 +23,46 @@ export default function UpdatePasswordPage() {
 
     useEffect(() => {
         const supabase = createClient();
-        
-        async function checkSession() {
+        let active = true;
+
+        async function verifySession() {
+            // 1. Intentar obtener la sesión inmediatamente
             const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
+            if (!active) return;
+            
+            if (session) {
+                setChecking(false);
+                return;
+            }
+
+            // 2. Si no la encuentra de inmediato, dar un pequeñísimo margen de 400ms para
+            //    que el SDK de Supabase termine de leer e inicializar las cookies del navegador.
+            await new Promise((resolve) => setTimeout(resolve, 400));
+            if (!active) return;
+
+            const { data: { session: retrySession } } = await supabase.auth.getSession();
+            if (retrySession) {
+                setChecking(false);
+                return;
+            }
+
+            // 3. Intento definitivo usando getUser (consulta segura contra el backend de Supabase usando las cookies)
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!active) return;
+
+            if (user) {
+                setChecking(false);
+            } else {
                 toast.error("Acceso no autorizado. Por favor inicia la recuperación de contraseña desde la pantalla de login.");
                 router.replace("/login");
-            } else {
-                setChecking(false);
             }
         }
-        
-        checkSession();
+
+        verifySession();
+
+        return () => {
+            active = false;
+        };
     }, [router]);
 
     async function handleSubmit(formData: FormData) {
