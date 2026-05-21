@@ -23,11 +23,28 @@ export default function LoginPage() {
 
     useEffect(() => {
         const supabase = createClient();
+
+        // 1. Escuchar por evento oficial de Supabase
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
             if (event === "PASSWORD_RECOVERY") {
                 router.push("/update-password");
             }
         });
+
+        // 2. Respaldo manual defensivo analizando el hash de la URL directamente
+        //    (Evita cualquier problema de tiempos o de eventos no disparados por el SDK)
+        if (typeof window !== "undefined") {
+            const hash = window.location.hash;
+            if (hash.includes("type=recovery") && hash.includes("access_token=")) {
+                const timer = setTimeout(() => {
+                    router.push("/update-password");
+                }, 800); // 800ms para asegurar que Supabase guarde las cookies de sesión
+                return () => {
+                    clearTimeout(timer);
+                    subscription.unsubscribe();
+                };
+            }
+        }
 
         return () => {
             subscription.unsubscribe();
