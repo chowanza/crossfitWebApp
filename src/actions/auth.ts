@@ -98,7 +98,10 @@ export async function resetPassword(formData: FormData) {
 
     // 1. Generar el link de restablecimiento sin que Supabase envíe el email.
     //    Requiere service_role key. El link ya incluye el token seguro.
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    const vercelUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL;
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
+        ? process.env.NEXT_PUBLIC_SITE_URL
+        : vercelUrl ? `https://${vercelUrl}` : "http://localhost:3000";
     const { data: linkData, error: linkError } = await adminSupabase.auth.admin.generateLink({
         type: "recovery",
         email,

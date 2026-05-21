@@ -182,6 +182,7 @@ app_ratings         -- id, user_id, rating(1-5), comment, period(YYYY-MM), creat
 - **País:** Venezuela (UTC-4, moneda: USD/Bolívares, cédula de identidad venezolana)
 - **Usuarios típicos:** 10-50 atletas, 1-3 entrenadores, 1 superadmin
 - **Dispositivos:** Principalmente móvil (atletas en el gym entre ejercicios)
+- **la app esta corriendo en:** ironfitvzla.vercel.app
 
 crossfitApp
 AibbysCrossfit
