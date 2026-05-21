@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { updatePassword } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { KeyRound, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import {
     Card,
     CardContent,
@@ -32,10 +32,13 @@ export default function UpdatePasswordPage() {
             return;
         }
 
-        const result = await updatePassword(formData);
+        const supabase = createClient();
+        const { error } = await supabase.auth.updateUser({
+            password: password
+        });
         
-        if (result?.error) {
-            toast.error(result.error);
+        if (error) {
+            toast.error(error.message);
             setLoading(false);
         } else {
             toast.success("¡Contraseña actualizada con éxito!");
