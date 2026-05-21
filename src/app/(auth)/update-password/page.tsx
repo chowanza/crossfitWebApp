@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { KeyRound, ShieldCheck } from "lucide-react";
+import { KeyRound, ShieldCheck, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -18,7 +18,24 @@ import {
 
 export default function UpdatePasswordPage() {
     const [loading, setLoading] = useState(false);
+    const [checking, setChecking] = useState(true);
     const router = useRouter();
+
+    useEffect(() => {
+        const supabase = createClient();
+        
+        async function checkSession() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                toast.error("Acceso no autorizado. Por favor inicia la recuperación de contraseña desde la pantalla de login.");
+                router.replace("/login");
+            } else {
+                setChecking(false);
+            }
+        }
+        
+        checkSession();
+    }, [router]);
 
     async function handleSubmit(formData: FormData) {
         setLoading(true);
@@ -44,6 +61,21 @@ export default function UpdatePasswordPage() {
             toast.success("¡Contraseña actualizada con éxito!");
             router.push("/");
         }
+    }
+
+    if (checking) {
+        return (
+            <div className="flex min-h-screen items-center justify-center p-4 bg-background relative overflow-hidden">
+                {/* Background Blobs */}
+                <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none" />
+                <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-[120px] pointer-events-none" />
+                
+                <div className="text-center space-y-4 relative z-10">
+                    <Loader2 className="h-10 w-10 text-indigo-500 animate-spin mx-auto" />
+                    <p className="text-muted-foreground animate-pulse text-sm font-medium">Verificando sesión segura...</p>
+                </div>
+            </div>
+        );
     }
 
     return (
