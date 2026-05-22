@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { KeyRound, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { updatePassword } from "@/actions/auth";
 import {
     Card,
     CardContent,
@@ -22,27 +22,24 @@ export default function UpdatePasswordPage() {
 
     async function handleSubmit(formData: FormData) {
         setLoading(true);
-        
+
         const password = formData.get("password") as string;
         const confirmStr = formData.get("confirmPassword") as string;
-        
+
         if (password !== confirmStr) {
             toast.error("Las contraseñas no coinciden.");
             setLoading(false);
             return;
         }
 
-        const supabase = createClient();
-        const { error } = await supabase.auth.updateUser({
-            password: password
-        });
-        
-        if (error) {
-            toast.error(error.message);
+        const result = await updatePassword(formData);
+
+        if (result?.error) {
+            toast.error(result.error);
             setLoading(false);
         } else {
             toast.success("¡Contraseña actualizada con éxito!");
-            router.push("/");
+            router.push("/login");
         }
     }
 
@@ -73,7 +70,9 @@ export default function UpdatePasswordPage() {
                     <CardContent>
                         <form action={handleSubmit} className="space-y-6">
                             <div className="space-y-2 text-left">
-                                <Label htmlFor="password" className="text-sm font-semibold text-foreground/80">Nueva contraseña</Label>
+                                <Label htmlFor="password" className="text-sm font-semibold text-foreground/80">
+                                    Nueva contraseña
+                                </Label>
                                 <Input
                                     id="password"
                                     name="password"
@@ -84,9 +83,11 @@ export default function UpdatePasswordPage() {
                                     className="h-12 bg-background/50 border-border/50 focus:border-indigo-500 focus:ring-indigo-500/20 transition-all px-4 text-md font-mono tracking-widest"
                                 />
                             </div>
-                            
+
                             <div className="space-y-2 text-left">
-                                <Label htmlFor="confirmPassword" className="text-sm font-semibold text-foreground/80">Confirmar contraseña</Label>
+                                <Label htmlFor="confirmPassword" className="text-sm font-semibold text-foreground/80">
+                                    Confirmar contraseña
+                                </Label>
                                 <Input
                                     id="confirmPassword"
                                     name="confirmPassword"
