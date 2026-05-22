@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { KeyRound, ShieldCheck, Loader2 } from "lucide-react";
+import { KeyRound, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -18,52 +18,7 @@ import {
 
 export default function UpdatePasswordPage() {
     const [loading, setLoading] = useState(false);
-    const [checking, setChecking] = useState(true);
     const router = useRouter();
-
-    useEffect(() => {
-        const supabase = createClient();
-        let active = true;
-
-        async function verifySession() {
-            // 1. Intentar obtener la sesión inmediatamente
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!active) return;
-            
-            if (session) {
-                setChecking(false);
-                return;
-            }
-
-            // 2. Si no la encuentra de inmediato, dar un pequeñísimo margen de 400ms para
-            //    que el SDK de Supabase termine de leer e inicializar las cookies del navegador.
-            await new Promise((resolve) => setTimeout(resolve, 400));
-            if (!active) return;
-
-            const { data: { session: retrySession } } = await supabase.auth.getSession();
-            if (retrySession) {
-                setChecking(false);
-                return;
-            }
-
-            // 3. Intento definitivo usando getUser (consulta segura contra el backend de Supabase usando las cookies)
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!active) return;
-
-            if (user) {
-                setChecking(false);
-            } else {
-                toast.error("Acceso no autorizado. Por favor inicia la recuperación de contraseña desde la pantalla de login.");
-                router.replace("/login");
-            }
-        }
-
-        verifySession();
-
-        return () => {
-            active = false;
-        };
-    }, [router]);
 
     async function handleSubmit(formData: FormData) {
         setLoading(true);
@@ -89,21 +44,6 @@ export default function UpdatePasswordPage() {
             toast.success("¡Contraseña actualizada con éxito!");
             router.push("/");
         }
-    }
-
-    if (checking) {
-        return (
-            <div className="flex min-h-screen items-center justify-center p-4 bg-background relative overflow-hidden">
-                {/* Background Blobs */}
-                <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none" />
-                <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-[120px] pointer-events-none" />
-                
-                <div className="text-center space-y-4 relative z-10">
-                    <Loader2 className="h-10 w-10 text-indigo-500 animate-spin mx-auto" />
-                    <p className="text-muted-foreground animate-pulse text-sm font-medium">Verificando sesión segura...</p>
-                </div>
-            </div>
-        );
     }
 
     return (
