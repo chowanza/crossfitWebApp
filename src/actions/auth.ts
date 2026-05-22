@@ -106,7 +106,7 @@ export async function resetPassword(formData: FormData) {
         type: "recovery",
         email,
         options: {
-            redirectTo: `${siteUrl}/auth/callback?next=/update-password`,
+            redirectTo: `${siteUrl}/update-password`,
         },
     });
 

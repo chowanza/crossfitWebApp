@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { KeyRound, ShieldCheck } from "lucide-react";
+import { KeyRound, ShieldCheck, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { updatePassword } from "@/actions/auth";
+import { createClient } from "@/lib/supabase/client";
 import {
     Card,
     CardContent,
@@ -18,7 +18,28 @@ import {
 
 export default function UpdatePasswordPage() {
     const [loading, setLoading] = useState(false);
+    // Espera a que Supabase establezca la sesión desde el hash fragment del email
+    const [sessionReady, setSessionReady] = useState(false);
     const router = useRouter();
+
+    useEffect(() => {
+        const supabase = createClient();
+
+        // Supabase detecta automáticamente el #access_token en la URL al cargar
+        // y dispara el evento PASSWORD_RECOVERY cuando el link del correo es válido.
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            if (event === "PASSWORD_RECOVERY" || (event === "SIGNED_IN" && session)) {
+                setSessionReady(true);
+            }
+        });
+
+        // Fallback: si ya hay una sesión activa (ej: recarga de página)
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session) setSessionReady(true);
+        });
+
+        return () => subscription.unsubscribe();
+    }, []);
 
     async function handleSubmit(formData: FormData) {
         setLoading(true);
@@ -32,13 +53,17 @@ export default function UpdatePasswordPage() {
             return;
         }
 
-        const result = await updatePassword(formData);
+        // Llamada cliente: el SDK ya tiene la sesión en memoria desde onAuthStateChange
+        const supabase = createClient();
+        const { error } = await supabase.auth.updateUser({ password });
 
-        if (result?.error) {
-            toast.error(result.error);
+        if (error) {
+            toast.error(error.message);
             setLoading(false);
         } else {
-            toast.success("¡Contraseña actualizada con éxito!");
+            // Cerrar sesión de recovery y mandar al login para que inicie de nuevo
+            await supabase.auth.signOut();
+            toast.success("¡Contraseña actualizada! Inicia sesión con tu nueva clave.");
             router.push("/login");
         }
     }
@@ -68,54 +93,64 @@ export default function UpdatePasswordPage() {
                         </div>
                     </CardHeader>
                     <CardContent>
-                        <form action={handleSubmit} className="space-y-6">
-                            <div className="space-y-2 text-left">
-                                <Label htmlFor="password" className="text-sm font-semibold text-foreground/80">
-                                    Nueva contraseña
-                                </Label>
-                                <Input
-                                    id="password"
-                                    name="password"
-                                    type="password"
-                                    placeholder="••••••••"
-                                    minLength={6}
-                                    required
-                                    className="h-12 bg-background/50 border-border/50 focus:border-indigo-500 focus:ring-indigo-500/20 transition-all px-4 text-md font-mono tracking-widest"
-                                />
+                        {!sessionReady ? (
+                            // Mientras Supabase procesa el token del hash
+                            <div className="flex flex-col items-center gap-3 py-8">
+                                <Loader2 className="h-8 w-8 text-indigo-500 animate-spin" />
+                                <p className="text-sm text-muted-foreground animate-pulse">
+                                    Verificando enlace de recuperación...
+                                </p>
                             </div>
+                        ) : (
+                            <form action={handleSubmit} className="space-y-6">
+                                <div className="space-y-2 text-left">
+                                    <Label htmlFor="password" className="text-sm font-semibold text-foreground/80">
+                                        Nueva contraseña
+                                    </Label>
+                                    <Input
+                                        id="password"
+                                        name="password"
+                                        type="password"
+                                        placeholder="••••••••"
+                                        minLength={6}
+                                        required
+                                        className="h-12 bg-background/50 border-border/50 focus:border-indigo-500 focus:ring-indigo-500/20 transition-all px-4 text-md font-mono tracking-widest"
+                                    />
+                                </div>
 
-                            <div className="space-y-2 text-left">
-                                <Label htmlFor="confirmPassword" className="text-sm font-semibold text-foreground/80">
-                                    Confirmar contraseña
-                                </Label>
-                                <Input
-                                    id="confirmPassword"
-                                    name="confirmPassword"
-                                    type="password"
-                                    placeholder="••••••••"
-                                    minLength={6}
-                                    required
-                                    className="h-12 bg-background/50 border-border/50 focus:border-indigo-500 focus:ring-indigo-500/20 transition-all px-4 text-md font-mono tracking-widest"
-                                />
-                            </div>
+                                <div className="space-y-2 text-left">
+                                    <Label htmlFor="confirmPassword" className="text-sm font-semibold text-foreground/80">
+                                        Confirmar contraseña
+                                    </Label>
+                                    <Input
+                                        id="confirmPassword"
+                                        name="confirmPassword"
+                                        type="password"
+                                        placeholder="••••••••"
+                                        minLength={6}
+                                        required
+                                        className="h-12 bg-background/50 border-border/50 focus:border-indigo-500 focus:ring-indigo-500/20 transition-all px-4 text-md font-mono tracking-widest"
+                                    />
+                                </div>
 
-                            <Button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full h-12 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-md shadow-lg shadow-indigo-500/25 transition-all group overflow-hidden relative"
-                            >
-                                <span className="relative z-10 flex items-center justify-center gap-2">
-                                    {loading ? (
-                                        "Guardando..."
-                                    ) : (
-                                        <>
-                                            Guardar y continuar
-                                            <ShieldCheck className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                                        </>
-                                    )}
-                                </span>
-                            </Button>
-                        </form>
+                                <Button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="w-full h-12 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-md shadow-lg shadow-indigo-500/25 transition-all group overflow-hidden relative"
+                                >
+                                    <span className="relative z-10 flex items-center justify-center gap-2">
+                                        {loading ? (
+                                            "Guardando..."
+                                        ) : (
+                                            <>
+                                                Guardar y continuar
+                                                <ShieldCheck className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                            </>
+                                        )}
+                                    </span>
+                                </Button>
+                            </form>
+                        )}
                     </CardContent>
                 </Card>
             </div>
